@@ -76,22 +76,51 @@ FEATURE_COLS = ['age', 'cgpa', 'year', 'marital', 'anxiety', 'panic', 'treatment
 # ══════════════════════════════════════════════════════════════
 @st.cache_resource
 def train_and_evaluate_model():
-    # Load raw dataset (Fall back to path if utility function varies)
     try:
         df_raw = load_and_clean_dataset()
     except Exception:
         df_raw = pd.read_csv('dataset/Student_Mental_health.csv')
 
+    # Helper function to find column by name variations flexibly
+    def find_col(candidates):
+        for col in df_raw.columns:
+            cleaned_col = str(col).strip().lower()
+            for cand in candidates:
+                if cand.lower() in cleaned_col:
+                    return col
+        return None
+
+    # Flexible column matching
+    age_col       = find_col(['age'])
+    cgpa_col      = find_col(['cgpa', 'what is your cgpa'])
+    year_col      = find_col(['year', 'your current year of study'])
+    marital_col   = find_col(['marital'])
+    anxiety_col   = find_col(['anxiety'])
+    panic_col     = find_col(['panic'])
+    treatment_col = find_col(['treatment', 'specialist'])
+    target_col    = find_col(['depression', 'depress'])
+
     # Feature Preprocessing
     df_proc = pd.DataFrame()
-    df_proc['age'] = df_raw['Age'].apply(lambda x: int(x) if pd.notna(x) else 20)
-    df_proc['cgpa'] = df_raw['What is your CGPA?'].apply(lambda x: CGPA_MAP.get(str(x).strip(), 3.0))
-    df_proc['year'] = df_raw['Your current year of Study'].apply(parse_year)
-    df_proc['marital'] = df_raw['Marital status'].apply(encode_binary)
-    df_proc['anxiety'] = df_raw['Do you have Anxiety?'].apply(encode_binary)
-    df_proc['panic'] = df_raw['Do you have Panic attack?'].apply(encode_binary)
-    df_proc['treatment'] = df_raw['Did you seek any specialist for a treatment?'].apply(encode_binary)
-    df_proc['target'] = df_raw['Do you have Depression?'].apply(encode_binary)
+    df_proc['age'] = df_raw[age_col].apply(lambda x: int(re.findall(r'\d+', str(x))[0]) if pd.notna(x) and re.findall(r'\d+', str(x)) else 20)
+
+    # Check if CGPA is already numerical or string range
+    def parse_cgpa(val):
+        val_str = str(val).strip()
+        if val_str in CGPA_MAP:
+            return CGPA_MAP[val_str]
+        try:
+            return float(val_str)
+        except ValueError:
+            return 3.0
+
+    df_proc['cgpa'] = df_raw[cgpa_col].apply(parse_cgpa)
+    df_proc['year'] = df_raw[year_col].apply(parse_year)
+    df_proc['marital'] = df_raw[marital_col].apply(encode_binary)
+    df_proc['anxiety'] = df_raw[anxiety_col].apply(encode_binary)
+    df_proc['panic'] = df_raw[panic_col].apply(encode_binary)
+    df_proc['treatment'] = df_raw[treatment_col].apply(encode_binary)
+    df_proc['target'] = df_raw[target_col].apply(encode_binary)
 
     X = df_proc[FEATURE_COLS]
     y = df_proc['target']
