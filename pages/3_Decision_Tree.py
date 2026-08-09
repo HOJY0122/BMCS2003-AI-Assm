@@ -72,22 +72,21 @@ CGPA_MAP = {
     '3.50 - 4.00': 3.75,
 }
 
-# Features using explicit rule thresholds to guarantee logical splits
 FEATURE_COLS = ['marital', 'anxiety', 'treatment', 'cgpa_le_2_5', 'year_ge_3', 'age_le_20', 'panic']
 
-# Display names for clean decision tree visualization
+# Clean feature labels for plot_tree display without pre-baked operators
 FEATURE_NAMES_DISPLAY = [
-    'marital <= 0.5',
-    'anxiety <= 0.5',
-    'treatment <= 0.5',
-    'cgpa <= 2.5',
-    'year >= 3',
-    'age <= 20.0',
-    'panic <= 0.5'
+    'Marital Status',
+    'Anxiety',
+    'Treatment',
+    'Low CGPA (<= 2.5)',
+    'Senior Year (>= 3)',
+    'Young Age (<= 20)',
+    'Panic Attack'
 ]
 
 # ══════════════════════════════════════════════════════════════
-# MODEL TRAINING & EVALUATION (SCIKIT-LEARN FIT)
+# MODEL TRAINING & EVALUATION
 # ══════════════════════════════════════════════════════════════
 @st.cache_resource
 def train_and_evaluate_model():
@@ -124,12 +123,10 @@ def train_and_evaluate_model():
 
     df_proc = pd.DataFrame()
     
-    # Extract raw values
     raw_age  = df_raw[age_col].apply(lambda x: int(re.findall(r'\d+', str(x))[0]) if pd.notna(x) and re.findall(r'\d+', str(x)) else 20) if age_col else 20
     raw_cgpa = df_raw[cgpa_col].apply(parse_cgpa) if cgpa_col else 3.0
     raw_year = df_raw[year_col].apply(parse_year) if year_col else 1
 
-    # Map variables to binary indicators matching target logic
     df_proc['marital']     = df_raw[marital_col].apply(encode_binary) if marital_col else 0
     df_proc['anxiety']     = df_raw[anxiety_col].apply(encode_binary) if anxiety_col else 0
     df_proc['treatment']   = df_raw[treatment_col].apply(encode_binary) if treatment_col else 0
@@ -142,7 +139,6 @@ def train_and_evaluate_model():
     X = df_proc[FEATURE_COLS]
     y = df_proc['target']
 
-    # Train decision tree classifier
     clf = DecisionTreeClassifier(
         criterion='gini',
         max_depth=4,
@@ -158,7 +154,6 @@ def train_and_evaluate_model():
 
 clf, X_data, actuals, preds, df_raw = train_and_evaluate_model()
 
-# Decision path trace for single student sample
 def trace_decision_path(model, sample_df):
     node_indicator = model.decision_path(sample_df)
     leaf_id = model.apply(sample_df)
@@ -172,20 +167,12 @@ def trace_decision_path(model, sample_df):
         if leaf_id[0] == node_id:
             continue
         
-        feat_name = FEATURE_COLS[feature[node_id]]
-        val = sample_df[feat_name].iloc[0]
+        feat_idx = feature[node_id]
+        feat_label = FEATURE_NAMES_DISPLAY[feat_idx]
+        val = sample_df[FEATURE_COLS[feat_idx]].iloc[0]
         thresh = threshold[node_id]
         
-        # Display readable rule context
-        if feat_name == 'cgpa_le_2_5':
-            cond = f"cgpa <= 2.5" if val == 1 else "cgpa > 2.5"
-        elif feat_name == 'year_ge_3':
-            cond = f"year >= 3" if val == 1 else "year < 3"
-        elif feat_name == 'age_le_20':
-            cond = f"age <= 20.0" if val == 1 else "age > 20.0"
-        else:
-            cond = f"{feat_name} <= {thresh:.1f}" if val <= thresh else f"{feat_name} > {thresh:.1f}"
-            
+        cond = f"{feat_label} <= {thresh:.1f}" if val <= thresh else f"{feat_label} > {thresh:.1f}"
         path_steps.append(cond)
         
     return path_steps
@@ -206,11 +193,11 @@ st.markdown("""
 
 The decision tree is dynamically fit using scikit-learn CART classifier on the structured feature set:
 
-1. **Target Rules:**
-   - **CGPA Condition:** `cgpa <= 2.5`
-   - **Year Condition:** `year >= 3`
-   - **Age Condition:** `age <= 20.0`
-2. **Clinical & Behavioral Rules:** `marital`, `anxiety`, `treatment`, and `panic`.
+1. **Academic & Age Rules:**
+   - **Low CGPA:** CGPA $\le 2.5$
+   - **Senior Year:** Year $\ge 3$
+   - **Young Age:** Age $\le 20.0$
+2. **Clinical & Behavioral Factors:** Marital Status, Anxiety, Treatment, and Panic Attacks.
 """)
 
 st.markdown("---")
