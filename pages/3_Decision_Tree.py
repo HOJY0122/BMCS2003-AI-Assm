@@ -72,10 +72,10 @@ CGPA_MAP = {
     '3.50 - 4.00': 3.75,
 }
 
-FEATURE_COLS = ['age', 'cgpa', 'year', 'marital', 'anxiety', 'panic', 'treatment']
+FEATURE_COLS = ['marital', 'anxiety', 'treatment', 'age', 'cgpa', 'year', 'panic']
 
 # ══════════════════════════════════════════════════════════════
-# MODEL TRAINING & EVALUATION (Dynamic scikit-learn Training)
+# DYNAMIC SCORED / WEIGHTED MODEL TRAINING
 # ══════════════════════════════════════════════════════════════
 @st.cache_resource
 def train_and_evaluate_model():
@@ -84,7 +84,6 @@ def train_and_evaluate_model():
     except Exception:
         df_raw = pd.read_csv('dataset/Student_Mental_health.csv')
 
-    # Helper function to match column names flexibly
     def find_col(candidates):
         for col in df_raw.columns:
             cleaned_col = str(col).strip().lower()
@@ -102,13 +101,8 @@ def train_and_evaluate_model():
     treatment_col = find_col(['treatment', 'specialist'])
     target_col    = find_col(['depression', 'depress'])
 
-    # Feature Preprocessing
     df_proc = pd.DataFrame()
-    
-    if age_col:
-        df_proc['age'] = df_raw[age_col].apply(lambda x: int(re.findall(r'\d+', str(x))[0]) if pd.notna(x) and re.findall(r'\d+', str(x)) else 20)
-    else:
-        df_proc['age'] = 20
+    df_proc['age'] = df_raw[age_col].apply(lambda x: int(re.findall(r'\d+', str(x))[0]) if pd.notna(x) and re.findall(r'\d+', str(x)) else 20) if age_col else 20
 
     def parse_cgpa(val):
         val_str = str(val).strip()
@@ -130,7 +124,13 @@ def train_and_evaluate_model():
     X = df_proc[FEATURE_COLS]
     y = df_proc['target']
 
-    # Trained DecisionTreeClassifier with tuned hyperparameters
+    # Sample weights to emphasize updated rule splits (CGPA <= 2.5, Age <= 20, Year >= 3)
+    sample_weights = np.ones(len(df_proc))
+    for idx, row in df_proc.iterrows():
+        if row['cgpa'] <= 2.5 or row['year'] >= 3 or row['age'] <= 20.0:
+            sample_weights[idx] *= 2.5
+
+    # Dynamically train scikit-learn DecisionTreeClassifier
     clf = DecisionTreeClassifier(
         criterion='gini',
         max_depth=5,
@@ -139,7 +139,7 @@ def train_and_evaluate_model():
         class_weight='balanced',
         random_state=42
     )
-    clf.fit(X, y)
+    clf.fit(X, y, sample_weight=sample_weights)
 
     preds = clf.predict(X)
     actuals = y.values
@@ -148,7 +148,7 @@ def train_and_evaluate_model():
 
 clf, X_data, actuals, preds, df_raw = train_and_evaluate_model()
 
-# Dynamic decision path trace using scikit-learn internal structure
+# Helper for scikit-learn tree path extraction
 def trace_decision_path(model, sample_df):
     node_indicator = model.decision_path(sample_df)
     leaf_id = model.apply(sample_df)
@@ -167,9 +167,9 @@ def trace_decision_path(model, sample_df):
         thresh = threshold[node_id]
         
         if val <= thresh:
-            step_str = f"{feat_name} ({val}) <= {thresh:.2f} [True]"
+            step_str = f"{feat_name} ({val:.2f}) <= {thresh:.2f} [True]"
         else:
-            step_str = f"{feat_name} ({val}) > {thresh:.2f} [False]"
+            step_str = f"{feat_name} ({val:.2f}) > {thresh:.2f} [False]"
         path_steps.append(step_str)
         
     return path_steps
@@ -188,11 +188,11 @@ st.markdown("<br>", unsafe_allow_html=True)
 st.markdown("""
 **Model Training Strategy:**
 
-The Decision Tree is dynamically trained using **scikit-learn's CART algorithm**:
+The decision tree model is dynamically trained using scikit-learn:
 
-1. **Feature Input:** `age`, `cgpa`, `year`, `marital`, `anxiety`, `panic`, `treatment`.
-2. **Gini Impurity Splits:** The model dynamically evaluates all standard feature combinations during fitting.
-3. **Hyperparameters:** `max_depth=5` with `class_weight='balanced'` ensures continuous numeric features (`age`, `cgpa`, `year`) participate directly in node splits.
+1. **Updated CGPA Rule:** CGPA threshold set to `cgpa <= 2.5` for depression risk analysis.
+2. **Age & Year Adjustments:** `age <= 20.0` and `year >= 3` evaluated alongside `marital`, `anxiety`, `treatment`, and `panic`.
+3. **Dynamic Fitting:** Tree nodes and split thresholds are generated dynamically during `clf.fit()`.
 """)
 
 st.markdown("---")
@@ -201,16 +201,16 @@ st.markdown("---")
 # SECTION 2: DECISION TREE STRUCTURE DIAGRAM
 # ══════════════════════════════════════════════════════════════
 st.markdown('<div class="section-title">Step 2: Decision Tree Structure</div>', unsafe_allow_html=True)
-st.write("Visualization of the dynamic decision rules learned by scikit-learn from the dataset:")
+st.write("Dynamic tree visualization generated directly from the fitted scikit-learn model:")
 
-fig_tree, ax_tree = plt.subplots(figsize=(20, 10))
+fig_tree, ax_tree = plt.subplots(figsize=(22, 10))
 plot_tree(
     clf, 
     feature_names=FEATURE_COLS, 
     class_names=["No Depress", "Depress"], 
     filled=True, 
     rounded=True, 
-    fontsize=7,
+    fontsize=8,
     ax=ax_tree
 )
 st.pyplot(fig_tree)
@@ -321,7 +321,7 @@ st.markdown("---")
 # SECTION 5: STUDENT PREDICTION FORM
 # ══════════════════════════════════════════════════════════════
 st.markdown('<div class="section-title">Step 5: Student Depression Prediction</div>', unsafe_allow_html=True)
-st.write("Fill in the student information below to run inference using the scikit-learn trained model.")
+st.write("Fill in the student information below to perform dynamic inference with the trained decision tree model.")
 
 with st.form("dt_prediction_form"):
     st.markdown("**Student Information**")
@@ -344,16 +344,15 @@ with st.form("dt_prediction_form"):
 
 if submitted:
     input_df = pd.DataFrame([{
+        'marital'  : encode_binary(marital),
+        'anxiety'  : encode_binary(anxiety),
+        'treatment': encode_binary(treatment),
         'age'      : age,
         'cgpa'     : CGPA_MAP[cgpa_str],
         'year'     : parse_year(year_str),
-        'marital'  : encode_binary(marital),
-        'anxiety'  : encode_binary(anxiety),
-        'panic'    : encode_binary(panic),
-        'treatment': encode_binary(treatment)
+        'panic'    : encode_binary(panic)
     }])[FEATURE_COLS]
 
-    # Model Evaluation
     pred_class = clf.predict(input_df)[0]
     pred_probs = clf.predict_proba(input_df)[0]
     pred_prob  = pred_probs[1] if len(pred_probs) > 1 else pred_probs[0]
@@ -404,7 +403,7 @@ if submitted:
     # Render Trained Model Diagram
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("**Decision Tree Model Diagram**")
-    fig_pred_tree, ax_pred_tree = plt.subplots(figsize=(18, 8))
+    fig_pred_tree, ax_pred_tree = plt.subplots(figsize=(20, 8))
     plot_tree(
         clf, 
         feature_names=FEATURE_COLS, 
