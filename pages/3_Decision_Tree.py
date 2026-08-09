@@ -72,21 +72,14 @@ CGPA_MAP = {
     '3.50 - 4.00': 3.75,
 }
 
-FEATURE_COLS = ['marital', 'anxiety', 'treatment', 'cgpa_le_2_5', 'year_ge_3', 'age_le_20', 'panic']
+# Raw dynamic feature set
+FEATURE_COLS = ['marital', 'anxiety', 'treatment', 'cgpa', 'year', 'age', 'panic']
 
-# Clean feature labels for plot_tree display without pre-baked operators
-FEATURE_NAMES_DISPLAY = [
-    'Marital Status',
-    'Anxiety',
-    'Treatment',
-    'Low CGPA (<= 2.5)',
-    'Senior Year (>= 3)',
-    'Young Age (<= 20)',
-    'Panic Attack'
-]
+# Feature names for matplotlib/scikit-learn visualization
+FEATURE_NAMES_DISPLAY = ['Marital Status', 'Anxiety', 'Treatment', 'CGPA', 'Year of Study', 'Age', 'Panic Attack']
 
 # ══════════════════════════════════════════════════════════════
-# MODEL TRAINING & EVALUATION
+# FULLY DYNAMIC MODEL TRAINING (NO HARDCODED RULES)
 # ══════════════════════════════════════════════════════════════
 @st.cache_resource
 def train_and_evaluate_model():
@@ -123,25 +116,24 @@ def train_and_evaluate_model():
 
     df_proc = pd.DataFrame()
     
-    raw_age  = df_raw[age_col].apply(lambda x: int(re.findall(r'\d+', str(x))[0]) if pd.notna(x) and re.findall(r'\d+', str(x)) else 20) if age_col else 20
-    raw_cgpa = df_raw[cgpa_col].apply(parse_cgpa) if cgpa_col else 3.0
-    raw_year = df_raw[year_col].apply(parse_year) if year_col else 1
-
-    df_proc['marital']     = df_raw[marital_col].apply(encode_binary) if marital_col else 0
-    df_proc['anxiety']     = df_raw[anxiety_col].apply(encode_binary) if anxiety_col else 0
-    df_proc['treatment']   = df_raw[treatment_col].apply(encode_binary) if treatment_col else 0
-    df_proc['panic']       = df_raw[panic_col].apply(encode_binary) if panic_col else 0
-    df_proc['cgpa_le_2_5'] = (raw_cgpa <= 2.5).astype(int)
-    df_proc['year_ge_3']   = (raw_year >= 3).astype(int)
-    df_proc['age_le_20']   = (raw_age <= 20.0).astype(int)
-    df_proc['target']      = df_raw[target_col].apply(encode_binary) if target_col else 0
+    # Process continuous raw values without forcing hardcoded boundaries
+    df_proc['age']       = df_raw[age_col].apply(lambda x: int(re.findall(r'\d+', str(x))[0]) if pd.notna(x) and re.findall(r'\d+', str(x)) else 20) if age_col else 20
+    df_proc['cgpa']      = df_raw[cgpa_col].apply(parse_cgpa) if cgpa_col else 3.0
+    df_proc['year']      = df_raw[year_col].apply(parse_year) if year_col else 1
+    df_proc['marital']   = df_raw[marital_col].apply(encode_binary) if marital_col else 0
+    df_proc['anxiety']   = df_raw[anxiety_col].apply(encode_binary) if anxiety_col else 0
+    df_proc['treatment'] = df_raw[treatment_col].apply(encode_binary) if treatment_col else 0
+    df_proc['panic']     = df_raw[panic_col].apply(encode_binary) if panic_col else 0
+    df_proc['target']    = df_raw[target_col].apply(encode_binary) if target_col else 0
 
     X = df_proc[FEATURE_COLS]
     y = df_proc['target']
 
+    # Trained dynamically using Gini impurity across max depth 5 to let CGPA split naturally
     clf = DecisionTreeClassifier(
         criterion='gini',
-        max_depth=4,
+        max_depth=5,
+        min_samples_split=4,
         class_weight='balanced',
         random_state=42
     )
@@ -172,7 +164,7 @@ def trace_decision_path(model, sample_df):
         val = sample_df[FEATURE_COLS[feat_idx]].iloc[0]
         thresh = threshold[node_id]
         
-        cond = f"{feat_label} <= {thresh:.1f}" if val <= thresh else f"{feat_label} > {thresh:.1f}"
+        cond = f"{feat_label} ({val:.2f}) <= {thresh:.2f}" if val <= thresh else f"{feat_label} ({val:.2f}) > {thresh:.2f}"
         path_steps.append(cond)
         
     return path_steps
@@ -185,19 +177,17 @@ st.markdown('<div class="section-title">Step 1: Algorithm Overview</div>', unsaf
 c1, c2, c3 = st.columns(3)
 c1.info("**Algorithm:** DecisionTreeClassifier (scikit-learn)\n\n**Type:** Supervised Learning (CART)")
 c2.info("**Target:** Depression Prediction\n\n**Output:** Depress (1) / No Depress (0)")
-c3.info(f"**Dataset Size:** {len(actuals)} records\n\n**Max Depth:** 4 Levels")
+c3.info(f"**Dataset Size:** {len(actuals)} records\n\n**Max Depth:** 5 Levels")
 
 st.markdown("<br>", unsafe_allow_html=True)
 st.markdown("""
 **Model Training Strategy:**
 
-The decision tree is dynamically fit using scikit-learn CART classifier on the structured feature set:
+The decision tree is dynamically fit using scikit-learn CART classifier on raw continuous features:
 
-1. **Academic & Age Rules:**
-   - **Low CGPA:** CGPA $\le 2.5$
-   - **Senior Year:** Year $\ge 3$
-   - **Young Age:** Age $\le 20.0$
+1. **Academic & Age Attributes:** CGPA, Year of Study, Age.
 2. **Clinical & Behavioral Factors:** Marital Status, Anxiety, Treatment, and Panic Attacks.
+3. **Dynamic CART Fitting:** Thresholds (e.g., `CGPA <= 3.12`, `Age <= 20.5`) are derived purely by maximizing Gini impurity reduction.
 """)
 
 st.markdown("---")
@@ -206,9 +196,9 @@ st.markdown("---")
 # SECTION 2: DECISION TREE STRUCTURE DIAGRAM
 # ══════════════════════════════════════════════════════════════
 st.markdown('<div class="section-title">Step 2: Decision Tree Structure</div>', unsafe_allow_html=True)
-st.write("Visual structure of the fitted decision tree:")
+st.write("Visual structure of the fitted dynamic decision tree:")
 
-fig_tree, ax_tree = plt.subplots(figsize=(18, 9))
+fig_tree, ax_tree = plt.subplots(figsize=(22, 10))
 plot_tree(
     clf, 
     feature_names=FEATURE_NAMES_DISPLAY, 
@@ -326,7 +316,7 @@ st.markdown("---")
 # SECTION 5: STUDENT PREDICTION FORM
 # ══════════════════════════════════════════════════════════════
 st.markdown('<div class="section-title">Step 5: Student Depression Prediction</div>', unsafe_allow_html=True)
-st.write("Fill in the student information below to run inference through the trained model.")
+st.write("Fill in the student information below to run dynamic inference through the trained model.")
 
 with st.form("dt_prediction_form"):
     st.markdown("**Student Information**")
@@ -348,17 +338,14 @@ with st.form("dt_prediction_form"):
     submitted = st.form_submit_button("Predict", use_container_width=True)
 
 if submitted:
-    cgpa_val = CGPA_MAP[cgpa_str]
-    year_val = parse_year(year_str)
-
     input_df = pd.DataFrame([{
-        'marital'     : encode_binary(marital),
-        'anxiety'     : encode_binary(anxiety),
-        'treatment'   : encode_binary(treatment),
-        'cgpa_le_2_5' : 1 if cgpa_val <= 2.5 else 0,
-        'year_ge_3'   : 1 if year_val >= 3 else 0,
-        'age_le_20'   : 1 if age <= 20.0 else 0,
-        'panic'       : encode_binary(panic)
+        'marital'  : encode_binary(marital),
+        'anxiety'  : encode_binary(anxiety),
+        'treatment': encode_binary(treatment),
+        'cgpa'     : CGPA_MAP[cgpa_str],
+        'year'     : parse_year(year_str),
+        'age'      : age,
+        'panic'    : encode_binary(panic)
     }])[FEATURE_COLS]
 
     pred_class = clf.predict(input_df)[0]
@@ -411,7 +398,7 @@ if submitted:
     # Render Tree Diagram
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("**Decision Tree Model Diagram**")
-    fig_pred_tree, ax_pred_tree = plt.subplots(figsize=(18, 8))
+    fig_pred_tree, ax_pred_tree = plt.subplots(figsize=(22, 10))
     plot_tree(
         clf, 
         feature_names=FEATURE_NAMES_DISPLAY, 
