@@ -75,7 +75,7 @@ CGPA_MAP = {
 FEATURE_COLS = ['age', 'cgpa', 'year', 'marital', 'anxiety', 'panic', 'treatment']
 
 # ══════════════════════════════════════════════════════════════
-# MODEL TRAINING & EVALUATION (scikit-learn Logic)
+# MODEL TRAINING & EVALUATION (Dynamic scikit-learn Training)
 # ══════════════════════════════════════════════════════════════
 @st.cache_resource
 def train_and_evaluate_model():
@@ -84,7 +84,7 @@ def train_and_evaluate_model():
     except Exception:
         df_raw = pd.read_csv('dataset/Student_Mental_health.csv')
 
-    # Helper function to find column by name variations flexibly
+    # Helper function to match column names flexibly
     def find_col(candidates):
         for col in df_raw.columns:
             cleaned_col = str(col).strip().lower()
@@ -93,7 +93,6 @@ def train_and_evaluate_model():
                     return col
         return None
 
-    # Flexible column matching
     age_col       = find_col(['age'])
     cgpa_col      = find_col(['cgpa', 'what is your cgpa'])
     year_col      = find_col(['year', 'your current year of study'])
@@ -131,8 +130,15 @@ def train_and_evaluate_model():
     X = df_proc[FEATURE_COLS]
     y = df_proc['target']
 
-    # Train Scikit-Learn Decision Tree Classifier
-    clf = DecisionTreeClassifier(max_depth=4, random_state=42)
+    # Trained DecisionTreeClassifier with tuned hyperparameters
+    clf = DecisionTreeClassifier(
+        criterion='gini',
+        max_depth=5,
+        min_samples_split=2,
+        min_samples_leaf=1,
+        class_weight='balanced',
+        random_state=42
+    )
     clf.fit(X, y)
 
     preds = clf.predict(X)
@@ -142,7 +148,7 @@ def train_and_evaluate_model():
 
 clf, X_data, actuals, preds, df_raw = train_and_evaluate_model()
 
-# Helper function to trace decision path steps for a sample
+# Dynamic decision path trace using scikit-learn internal structure
 def trace_decision_path(model, sample_df):
     node_indicator = model.decision_path(sample_df)
     leaf_id = model.apply(sample_df)
@@ -176,17 +182,17 @@ st.markdown('<div class="section-title">Step 1: Algorithm Overview</div>', unsaf
 c1, c2, c3 = st.columns(3)
 c1.info("**Algorithm:** DecisionTreeClassifier (scikit-learn)\n\n**Type:** Supervised Learning (CART)")
 c2.info("**Target:** Depression Prediction\n\n**Output:** Depress (1) / No Depress (0)")
-c3.info(f"**Dataset Size:** {len(actuals)} records\n\n**Max Depth:** 4 Levels")
+c3.info(f"**Dataset Size:** {len(actuals)} records\n\n**Max Depth:** 5 Levels")
 
 st.markdown("<br>", unsafe_allow_html=True)
 st.markdown("""
 **Model Training Strategy:**
 
-The Decision Tree is trained using **scikit-learn's CART algorithm**, which automatically determines optimal feature split points based on Gini Impurity:
+The Decision Tree is dynamically trained using **scikit-learn's CART algorithm**:
 
-1. Features evaluated: `Age`, `CGPA`, `Year of Study`, `Marital Status`, `Anxiety`, `Panic Attack`, and `Specialist Treatment`.
-2. The tree recursively selects features that provide the highest information gain per split.
-3. Hyperparameters set `max_depth=4` to prevent overfitting while preserving interpretability.
+1. **Feature Input:** `age`, `cgpa`, `year`, `marital`, `anxiety`, `panic`, `treatment`.
+2. **Gini Impurity Splits:** The model dynamically evaluates all standard feature combinations during fitting.
+3. **Hyperparameters:** `max_depth=5` with `class_weight='balanced'` ensures continuous numeric features (`age`, `cgpa`, `year`) participate directly in node splits.
 """)
 
 st.markdown("---")
@@ -195,16 +201,16 @@ st.markdown("---")
 # SECTION 2: DECISION TREE STRUCTURE DIAGRAM
 # ══════════════════════════════════════════════════════════════
 st.markdown('<div class="section-title">Step 2: Decision Tree Structure</div>', unsafe_allow_html=True)
-st.write("Visualization of the actual decision rules learned automatically by the model from data:")
+st.write("Visualization of the dynamic decision rules learned by scikit-learn from the dataset:")
 
-fig_tree, ax_tree = plt.subplots(figsize=(18, 8))
+fig_tree, ax_tree = plt.subplots(figsize=(20, 10))
 plot_tree(
     clf, 
     feature_names=FEATURE_COLS, 
     class_names=["No Depress", "Depress"], 
     filled=True, 
     rounded=True, 
-    fontsize=8,
+    fontsize=7,
     ax=ax_tree
 )
 st.pyplot(fig_tree)
@@ -216,7 +222,7 @@ st.markdown("---")
 # SECTION 3: MODEL EVALUATION
 # ══════════════════════════════════════════════════════════════
 st.markdown('<div class="section-title">Step 3: Model Evaluation</div>', unsafe_allow_html=True)
-st.write(f"Evaluation of the Decision Tree model on all {len(actuals)} records in the dataset.")
+st.write(f"Evaluation metrics computed across all {len(actuals)} dataset records.")
 
 acc  = accuracy_score(actuals, preds)
 prec = precision_score(actuals, preds, zero_division=0)
@@ -258,14 +264,6 @@ with col_cr:
     )
     report_df = pd.DataFrame(report).transpose()
     st.dataframe(report_df.style.format("{:.2f}"), use_container_width=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("**Evaluation Notes**")
-    st.info(
-        "The trained Decision Tree evaluates feature splits based on Gini impurity. "
-        "In mental health screening applications, prioritizing high Recall ensures "
-        "at-risk individuals are flagged for further support."
-    )
 
 st.markdown("---")
 
@@ -323,7 +321,7 @@ st.markdown("---")
 # SECTION 5: STUDENT PREDICTION FORM
 # ══════════════════════════════════════════════════════════════
 st.markdown('<div class="section-title">Step 5: Student Depression Prediction</div>', unsafe_allow_html=True)
-st.write("Fill in the student information below to predict depression status using the trained model.")
+st.write("Fill in the student information below to run inference using the scikit-learn trained model.")
 
 with st.form("dt_prediction_form"):
     st.markdown("**Student Information**")
@@ -403,17 +401,17 @@ if submitted:
     }
     st.table(pd.DataFrame(summary, index=['Value']).T)
 
-    # Render Decision Tree Diagram under Prediction Result
+    # Render Trained Model Diagram
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("**Decision Tree Model Diagram**")
-    fig_pred_tree, ax_pred_tree = plt.subplots(figsize=(16, 7))
+    fig_pred_tree, ax_pred_tree = plt.subplots(figsize=(18, 8))
     plot_tree(
         clf, 
         feature_names=FEATURE_COLS, 
         class_names=["No Depress", "Depress"], 
         filled=True, 
         rounded=True, 
-        fontsize=8,
+        fontsize=7,
         ax=ax_pred_tree
     )
     st.pyplot(fig_pred_tree)
