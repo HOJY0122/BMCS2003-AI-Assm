@@ -59,7 +59,10 @@ def parse_year(val):
     return int(numbers[0]) if numbers else 1
 
 def encode_binary(val):
-    return 1 if str(val).strip().lower() == 'yes' else 0
+    if pd.isna(val):
+        return 0
+    val_str = str(val).strip().lower()
+    return 1 if val_str in ['yes', '1', 'true', '1.0'] else 0
 
 CGPA_MAP = {
     '0 - 1.99'   : 1.00,
@@ -102,9 +105,12 @@ def train_and_evaluate_model():
 
     # Feature Preprocessing
     df_proc = pd.DataFrame()
-    df_proc['age'] = df_raw[age_col].apply(lambda x: int(re.findall(r'\d+', str(x))[0]) if pd.notna(x) and re.findall(r'\d+', str(x)) else 20)
+    
+    if age_col:
+        df_proc['age'] = df_raw[age_col].apply(lambda x: int(re.findall(r'\d+', str(x))[0]) if pd.notna(x) and re.findall(r'\d+', str(x)) else 20)
+    else:
+        df_proc['age'] = 20
 
-    # Check if CGPA is already numerical or string range
     def parse_cgpa(val):
         val_str = str(val).strip()
         if val_str in CGPA_MAP:
@@ -114,13 +120,13 @@ def train_and_evaluate_model():
         except ValueError:
             return 3.0
 
-    df_proc['cgpa'] = df_raw[cgpa_col].apply(parse_cgpa)
-    df_proc['year'] = df_raw[year_col].apply(parse_year)
-    df_proc['marital'] = df_raw[marital_col].apply(encode_binary)
-    df_proc['anxiety'] = df_raw[anxiety_col].apply(encode_binary)
-    df_proc['panic'] = df_raw[panic_col].apply(encode_binary)
-    df_proc['treatment'] = df_raw[treatment_col].apply(encode_binary)
-    df_proc['target'] = df_raw[target_col].apply(encode_binary)
+    df_proc['cgpa']      = df_raw[cgpa_col].apply(parse_cgpa) if cgpa_col else 3.0
+    df_proc['year']      = df_raw[year_col].apply(parse_year) if year_col else 1
+    df_proc['marital']   = df_raw[marital_col].apply(encode_binary) if marital_col else 0
+    df_proc['anxiety']   = df_raw[anxiety_col].apply(encode_binary) if anxiety_col else 0
+    df_proc['panic']     = df_raw[panic_col].apply(encode_binary) if panic_col else 0
+    df_proc['treatment'] = df_raw[treatment_col].apply(encode_binary) if treatment_col else 0
+    df_proc['target']    = df_raw[target_col].apply(encode_binary) if target_col else 0
 
     X = df_proc[FEATURE_COLS]
     y = df_proc['target']
@@ -229,7 +235,7 @@ col_cm, col_cr = st.columns(2)
 
 with col_cm:
     st.markdown("**Confusion Matrix**")
-    cm = confusion_matrix(actuals, preds)
+    cm = confusion_matrix(actuals, preds, labels=[0, 1])
     fig_cm, ax_cm = plt.subplots(figsize=(5, 4))
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax_cm,
                 xticklabels=['No Depression', 'Depression'],
@@ -242,9 +248,14 @@ with col_cm:
 
 with col_cr:
     st.markdown("**Classification Report**")
-    report = classification_report(actuals, preds,
-                                   target_names=['No Depression', 'Depression'],
-                                   output_dict=True)
+    report = classification_report(
+        actuals, 
+        preds,
+        labels=[0, 1],
+        target_names=['No Depression', 'Depression'],
+        output_dict=True,
+        zero_division=0
+    )
     report_df = pd.DataFrame(report).transpose()
     st.dataframe(report_df.style.format("{:.2f}"), use_container_width=True)
 
@@ -266,13 +277,20 @@ st.markdown('<div class="section-title">Step 4: Prediction Distribution on Datas
 p1, p2 = st.columns(2)
 
 with p1:
-    pred_counts   = pd.Series(preds).value_counts().sort_index()
-    actual_counts = pd.Series(actuals).value_counts().sort_index()
+    pred_counts   = pd.Series(preds).value_counts()
+    actual_counts = pd.Series(actuals).value_counts()
+    
+    # Ensure both classes (0 and 1) exist in counts for visualization
+    pred_0 = pred_counts.get(0, 0)
+    pred_1 = pred_counts.get(1, 0)
+    act_0  = actual_counts.get(0, 0)
+    act_1  = actual_counts.get(1, 0)
+
     x = np.arange(2)
     w = 0.35
     fig_bar, ax_bar = plt.subplots(figsize=(6, 4))
-    ax_bar.bar(x - w/2, actual_counts.values, w, label='Actual',    color='#2874A6', edgecolor='white')
-    ax_bar.bar(x + w/2, pred_counts.values,   w, label='Predicted', color='#E74C3C', edgecolor='white')
+    ax_bar.bar(x - w/2, [act_0, act_1], w, label='Actual',    color='#2874A6', edgecolor='white')
+    ax_bar.bar(x + w/2, [pred_0, pred_1], w, label='Predicted', color='#E74C3C', edgecolor='white')
     ax_bar.set_xticks(x)
     ax_bar.set_xticklabels(['No Depression', 'Depression'])
     ax_bar.set_ylabel('Count')
@@ -285,7 +303,7 @@ with p1:
 
 with p2:
     labels_pie = ['True Negative', 'False Positive', 'False Negative', 'True Positive']
-    cm_flat    = confusion_matrix(actuals, preds).ravel()
+    cm_flat    = confusion_matrix(actuals, preds, labels=[0, 1]).ravel()
     colors_pie = ['#2ecc71', '#e74c3c', '#f39c12', '#2874A6']
     fig_pie, ax_pie = plt.subplots(figsize=(5, 4))
     wedges, texts, autotexts = ax_pie.pie(
@@ -340,7 +358,8 @@ if submitted:
 
     # Model Evaluation
     pred_class = clf.predict(input_df)[0]
-    pred_prob  = clf.predict_proba(input_df)[0][1]
+    pred_probs = clf.predict_proba(input_df)[0]
+    pred_prob  = pred_probs[1] if len(pred_probs) > 1 else pred_probs[0]
     
     display_name = name.strip() if name.strip() != '' else 'Student'
 
