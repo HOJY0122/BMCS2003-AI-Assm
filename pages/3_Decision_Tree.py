@@ -280,7 +280,6 @@ with p1:
     pred_counts   = pd.Series(preds).value_counts()
     actual_counts = pd.Series(actuals).value_counts()
     
-    # Ensure both classes (0 and 1) exist in counts for visualization
     pred_0 = pred_counts.get(0, 0)
     pred_1 = pred_counts.get(1, 0)
     act_0  = actual_counts.get(0, 0)
@@ -403,3 +402,19 @@ if submitted:
         'Seek Treatment': treatment,
     }
     st.table(pd.DataFrame(summary, index=['Value']).T)
+
+    # Render Decision Tree Diagram under Prediction Result
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("**Decision Tree Model Diagram**")
+    fig_pred_tree, ax_pred_tree = plt.subplots(figsize=(16, 7))
+    plot_tree(
+        clf, 
+        feature_names=FEATURE_COLS, 
+        class_names=["No Depress", "Depress"], 
+        filled=True, 
+        rounded=True, 
+        fontsize=8,
+        ax=ax_pred_tree
+    )
+    st.pyplot(fig_pred_tree)
+    plt.close(fig_pred_tree)
