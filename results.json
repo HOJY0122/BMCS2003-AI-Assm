@@ -1,0 +1,24 @@
+{
+  "best_params": {
+    "svm__C": 10,
+    "svm__gamma": "scale",
+    "svm__kernel": "linear"
+  },
+  "accuracy": 0.7692307692307693,
+  "precision": 0.8,
+  "recall": 0.4444444444444444,
+  "f1_score": 0.5714285714285714,
+  "n_train": 75,
+  "n_test": 26,
+  "classification_report": "               precision    recall  f1-score   support\n\nNo Depression       0.76      0.94      0.84        17\n   Depression       0.80      0.44      0.57         9\n\n     accuracy                           0.77        26\n    macro avg       0.78      0.69      0.71        26\n weighted avg       0.78      0.77      0.75        26\n",
+  "confusion_matrix": [
+    [
+      16,
+      1
+    ],
+    [
+      5,
+      4
+    ]
+  ]
+}
