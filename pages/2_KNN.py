@@ -13,12 +13,16 @@ from sklearn.metrics import (accuracy_score, precision_score, recall_score,
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.preprocessing import load_and_clean_dataset
+from utils.sidebar import render_sidebar
 
 # ── Page Config ────────────────────────────────────────────────
 st.set_page_config(
     page_title="KNN - Depression Prediction",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
+
+render_sidebar("knn")
 
 st.title("KNN - Depression Prediction")
 st.markdown("**Member 1: Ho Jun Yon**")
@@ -164,7 +168,7 @@ with col_cr:
                                       target_names=['No Depression', 'Depression'],
                                       output_dict=True)
     report_df = pd.DataFrame(report).transpose()
-    st.dataframe(report_df.style.format("{:.2f}"), use_container_width=True)
+    st.dataframe(report_df.style.format("{:.2f}"), width='stretch')
 
 # ══════════════════════════════════════════════════════════════
 # 5. CROSS VALIDATION
@@ -234,7 +238,7 @@ with st.form("knn_prediction_form"):
         anxiety      = st.selectbox("Do you have Anxiety?",      ["No", "Yes"])
         panic_attack = st.selectbox("Do you have Panic Attack?", ["No", "Yes"])
 
-    submitted = st.form_submit_button("Predict", use_container_width=True)
+    submitted = st.form_submit_button("Predict", width='stretch')
 
 if submitted:
     # ── Encode inputs ──────────────────────────────────────────
