@@ -7,351 +7,318 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ── CSS ────────────────────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 html, body, [data-testid="stAppViewContainer"] {
-    background: #F0F4FF !important;
+    background: #1A1D2E !important;
     font-family: 'Inter', sans-serif;
 }
 [data-testid="stAppViewContainer"] > .main {
-    background: #F0F4FF !important;
+    background: #1A1D2E !important;
     padding: 0 !important;
 }
 .block-container { padding: 0 !important; max-width: 100% !important; }
 #MainMenu, footer, header { visibility: hidden; }
 
-/* ── Sidebar ── */
 [data-testid="stSidebar"] {
-    background: #1A1D2E !important;
+    background: #12152A !important;
     border-right: 1px solid rgba(255,255,255,0.06) !important;
 }
 [data-testid="stSidebar"] * { color: rgba(255,255,255,0.85) !important; }
 [data-testid="stSidebarNav"] { display: none !important; }
 
-/* Sidebar collapse button */
-[data-testid="collapsedControl"] {
-    color: #3D52FF !important;
-    background: white !important;
-    border-radius: 0 8px 8px 0 !important;
-    box-shadow: 2px 0 8px rgba(61,82,255,0.15) !important;
-}
-
-/* ── Sidebar nav buttons ── */
-.sidebar-logo {
-    padding: 28px 24px 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    margin-bottom: 16px;
-}
-.sidebar-brand {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 22px; font-weight: 700; color: white !important;
-    letter-spacing: -0.5px;
-}
-.sidebar-brand span { color: #6B86FF !important; }
-.sidebar-sub {
-    font-size: 11px; color: rgba(255,255,255,0.4) !important;
-    margin-top: 4px; letter-spacing: 0.5px;
-}
-
-.nav-section {
-    font-size: 10px; font-weight: 700;
-    color: rgba(255,255,255,0.3) !important;
-    letter-spacing: 1.8px; text-transform: uppercase;
-    padding: 0 24px 8px;
-}
-
-.nav-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 11px 24px; font-size: 14px; font-weight: 500;
-    color: rgba(255,255,255,0.65) !important;
-    border-radius: 0; cursor: pointer;
-    transition: all 0.18s; text-decoration: none;
-    border-left: 3px solid transparent;
-}
-.nav-item:hover {
-    background: rgba(255,255,255,0.06) !important;
-    color: white !important;
-    border-left-color: #3D52FF;
-}
-.nav-item.active {
-    background: rgba(61,82,255,0.15) !important;
-    color: white !important;
-    border-left-color: #3D52FF;
-}
-.nav-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    flex-shrink: 0;
-}
-.dot-blue { background: #3D52FF; }
-.dot-green { background: #10B981; }
-.dot-yellow { background: #F59E0B; }
-.dot-purple { background: #8B5CF6; }
-.dot-pink { background: #EC4899; }
-.dot-cyan { background: #06B6D4; }
-
-.sidebar-footer {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    padding: 16px 24px;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    font-size: 11px; color: rgba(255,255,255,0.25) !important;
-}
-
-/* ── Buttons ── */
 .stButton > button {
-    background: #3D52FF !important; color: white !important;
-    border: none !important; border-radius: 12px !important;
+    background: rgba(255,255,255,0.06) !important;
+    color: rgba(255,255,255,0.75) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 10px !important;
     font-family: 'Inter', sans-serif !important;
-    font-weight: 600 !important; font-size: 15px !important;
-    padding: 14px 28px !important; transition: all 0.2s !important;
-    width: 100% !important; cursor: pointer !important;
+    font-weight: 500 !important;
+    font-size: 13px !important;
+    padding: 10px 16px !important;
+    transition: all 0.2s !important;
+    text-align: left !important;
 }
 .stButton > button:hover {
-    background: #2A3ECC !important; transform: translateY(-2px) !important;
-    box-shadow: 0 8px 24px rgba(61,82,255,0.35) !important;
+    background: rgba(61,82,255,0.2) !important;
+    border-color: #3D52FF !important;
+    color: white !important;
+    transform: translateX(3px) !important;
 }
 
-/* ── Hero ── */
-.hero-wrap {
+.hero-section {
     min-height: 100vh;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    padding: 60px 80px;
+    padding: 60px 40px;
     background: linear-gradient(135deg, #1A1D2E 0%, #2D3278 55%, #1A1D2E 100%);
     position: relative; overflow: hidden;
+    text-align: center;
 }
-.hero-wrap::before {
-    content: '';
-    position: absolute; top: -120px; right: -120px;
-    width: 600px; height: 600px;
+.hero-glow-1 {
+    position: absolute; top: -100px; right: -100px;
+    width: 500px; height: 500px;
     background: radial-gradient(circle, rgba(61,82,255,0.22) 0%, transparent 70%);
-    border-radius: 50%;
+    border-radius: 50%; pointer-events: none;
 }
-.hero-wrap::after {
-    content: '';
-    position: absolute; bottom: -80px; left: 10%;
-    width: 400px; height: 400px;
+.hero-glow-2 {
+    position: absolute; bottom: -60px; left: 10%;
+    width: 380px; height: 380px;
     background: radial-gradient(circle, rgba(99,179,237,0.1) 0%, transparent 70%);
-    border-radius: 50%;
+    border-radius: 50%; pointer-events: none;
 }
-.hero-inner { position: relative; z-index: 1; text-align: center; max-width: 780px; }
+.hero-content { position: relative; z-index: 1; max-width: 760px; }
 .hero-badge {
     display: inline-block;
-    background: rgba(61,82,255,0.2);
-    color: #93A3FF; font-size: 11px; font-weight: 700;
+    background: rgba(61,82,255,0.18);
+    color: #93A3FF;
+    font-size: 11px; font-weight: 700;
     padding: 7px 18px; border-radius: 20px;
     border: 1px solid rgba(61,82,255,0.35);
-    margin-bottom: 28px; letter-spacing: 1.8px;
-    text-transform: uppercase;
+    margin-bottom: 28px;
+    letter-spacing: 1.8px; text-transform: uppercase;
 }
 .hero-title {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 58px; font-weight: 700; color: #FFFFFF;
-    line-height: 1.12; letter-spacing: -2px;
-    margin-bottom: 24px;
+    font-size: 56px; font-weight: 700;
+    color: #FFFFFF; line-height: 1.12;
+    letter-spacing: -2px; margin-bottom: 22px;
 }
-.hero-title span {
+.hero-title .accent {
     background: linear-gradient(135deg, #6B86FF 0%, #93CFFF 100%);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 .hero-desc {
-    font-size: 18px; color: rgba(255,255,255,0.55);
-    line-height: 1.75; margin-bottom: 48px; max-width: 580px; margin-left: auto; margin-right: auto;
+    font-size: 17px; color: rgba(255,255,255,0.55);
+    line-height: 1.75; margin-bottom: 48px;
+    max-width: 540px; margin-left: auto; margin-right: auto;
 }
-
-/* ── Nav Cards Grid ── */
-.nav-cards {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 16px; width: 100%; max-width: 800px; margin: 0 auto;
+.nav-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    width: 100%; max-width: 780px;
+    margin: 0 auto 44px;
 }
 .nav-card {
-    background: rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 16px; padding: 24px 20px;
-    text-align: left; cursor: pointer;
-    transition: all 0.25s cubic-bezier(.4,0,.2,1);
+    border-radius: 14px; padding: 22px 18px;
+    text-align: left; cursor: default;
+    transition: all 0.25s;
     position: relative; overflow: hidden;
 }
 .nav-card:hover {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.09);
     border-color: rgba(255,255,255,0.2);
-    transform: translateY(-4px);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.3);
 }
-.nav-card-icon {
-    font-size: 28px; margin-bottom: 12px; display: block;
-}
-.nav-card-title {
+.nc-blue  { border-top: 3px solid #3D52FF; }
+.nc-green { border-top: 3px solid #10B981; }
+.nc-amber { border-top: 3px solid #F59E0B; }
+.nc-violet{ border-top: 3px solid #8B5CF6; }
+.nc-cyan  { border-top: 3px solid #06B6D4; }
+.nc-rose  { border-top: 3px solid #EC4899; }
+.nc-title {
     font-family: 'Space Grotesk', sans-serif;
-    font-size: 15px; font-weight: 600; color: white;
-    margin-bottom: 6px;
+    font-size: 14px; font-weight: 600;
+    color: white; margin-bottom: 5px; margin-top: 10px;
 }
-.nav-card-desc { font-size: 12px; color: rgba(255,255,255,0.45); line-height: 1.5; }
-.nav-card-arrow {
-    position: absolute; top: 20px; right: 20px;
-    color: rgba(255,255,255,0.25); font-size: 18px;
+.nc-icon { font-size: 24px; }
+.nc-desc { font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.5; }
+.nc-arrow {
+    position: absolute; top: 14px; right: 14px;
+    color: rgba(255,255,255,0.2); font-size: 14px;
     transition: all 0.2s;
 }
-.nav-card:hover .nav-card-arrow { color: rgba(255,255,255,0.7); transform: translate(3px, -3px); }
+.nav-card:hover .nc-arrow { color: rgba(255,255,255,0.6); }
 
-.nc-blue { border-top: 3px solid #3D52FF; }
-.nc-green { border-top: 3px solid #10B981; }
-.nc-yellow { border-top: 3px solid #F59E0B; }
-.nc-purple { border-top: 3px solid #8B5CF6; }
-.nc-pink { border-top: 3px solid #EC4899; }
-.nc-cyan { border-top: 3px solid #06B6D4; }
-
-/* Stats row */
-.stats-row {
-    display: flex; gap: 32px; justify-content: center;
-    margin-top: 48px; flex-wrap: wrap;
+.stats-strip {
+    display: flex; gap: 24px; justify-content: center;
+    flex-wrap: wrap;
 }
 .stat-chip {
-    text-align: center;
-    padding: 14px 24px;
+    text-align: center; padding: 14px 22px;
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
+    border-radius: 12px; min-width: 100px;
 }
-.stat-chip-num {
+.stat-n {
     font-family: 'Space Grotesk', sans-serif;
     font-size: 22px; font-weight: 700; color: #6B86FF;
     line-height: 1;
 }
-.stat-chip-label { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+.stat-l { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 4px; }
 </style>
 """, unsafe_allow_html=True)
 
 # ── SIDEBAR ────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("""
-    <div class="sidebar-logo">
-        <div class="sidebar-brand">Mind<span>Check</span></div>
-        <div class="sidebar-sub">BMCS2003 Artificial Intelligence</div>
+    <div style="padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:14px;">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;color:white;">
+            Mind<span style="color:#6B86FF;">Check</span>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">
+            BMCS2003 Artificial Intelligence
+        </div>
+    </div>
+    <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.25);
+                letter-spacing:1.8px;text-transform:uppercase;padding:0 8px 8px;">
+        MAIN
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="nav-section">Main</div>', unsafe_allow_html=True)
-    if st.button("Home", key="nav_home", use_container_width=True):
-        st.switch_page("Main.py")
+    if st.button("Home", key="sb_home", width='stretch'):
+        st.switch_page("Home.py")
 
-    st.markdown('<div class="nav-section" style="margin-top:12px;">Analysis</div>', unsafe_allow_html=True)
-    if st.button("Exploratory Data Analysis", key="nav_eda", use_container_width=True):
+    st.markdown("""
+    <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.25);
+                letter-spacing:1.8px;text-transform:uppercase;
+                padding:14px 8px 8px;">ANALYSIS</div>
+    """, unsafe_allow_html=True)
+
+    if st.button("Exploratory Data Analysis", key="sb_eda", width='stretch'):
         st.switch_page("pages/1_EDA.py")
-    if st.button("Dataset Overview", key="nav_dataset", use_container_width=True):
+    if st.button("Dataset Overview", key="sb_ds", width='stretch'):
         st.switch_page("pages/6_Dataset.py")
 
-    st.markdown('<div class="nav-section" style="margin-top:12px;">Models</div>', unsafe_allow_html=True)
-    if st.button("KNN — Ho Jun Yon", key="nav_knn", use_container_width=True):
+    st.markdown("""
+    <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.25);
+                letter-spacing:1.8px;text-transform:uppercase;
+                padding:14px 8px 8px;">MODELS</div>
+    """, unsafe_allow_html=True)
+
+    if st.button("KNN — Ho Jun Yon", key="sb_knn", width='stretch'):
         st.switch_page("pages/2_KNN.py")
-    if st.button("Decision Tree — Irvin", key="nav_dt", use_container_width=True):
+    if st.button("Decision Tree — Irvin", key="sb_dt", width='stretch'):
         st.switch_page("pages/3_Decision_Tree.py")
-    if st.button("SVM — Chiang Jun Hang", key="nav_svm", use_container_width=True):
+    if st.button("SVM — Chiang Jun Hang", key="sb_svm", width='stretch'):
         st.switch_page("pages/4_SVM.py")
 
-    st.markdown('<div class="nav-section" style="margin-top:12px;">Compare</div>', unsafe_allow_html=True)
-    if st.button("Compare All Models", key="nav_compare", use_container_width=True):
+    st.markdown("""
+    <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.25);
+                letter-spacing:1.8px;text-transform:uppercase;
+                padding:14px 8px 8px;">COMPARE</div>
+    """, unsafe_allow_html=True)
+
+    if st.button("Compare All Models", key="sb_cmp", width='stretch'):
         st.switch_page("pages/5_Comparison.py")
 
     st.markdown("""
-    <div class="sidebar-footer">
+    <div style="position:fixed;bottom:0;left:0;width:250px;
+                padding:14px 20px;border-top:1px solid rgba(255,255,255,0.06);
+                font-size:11px;color:rgba(255,255,255,0.2);line-height:1.8;
+                background:#12152A;">
         Tutorial Group 3 · Tutor: Dr Goh<br>
         202605 Session · TARUMT
     </div>
     """, unsafe_allow_html=True)
 
-# ── HERO / WELCOME ────────────────────────────────────────────
+# ── HERO ──────────────────────────────────────────────────────
 st.markdown("""
-<div class="hero-wrap">
-  <div class="hero-inner">
+<div class="hero-section">
+    <div class="hero-glow-1"></div>
+    <div class="hero-glow-2"></div>
+    <div class="hero-content">
 
-    <div class="hero-badge">Supervised Machine Learning · TARUMT</div>
+        <div class="hero-badge">Supervised Machine Learning · TARUMT · BMCS2003</div>
 
-    <h1 class="hero-title">
-      Student<br>
-      <span>Mental Health</span><br>
-      Prediction
-    </h1>
+        <h1 class="hero-title">
+            Student<br>
+            <span class="accent">Mental Health</span><br>
+            Prediction
+        </h1>
 
-    <p class="hero-desc">
-      An AI-powered system that analyses student demographics and
-      academic data to predict depression and panic attack risk —
-      enabling early detection and timely support.
-    </p>
+        <p class="hero-desc">
+            An AI-powered system that analyses student demographics
+            and academic data to predict depression and panic attack
+            risk — enabling early detection and timely support.
+        </p>
 
-    <div class="nav-cards">
-      <div class="nav-card nc-blue">
-        <span class="nav-card-arrow">↗</span>
-        <span class="nav-card-icon">📊</span>
-        <div class="nav-card-title">EDA</div>
-        <div class="nav-card-desc">Explore dataset visualizations and distributions</div>
-      </div>
-      <div class="nav-card nc-green">
-        <span class="nav-card-arrow">↗</span>
-        <span class="nav-card-icon">🔵</span>
-        <div class="nav-card-title">KNN Model</div>
-        <div class="nav-card-desc">K-Nearest Neighbor · 95.83% accuracy</div>
-      </div>
-      <div class="nav-card nc-yellow">
-        <span class="nav-card-arrow">↗</span>
-        <span class="nav-card-icon">🌳</span>
-        <div class="nav-card-title">Decision Tree</div>
-        <div class="nav-card-desc">CART · 85.50% accuracy · Depth 5</div>
-      </div>
-      <div class="nav-card nc-purple">
-        <span class="nav-card-arrow">↗</span>
-        <span class="nav-card-icon">🔴</span>
-        <div class="nav-card-title">SVM Model</div>
-        <div class="nav-card-desc">Support Vector Machine · RBF Kernel</div>
-      </div>
-      <div class="nav-card nc-cyan">
-        <span class="nav-card-arrow">↗</span>
-        <span class="nav-card-icon">📈</span>
-        <div class="nav-card-title">Compare Models</div>
-        <div class="nav-card-desc">Side-by-side algorithm comparison</div>
-      </div>
-      <div class="nav-card nc-pink">
-        <span class="nav-card-arrow">↗</span>
-        <span class="nav-card-icon">📋</span>
-        <div class="nav-card-title">Dataset</div>
-        <div class="nav-card-desc">600 records · IIUM Malaysia · Kaggle</div>
-      </div>
+        <div class="nav-cards-grid">
+            <div class="nav-card nc-blue">
+                <span class="nc-arrow">↗</span>
+                <div class="nc-icon">📊</div>
+                <div class="nc-title">EDA</div>
+                <div class="nc-desc">Explore dataset visualizations and feature distributions</div>
+            </div>
+            <div class="nav-card nc-green">
+                <span class="nc-arrow">↗</span>
+                <div class="nc-icon">🔵</div>
+                <div class="nc-title">KNN Model</div>
+                <div class="nc-desc">K-Nearest Neighbor · 95.83% accuracy · K = 5</div>
+            </div>
+            <div class="nav-card nc-amber">
+                <span class="nc-arrow">↗</span>
+                <div class="nc-icon">🌳</div>
+                <div class="nc-title">Decision Tree</div>
+                <div class="nc-desc">CART · 85.50% accuracy · Max depth 5</div>
+            </div>
+            <div class="nav-card nc-violet">
+                <span class="nc-arrow">↗</span>
+                <div class="nc-icon">🔴</div>
+                <div class="nc-title">SVM Model</div>
+                <div class="nc-desc">Support Vector Machine · RBF Kernel</div>
+            </div>
+            <div class="nav-card nc-cyan">
+                <span class="nc-arrow">↗</span>
+                <div class="nc-icon">📈</div>
+                <div class="nc-title">Compare Models</div>
+                <div class="nc-desc">Side-by-side algorithm performance comparison</div>
+            </div>
+            <div class="nav-card nc-rose">
+                <span class="nc-arrow">↗</span>
+                <div class="nc-icon">📋</div>
+                <div class="nc-title">Dataset</div>
+                <div class="nc-desc">600 student records · IIUM Malaysia · Kaggle</div>
+            </div>
+        </div>
+
+        <div class="stats-strip">
+            <div class="stat-chip"><div class="stat-n">600</div><div class="stat-l">Student Records</div></div>
+            <div class="stat-chip"><div class="stat-n">95.83%</div><div class="stat-l">Best Accuracy</div></div>
+            <div class="stat-chip"><div class="stat-n">97.44%</div><div class="stat-l">Best Recall</div></div>
+            <div class="stat-chip"><div class="stat-n">3</div><div class="stat-l">ML Algorithms</div></div>
+            <div class="stat-chip"><div class="stat-n">11</div><div class="stat-l">Features</div></div>
+        </div>
+
     </div>
-
-    <div class="stats-row">
-      <div class="stat-chip"><div class="stat-chip-num">600</div><div class="stat-chip-label">Student Records</div></div>
-      <div class="stat-chip"><div class="stat-chip-num">95.83%</div><div class="stat-chip-label">Best Accuracy</div></div>
-      <div class="stat-chip"><div class="stat-chip-num">97.44%</div><div class="stat-chip-label">Best Recall</div></div>
-      <div class="stat-chip"><div class="stat-chip-num">3</div><div class="stat-chip-label">ML Algorithms</div></div>
-      <div class="stat-chip"><div class="stat-chip-num">11</div><div class="stat-chip-label">Features</div></div>
-    </div>
-
-  </div>
 </div>
 """, unsafe_allow_html=True)
 
-# ── Navigation Buttons (Real Streamlit) ───────────────────────
-st.markdown("<div style='background:#1A1D2E; padding: 0 80px 48px;'>", unsafe_allow_html=True)
-b1, b2, b3, b4, b5, b6 = st.columns(6)
-with b1:
-    if st.button("Explore EDA"):
+# ── Real Streamlit nav buttons below hero ─────────────────────
+st.markdown("""
+<div style="background:#12152A;padding:28px 40px;
+            border-top:1px solid rgba(255,255,255,0.06);">
+    <div style="font-size:12px;color:rgba(255,255,255,0.3);
+                text-align:center;margin-bottom:16px;letter-spacing:0.5px;">
+        Quick Navigation
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+c1,c2,c3,c4,c5,c6 = st.columns(6)
+with c1:
+    if st.button("EDA", key="qn_eda", width='stretch'):
         st.switch_page("pages/1_EDA.py")
-with b2:
-    if st.button("KNN Prediction"):
+with c2:
+    if st.button("KNN", key="qn_knn", width='stretch'):
         st.switch_page("pages/2_KNN.py")
-with b3:
-    if st.button("Decision Tree"):
+with c3:
+    if st.button("Decision Tree", key="qn_dt", width='stretch'):
         st.switch_page("pages/3_Decision_Tree.py")
-with b4:
-    if st.button("SVM Model"):
+with c4:
+    if st.button("SVM", key="qn_svm", width='stretch'):
         st.switch_page("pages/4_SVM.py")
-with b5:
-    if st.button("Compare Models"):
+with c5:
+    if st.button("Compare", key="qn_cmp", width='stretch'):
         st.switch_page("pages/5_Comparison.py")
-with b6:
-    if st.button("View Dataset"):
+with c6:
+    if st.button("Dataset", key="qn_ds", width='stretch'):
         st.switch_page("pages/6_Dataset.py")
-st.markdown("</div>", unsafe_allow_html=True)
