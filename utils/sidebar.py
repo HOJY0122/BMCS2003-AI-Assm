@@ -2,8 +2,12 @@ import streamlit as st
 
 SIDEBAR_CSS = """
 <style>
-#MainMenu, footer, header { visibility: hidden; }
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
+header { visibility: hidden; }
 [data-testid="stSidebarNav"] { display: none !important; }
+[data-testid="collapsedControl"] { display: flex !important; visibility: visible !important; }
+[data-testid="stSidebarCollapseButton"] { display: flex !important; visibility: visible !important; }
 [data-testid="stSidebar"] {
     background: #0F1117 !important;
     min-width: 240px !important;
