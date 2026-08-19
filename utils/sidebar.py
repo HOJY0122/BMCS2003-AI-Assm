@@ -1,89 +1,134 @@
 import streamlit as st
 
-def render_sidebar(active_page=""):
-    """Shared sidebar navigation for all pages"""
-    with st.sidebar:
-        st.markdown("""
-        <style>
-        [data-testid="stSidebar"] {
-            background: #12152A !important;
-            border-right: 1px solid rgba(255,255,255,0.06) !important;
-        }
-        [data-testid="stSidebar"] * { color: rgba(255,255,255,0.85) !important; }
-        [data-testid="stSidebarNav"] { display: none !important; }
-        section[data-testid="stSidebar"] .stButton > button {
-            background: rgba(255,255,255,0.05) !important;
-            color: rgba(255,255,255,0.7) !important;
-            border: 1px solid rgba(255,255,255,0.08) !important;
-            border-radius: 8px !important;
-            font-size: 13px !important;
-            font-weight: 500 !important;
-            padding: 9px 14px !important;
-            text-align: left !important;
-            transition: all 0.18s !important;
-        }
-        section[data-testid="stSidebar"] .stButton > button:hover {
-            background: rgba(61,82,255,0.18) !important;
-            border-color: #3D52FF !important;
-            color: white !important;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+SIDEBAR_CSS = """
+<style>
+#MainMenu, footer, header { visibility: hidden; }
+[data-testid="stSidebarNav"] { display: none !important; }
+[data-testid="stSidebar"] {
+    background: #0F1117 !important;
+    min-width: 240px !important;
+}
+[data-testid="stSidebar"] > div {
+    padding: 0 !important;
+}
+section[data-testid="stSidebar"] .stButton > button {
+    background: transparent !important;
+    color: rgba(255,255,255,0.65) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    padding: 9px 14px !important;
+    text-align: left !important;
+    transition: all 0.15s !important;
+    margin-bottom: 2px !important;
+    width: 100% !important;
+}
+section[data-testid="stSidebar"] .stButton > button:hover {
+    background: rgba(255,255,255,0.08) !important;
+    color: white !important;
+}
+section[data-testid="stSidebar"] .stButton > button:focus {
+    box-shadow: none !important;
+    outline: none !important;
+}
+div[data-testid="metric-container"] {
+    background: #1E2235;
+    border: 1px solid #2A2D3E;
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+div[data-testid="metric-container"] label {
+    font-size: 11px !important;
+    color: #8B92A5 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.6px !important;
+}
+div[data-testid="metric-container"] [data-testid="metric-value"] {
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    color: #4F7CFF !important;
+}
+</style>
+"""
 
+def sidebar(active="home"):
+    st.markdown(SIDEBAR_CSS, unsafe_allow_html=True)
+    with st.sidebar:
         # Brand
         st.markdown("""
-        <div style="padding:22px 18px 14px;border-bottom:1px solid rgba(255,255,255,0.07);margin-bottom:12px;">
-            <div style="font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:white;">
-                Mind<span style="color:#6B86FF;">Check</span>
+        <div style="padding:24px 20px 16px; border-bottom:1px solid #1E2235;">
+            <div style="font-size:20px; font-weight:800; color:white; letter-spacing:-0.5px;">
+                Mind<span style="color:#4F7CFF;">Check</span>
             </div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.28);margin-top:3px;">
-                BMCS2003 Artificial Intelligence
+            <div style="font-size:11px; color:#4A5060; margin-top:3px;">
+                BMCS2003 · AI · TARUMT
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        # Main
-        _section("MAIN")
-        if st.button("Home", key="sb_home", width='stretch'):
-            st.switch_page("Home.py")
+        st.markdown("<div style='padding:16px 20px 0;'>", unsafe_allow_html=True)
 
-        # Analysis
-        _section("ANALYSIS")
-        if st.button("Exploratory Data Analysis", key="sb_eda", width='stretch'):
-            st.switch_page("pages/1_EDA.py")
-        if st.button("Dataset Overview", key="sb_ds", width='stretch'):
-            st.switch_page("pages/6_Dataset.py")
+        # ── MAIN ──
+        _label("MAIN")
+        _btn("🏠  Home",             "home",   active, "Home.py")
 
-        # Models
-        _section("MODELS")
-        if st.button("KNN — Ho Jun Yon", key="sb_knn", width='stretch'):
-            st.switch_page("pages/2_KNN.py")
-        if st.button("Decision Tree — Irvin", key="sb_dt", width='stretch'):
-            st.switch_page("pages/3_Decision_Tree.py")
-        if st.button("SVM — Chiang Jun Hang", key="sb_svm", width='stretch'):
-            st.switch_page("pages/4_SVM.py")
+        # ── ANALYSIS ──
+        _label("ANALYSIS")
+        _btn("📊  EDA",              "eda",    active, "pages/1_EDA.py")
+        _btn("📋  Dataset",          "dataset",active, "pages/6_Dataset.py")
 
-        # Compare
-        _section("COMPARE")
-        if st.button("Compare All Models", key="sb_cmp", width='stretch'):
-            st.switch_page("pages/5_Comparison.py")
+        # ── MODELS ──
+        _label("MODELS")
+        _btn("🔵  KNN",              "knn",    active, "pages/2_KNN.py")
+        _btn("🌳  Decision Tree",    "dt",     active, "pages/3_Decision_Tree.py")
+        _btn("🔴  SVM",              "svm",    active, "pages/4_SVM.py")
+
+        # ── RESULTS ──
+        _label("RESULTS")
+        _btn("📈  Compare Models",   "compare",active, "pages/5_Comparison.py")
+
+        # ── INFO ──
+        _label("INFO")
+        _btn("ℹ️  About",            "about",  active, "pages/7_About.py")
+        _btn("❓  FAQ",              "faq",    active, "pages/8_FAQ.py")
+
+        st.markdown("</div>", unsafe_allow_html=True)
 
         # Footer
         st.markdown("""
-        <div style="margin-top:24px;padding:12px 0;
-                    border-top:1px solid rgba(255,255,255,0.06);
-                    font-size:11px;color:rgba(255,255,255,0.2);line-height:1.8;">
-            Tutorial Group 3 · Tutor: Dr Goh<br>
-            202605 Session · TARUMT
+        <div style="position:fixed; bottom:0; left:0; width:240px;
+                    padding:12px 20px; background:#0F1117;
+                    border-top:1px solid #1E2235;">
+            <div style="font-size:11px; color:#3A3F50; line-height:1.8;">
+                Group 3 · Tutor: Dr Goh<br>
+                202605 · TARUMT
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
-def _section(label):
+
+def _label(text):
     st.markdown(f"""
-    <div style="font-size:10px;font-weight:700;
-                color:rgba(255,255,255,0.22);
-                letter-spacing:1.8px;text-transform:uppercase;
-                padding:12px 0 6px;">
-        {label}
+    <div style="font-size:10px; font-weight:700; color:#3A4055;
+                letter-spacing:1.5px; text-transform:uppercase;
+                padding:12px 0 5px; margin-left:4px;">
+        {text}
     </div>
     """, unsafe_allow_html=True)
+
+
+def _btn(label, key, active, page):
+    is_active = (key == active)
+    style = ""
+    if is_active:
+        st.markdown(f"""
+        <div style="background:rgba(79,124,255,0.15); border-left:3px solid #4F7CFF;
+                    border-radius:8px; padding:9px 14px; margin-bottom:2px;
+                    font-size:13px; font-weight:600; color:white;">
+            {label}
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        if st.button(label, key=f"sb_{key}", use_container_width=True):
+            st.switch_page(page)
