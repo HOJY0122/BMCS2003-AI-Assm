@@ -1,53 +1,13 @@
 import streamlit as st
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.sidebar import sidebar
 
 st.set_page_config(page_title="About — MindCheck", page_icon="ℹ️",
                    layout="wide", initial_sidebar_state="expanded")
+sidebar("about")
 
-st.markdown("""
-<style>
-#MainMenu, footer, header { visibility: hidden; }
-[data-testid="stSidebarNav"] { display: none !important; }
-[data-testid="stSidebar"] { background: #12152A !important; }
-section[data-testid="stSidebar"] .stButton > button {
-    background: rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.8) !important;
-    border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 8px !important;
-    font-size: 13px !important; font-weight: 500 !important;
-    text-align: left !important; transition: all 0.18s !important; margin-bottom: 4px !important;
-}
-section[data-testid="stSidebar"] .stButton > button:hover {
-    background: rgba(61,82,255,0.25) !important; border-color: #3D52FF !important; color: white !important;
-}
-div[data-testid="metric-container"] {
-    background: #F8F9FF; border: 1px solid #E2E8FF; border-radius: 12px;
-    padding: 18px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-}
-</style>
-""", unsafe_allow_html=True)
 
-with st.sidebar:
-    st.markdown("## 🧠 MindCheck")
-    st.caption("BMCS2003 Artificial Intelligence")
-    st.divider()
-    st.markdown("**MAIN**")
-    if st.button("🏠  Home", key="sb_home", use_container_width=True): st.switch_page("Home.py")
-    st.divider()
-    st.markdown("**ANALYSIS**")
-    if st.button("📊  EDA", key="sb_eda", use_container_width=True): st.switch_page("pages/1_EDA.py")
-    if st.button("📋  Dataset", key="sb_ds", use_container_width=True): st.switch_page("pages/6_Dataset.py")
-    st.divider()
-    st.markdown("**MODELS**")
-    if st.button("🔵  KNN — Ho Jun Yon", key="sb_knn", use_container_width=True): st.switch_page("pages/2_KNN.py")
-    if st.button("🌳  Decision Tree — Irvin", key="sb_dt", use_container_width=True): st.switch_page("pages/3_Decision_Tree.py")
-    if st.button("🔴  SVM — Chiang Jun Hang", key="sb_svm", use_container_width=True): st.switch_page("pages/4_SVM.py")
-    st.divider()
-    st.markdown("**RESULTS**")
-    if st.button("📈  Compare All Models", key="sb_cmp", use_container_width=True): st.switch_page("pages/5_Comparison.py")
-    st.divider()
-    st.markdown("**INFO**")
-    if st.button("ℹ️  About", key="sb_about", use_container_width=True): st.switch_page("pages/7_About.py")
-    if st.button("❓  FAQ", key="sb_faq", use_container_width=True): st.switch_page("pages/8_FAQ.py")
-    st.divider()
-    st.caption("Tutorial Group 3 · Tutor: Dr Goh\n202605 Session · TARUMT")
 
 # ── PAGE ───────────────────────────────────────────────────────
 st.title("ℹ️ About MindCheck")
