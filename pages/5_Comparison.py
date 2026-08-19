@@ -120,28 +120,58 @@ st.write(
 st.divider()
 
 # ══════════════════════════════════════════════════════════════
-# SECTION 1 — TRAINED MODEL SCORES
+# SECTION 1 — SCORE CARDS WITH NAVIGATION
 # ══════════════════════════════════════════════════════════════
-st.subheader("Trained Performance")
-st.caption("Metrics from the training evaluation. Run live tests below to compare in real time.")
+c1, c2, c3 = st.columns(3)
 
-cols = st.columns(4)
-labels = ["", "🔵 KNN", "🌳 Decision Tree", "🔴 SVM"]
-for col, lbl in zip(cols, labels):
-    col.markdown(f"**{lbl}**")
+with c1:
+    with st.container(border=True):
+        st.markdown("### 🔵 KNN")
+        st.caption(f"Ho Jun Yon · K={M['best_k']} · Target: Depression")
+        st.divider()
+        # Accuracy big
+        st.metric("Accuracy",  f"{M['knn_m']['acc']:.2f}%")
+        ma, mb = st.columns(2)
+        ma.metric("Precision", f"{M['knn_m']['prec']:.2f}%")
+        mb.metric("Recall",    f"{M['knn_m']['rec']:.2f}%")
+        mc, md = st.columns(2)
+        mc.metric("F1 Score",  f"{M['knn_m']['f1']:.2f}%")
+        md.metric("Split",     "80 / 20")
+        st.divider()
+        if st.button("Open KNN Page →", key="go_knn", use_container_width=True):
+            st.switch_page("pages/2_KNN.py")
 
-rows = [
-    ("Target",    "Depression",       "Depression",       "Panic Attack"),
-    ("Accuracy",  f"{M['knn_m']['acc']:.2f}%",  f"{M['dt_m']['acc']:.2f}%",  f"{M['svm_m']['acc']:.2f}%"),
-    ("Precision", f"{M['knn_m']['prec']:.2f}%", f"{M['dt_m']['prec']:.2f}%", f"{M['svm_m']['prec']:.2f}%"),
-    ("Recall",    f"{M['knn_m']['rec']:.2f}%",  f"{M['dt_m']['rec']:.2f}%",  f"{M['svm_m']['rec']:.2f}%"),
-    ("F1 Score",  f"{M['knn_m']['f1']:.2f}%",   f"{M['dt_m']['f1']:.2f}%",   f"{M['svm_m']['f1']:.2f}%"),
-]
+with c2:
+    with st.container(border=True):
+        st.markdown("### 🌳 Decision Tree")
+        st.caption("Irvin Tan · Depth 5 · Target: Depression")
+        st.divider()
+        st.metric("Accuracy",  f"{M['dt_m']['acc']:.2f}%")
+        ma, mb = st.columns(2)
+        ma.metric("Precision", f"{M['dt_m']['prec']:.2f}%")
+        mb.metric("Recall",    f"{M['dt_m']['rec']:.2f}%")
+        mc, md = st.columns(2)
+        mc.metric("F1 Score",  f"{M['dt_m']['f1']:.2f}%")
+        md.metric("Split",     "70 / 30")
+        st.divider()
+        if st.button("Open Decision Tree Page →", key="go_dt", use_container_width=True):
+            st.switch_page("pages/3_Decision_Tree.py")
 
-for row in rows:
-    c0, c1, c2, c3 = st.columns(4)
-    c0.write(f"**{row[0]}**")
-    c1.write(row[1]); c2.write(row[2]); c3.write(row[3])
+with c3:
+    with st.container(border=True):
+        st.markdown("### 🔴 SVM")
+        st.caption("Chiang Jun Hang · RBF · Target: Panic Attack")
+        st.divider()
+        st.metric("Accuracy",  f"{M['svm_m']['acc']:.2f}%")
+        ma, mb = st.columns(2)
+        ma.metric("Precision", f"{M['svm_m']['prec']:.2f}%")
+        mb.metric("Recall",    f"{M['svm_m']['rec']:.2f}%")
+        mc, md = st.columns(2)
+        mc.metric("F1 Score",  f"{M['svm_m']['f1']:.2f}%")
+        md.metric("Split",     "75 / 25")
+        st.divider()
+        if st.button("Open SVM Page →", key="go_svm", use_container_width=True):
+            st.switch_page("pages/4_SVM.py")
 
 st.divider()
 
