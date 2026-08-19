@@ -15,12 +15,16 @@ from sklearn.metrics import (
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.preprocessing import load_and_clean_dataset
+from utils.sidebar import sidebar
 
 # ── Page Config ────────────────────────────────────────────────
 st.set_page_config(
     page_title="Decision Tree - Depression Prediction",
-    layout="wide"
+    page_icon="🌳",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
+sidebar("dt")
 
 # ── Custom CSS ─────────────────────────────────────────────────
 st.markdown("""
