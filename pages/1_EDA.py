@@ -6,11 +6,15 @@ import seaborn as sns
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.sidebar import sidebar
 
 st.set_page_config(
     page_title="Exploratory Data Analysis",
-    layout="wide"
+    page_icon="📊",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
+sidebar("eda")
 
 # ── Custom CSS ─────────────────────────────────────────────────
 st.markdown("""
