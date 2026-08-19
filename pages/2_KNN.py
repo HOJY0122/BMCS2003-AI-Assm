@@ -11,9 +11,12 @@ from sklearn.preprocessing import MinMaxScaler, LabelEncoder
 from sklearn.metrics import (accuracy_score, precision_score, recall_score,
                              f1_score, confusion_matrix, classification_report)
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.preprocessing import load_and_clean_dataset
-from utils.sidebar import render_sidebar
+
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.sidebar import sidebar
+
 
 # ── Page Config ────────────────────────────────────────────────
 st.set_page_config(
@@ -22,7 +25,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-render_sidebar("knn")
+sidebar("knn")
+
 
 st.title("KNN - Depression Prediction")
 st.markdown("**Member 1: Ho Jun Yon**")
