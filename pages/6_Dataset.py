@@ -3,9 +3,15 @@ import pandas as pd
 import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.preprocessing import load_and_clean_dataset
+from utils.sidebar import sidebar
 
-st.set_page_config(page_title="Dataset — MindCheck", layout="wide",
-                   initial_sidebar_state="expanded")
+st.set_page_config(
+    page_title="Dataset — MindCheck",
+    page_icon="📋",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+sidebar("dataset")
 
 st.markdown("""
 <style>
@@ -60,23 +66,7 @@ div[data-testid="stExpander"]:hover { box-shadow: 0 4px 16px rgba(61,82,255,0.08
 </style>
 """, unsafe_allow_html=True)
 
-# Sidebar
-with st.sidebar:
-    st.markdown("""
-    <div style="padding: 24px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 12px;">
-        <div style="font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: white;">Mind<span style="color:#6B86FF;">Check</span></div>
-        <div style="font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 4px;">BMCS2003 Artificial Intelligence</div>
-    </div>
-    """, unsafe_allow_html=True)
-    if st.button("Home", key="s_home"): st.switch_page("Main.py")
-    if st.button("EDA", key="s_eda"): st.switch_page("pages/1_EDA.py")
-    if st.button("Dataset", key="s_ds"): st.switch_page("pages/6_Dataset.py")
-    st.markdown("<hr style='border-color:rgba(255,255,255,0.08);margin:12px 0;'>", unsafe_allow_html=True)
-    if st.button("KNN", key="s_knn"): st.switch_page("pages/2_KNN.py")
-    if st.button("Decision Tree", key="s_dt"): st.switch_page("pages/3_Decision_Tree.py")
-    if st.button("SVM", key="s_svm"): st.switch_page("pages/4_SVM.py")
-    st.markdown("<hr style='border-color:rgba(255,255,255,0.08);margin:12px 0;'>", unsafe_allow_html=True)
-    if st.button("Compare All Models", key="s_cmp"): st.switch_page("pages/5_Comparison.py")
+# Sidebar handled by shared sidebar.py
 
 # Header
 st.markdown("""
@@ -222,6 +212,6 @@ with n1:
         st.switch_page("pages/1_EDA.py")
 with n2:
     if st.button("Back to Home"):
-        st.switch_page("Main.py")
+        st.switch_page("Home.py")
 
 st.markdown("</div>", unsafe_allow_html=True)
