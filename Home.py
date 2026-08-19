@@ -2,323 +2,339 @@ import streamlit as st
 
 st.set_page_config(
     page_title="MindCheck — Student Mental Health",
-    page_icon="",
+    page_icon="🧠",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
+# ── CSS (minimal, safe) ────────────────────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap');
 html, body, [data-testid="stAppViewContainer"] {
-    background: #1A1D2E !important;
-    font-family: 'Inter', sans-serif;
-}
-[data-testid="stAppViewContainer"] > .main {
-    background: #1A1D2E !important;
-    padding: 0 !important;
-}
-.block-container { padding: 0 !important; max-width: 100% !important; }
-#MainMenu, footer, header { visibility: hidden; }
-
-[data-testid="stSidebar"] {
-    background: #12152A !important;
-    border-right: 1px solid rgba(255,255,255,0.06) !important;
-}
-[data-testid="stSidebar"] * { color: rgba(255,255,255,0.85) !important; }
-[data-testid="stSidebarNav"] { display: none !important; }
-
-.stButton > button {
-    background: rgba(255,255,255,0.06) !important;
-    color: rgba(255,255,255,0.75) !important;
-    border: 1px solid rgba(255,255,255,0.1) !important;
-    border-radius: 10px !important;
     font-family: 'Inter', sans-serif !important;
-    font-weight: 500 !important;
-    font-size: 13px !important;
-    padding: 10px 16px !important;
-    transition: all 0.2s !important;
-    text-align: left !important;
 }
-.stButton > button:hover {
+#MainMenu, footer, header { visibility: hidden; }
+[data-testid="stSidebarNav"] { display: none !important; }
+[data-testid="stSidebar"] { background: #12152A !important; }
+section[data-testid="stSidebar"] .stButton > button {
+    background: rgba(255,255,255,0.06) !important;
+    color: rgba(255,255,255,0.8) !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    border-radius: 8px !important;
+    font-size: 13px !important; font-weight: 500 !important;
+    text-align: left !important; transition: all 0.18s !important;
+}
+section[data-testid="stSidebar"] .stButton > button:hover {
     background: rgba(61,82,255,0.2) !important;
-    border-color: #3D52FF !important;
-    color: white !important;
-    transform: translateX(3px) !important;
+    border-color: #3D52FF !important; color: white !important;
 }
-
-.hero-section {
-    min-height: 100vh;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 60px 40px;
-    background: linear-gradient(135deg, #1A1D2E 0%, #2D3278 55%, #1A1D2E 100%);
-    position: relative; overflow: hidden;
-    text-align: center;
+div[data-testid="metric-container"] {
+    background: white; border: 1px solid #E2E8FF;
+    border-radius: 12px; padding: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
-.hero-glow-1 {
-    position: absolute; top: -100px; right: -100px;
-    width: 500px; height: 500px;
-    background: radial-gradient(circle, rgba(61,82,255,0.22) 0%, transparent 70%);
-    border-radius: 50%; pointer-events: none;
-}
-.hero-glow-2 {
-    position: absolute; bottom: -60px; left: 10%;
-    width: 380px; height: 380px;
-    background: radial-gradient(circle, rgba(99,179,237,0.1) 0%, transparent 70%);
-    border-radius: 50%; pointer-events: none;
-}
-.hero-content { position: relative; z-index: 1; max-width: 760px; }
-.hero-badge {
-    display: inline-block;
-    background: rgba(61,82,255,0.18);
-    color: #93A3FF;
-    font-size: 11px; font-weight: 700;
-    padding: 7px 18px; border-radius: 20px;
-    border: 1px solid rgba(61,82,255,0.35);
-    margin-bottom: 28px;
-    letter-spacing: 1.8px; text-transform: uppercase;
-}
-.hero-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 56px; font-weight: 700;
-    color: #FFFFFF; line-height: 1.12;
-    letter-spacing: -2px; margin-bottom: 22px;
-}
-.hero-title .accent {
-    background: linear-gradient(135deg, #6B86FF 0%, #93CFFF 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-.hero-desc {
-    font-size: 17px; color: rgba(255,255,255,0.55);
-    line-height: 1.75; margin-bottom: 48px;
-    max-width: 540px; margin-left: auto; margin-right: auto;
-}
-.nav-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
-    width: 100%; max-width: 780px;
-    margin: 0 auto 44px;
-}
-.nav-card {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 14px; padding: 22px 18px;
-    text-align: left; cursor: default;
-    transition: all 0.25s;
-    position: relative; overflow: hidden;
-}
-.nav-card:hover {
-    background: rgba(255,255,255,0.09);
-    border-color: rgba(255,255,255,0.2);
-    transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(0,0,0,0.3);
-}
-.nc-blue  { border-top: 3px solid #3D52FF; }
-.nc-green { border-top: 3px solid #10B981; }
-.nc-amber { border-top: 3px solid #F59E0B; }
-.nc-violet{ border-top: 3px solid #8B5CF6; }
-.nc-cyan  { border-top: 3px solid #06B6D4; }
-.nc-rose  { border-top: 3px solid #EC4899; }
-.nc-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 14px; font-weight: 600;
-    color: white; margin-bottom: 5px; margin-top: 10px;
-}
-.nc-icon { font-size: 24px; }
-.nc-desc { font-size: 11px; color: rgba(255,255,255,0.4); line-height: 1.5; }
-.nc-arrow {
-    position: absolute; top: 14px; right: 14px;
-    color: rgba(255,255,255,0.2); font-size: 14px;
-    transition: all 0.2s;
-}
-.nav-card:hover .nc-arrow { color: rgba(255,255,255,0.6); }
-
-.stats-strip {
-    display: flex; gap: 24px; justify-content: center;
-    flex-wrap: wrap;
-}
-.stat-chip {
-    text-align: center; padding: 14px 22px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px; min-width: 100px;
-}
-.stat-n {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 22px; font-weight: 700; color: #6B86FF;
-    line-height: 1;
-}
-.stat-l { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 4px; }
 </style>
 """, unsafe_allow_html=True)
 
-# ── SIDEBAR ────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════
+# SIDEBAR
+# ══════════════════════════════════════════════════════════════
 with st.sidebar:
-    st.markdown("""
-    <div style="padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,0.08);margin-bottom:14px;">
-        <div style="font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:700;color:white;">
-            Mind<span style="color:#6B86FF;">Check</span>
-        </div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">
-            BMCS2003 Artificial Intelligence
-        </div>
-    </div>
-    <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.25);
-                letter-spacing:1.8px;text-transform:uppercase;padding:0 8px 8px;">
-        MAIN
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("## 🧠 MindCheck")
+    st.caption("BMCS2003 Artificial Intelligence")
+    st.divider()
 
-    if st.button("Home", key="sb_home", width='stretch'):
+    st.markdown("**MAIN**")
+    if st.button("🏠  Home", key="sb_home", use_container_width=True):
         st.switch_page("Home.py")
 
-    st.markdown("""
-    <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.25);
-                letter-spacing:1.8px;text-transform:uppercase;
-                padding:14px 8px 8px;">ANALYSIS</div>
-    """, unsafe_allow_html=True)
-
-    if st.button("Exploratory Data Analysis", key="sb_eda", width='stretch'):
+    st.markdown("**ANALYSIS**")
+    if st.button("📊  Exploratory Data Analysis", key="sb_eda", use_container_width=True):
         st.switch_page("pages/1_EDA.py")
-    if st.button("Dataset Overview", key="sb_ds", width='stretch'):
+    if st.button("📋  Dataset Overview", key="sb_ds", use_container_width=True):
         st.switch_page("pages/6_Dataset.py")
 
-    st.markdown("""
-    <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.25);
-                letter-spacing:1.8px;text-transform:uppercase;
-                padding:14px 8px 8px;">MODELS</div>
-    """, unsafe_allow_html=True)
-
-    if st.button("KNN — Ho Jun Yon", key="sb_knn", width='stretch'):
+    st.markdown("**MODELS**")
+    if st.button("🔵  KNN — Ho Jun Yon", key="sb_knn", use_container_width=True):
         st.switch_page("pages/2_KNN.py")
-    if st.button("Decision Tree — Irvin", key="sb_dt", width='stretch'):
+    if st.button("🌳  Decision Tree — Irvin", key="sb_dt", use_container_width=True):
         st.switch_page("pages/3_Decision_Tree.py")
-    if st.button("SVM — Chiang Jun Hang", key="sb_svm", width='stretch'):
+    if st.button("🔴  SVM — Chiang Jun Hang", key="sb_svm", use_container_width=True):
         st.switch_page("pages/4_SVM.py")
 
-    st.markdown("""
-    <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.25);
-                letter-spacing:1.8px;text-transform:uppercase;
-                padding:14px 8px 8px;">COMPARE</div>
-    """, unsafe_allow_html=True)
-
-    if st.button("Compare All Models", key="sb_cmp", width='stretch'):
+    st.markdown("**COMPARE**")
+    if st.button("📈  Compare All Models", key="sb_cmp", use_container_width=True):
         st.switch_page("pages/5_Comparison.py")
 
-    st.markdown("""
-    <div style="position:fixed;bottom:0;left:0;width:250px;
-                padding:14px 20px;border-top:1px solid rgba(255,255,255,0.06);
-                font-size:11px;color:rgba(255,255,255,0.2);line-height:1.8;
-                background:#12152A;">
-        Tutorial Group 3 · Tutor: Dr Goh<br>
-        202605 Session · TARUMT
-    </div>
-    """, unsafe_allow_html=True)
+    st.divider()
+    st.caption("Tutorial Group 3 · Tutor: Dr Goh\n202605 Session · TARUMT")
 
-# ── HERO ──────────────────────────────────────────────────────
-st.markdown("""
-<div class="hero-section">
-    <div class="hero-glow-1"></div>
-    <div class="hero-glow-2"></div>
-    <div class="hero-content">
+# ══════════════════════════════════════════════════════════════
+# HERO SECTION
+# ══════════════════════════════════════════════════════════════
+st.markdown("---")
 
-        <div class="hero-badge">Supervised Machine Learning · TARUMT · BMCS2003</div>
+col_hero, col_space = st.columns([3, 1])
+with col_hero:
+    st.markdown("##### 🎓 SUPERVISED MACHINE LEARNING · BMCS2003 · TARUMT")
+    st.title("Student Mental Health\nPrediction System")
+    st.markdown(
+        "An AI-powered system that analyses student demographics and academic data "
+        "to predict **depression** and **panic attack** risk — "
+        "enabling early detection and timely support."
+    )
 
-        <h1 class="hero-title">
-            Student<br>
-            <span class="accent">Mental Health</span><br>
-            Prediction
-        </h1>
+st.markdown("---")
 
-        <p class="hero-desc">
-            An AI-powered system that analyses student demographics
-            and academic data to predict depression and panic attack
-            risk — enabling early detection and timely support.
-        </p>
+# ══════════════════════════════════════════════════════════════
+# STATS ROW
+# ══════════════════════════════════════════════════════════════
+s1, s2, s3, s4, s5 = st.columns(5)
+s1.metric("Student Records", "600", help="Total records in dataset")
+s2.metric("Best Accuracy", "95.83%", help="KNN model accuracy")
+s3.metric("Best Recall", "97.44%", help="KNN model recall")
+s4.metric("ML Algorithms", "3", help="KNN, Decision Tree, SVM")
+s5.metric("Features", "11", help="Original dataset features")
 
-        <div class="nav-cards-grid">
-            <div class="nav-card nc-blue">
-                <span class="nc-arrow">↗</span>
-                <div class="nc-icon">📊</div>
-                <div class="nc-title">EDA</div>
-                <div class="nc-desc">Explore dataset visualizations and feature distributions</div>
-            </div>
-            <div class="nav-card nc-green">
-                <span class="nc-arrow">↗</span>
-                <div class="nc-icon">🔵</div>
-                <div class="nc-title">KNN Model</div>
-                <div class="nc-desc">K-Nearest Neighbor · 95.83% accuracy · K = 5</div>
-            </div>
-            <div class="nav-card nc-amber">
-                <span class="nc-arrow">↗</span>
-                <div class="nc-icon">🌳</div>
-                <div class="nc-title">Decision Tree</div>
-                <div class="nc-desc">CART · 85.50% accuracy · Max depth 5</div>
-            </div>
-            <div class="nav-card nc-violet">
-                <span class="nc-arrow">↗</span>
-                <div class="nc-icon">🔴</div>
-                <div class="nc-title">SVM Model</div>
-                <div class="nc-desc">Support Vector Machine · RBF Kernel</div>
-            </div>
-            <div class="nav-card nc-cyan">
-                <span class="nc-arrow">↗</span>
-                <div class="nc-icon">📈</div>
-                <div class="nc-title">Compare Models</div>
-                <div class="nc-desc">Side-by-side algorithm performance comparison</div>
-            </div>
-            <div class="nav-card nc-rose">
-                <span class="nc-arrow">↗</span>
-                <div class="nc-icon">📋</div>
-                <div class="nc-title">Dataset</div>
-                <div class="nc-desc">600 student records · IIUM Malaysia · Kaggle</div>
-            </div>
-        </div>
+st.markdown("---")
 
-        <div class="stats-strip">
-            <div class="stat-chip"><div class="stat-n">600</div><div class="stat-l">Student Records</div></div>
-            <div class="stat-chip"><div class="stat-n">95.83%</div><div class="stat-l">Best Accuracy</div></div>
-            <div class="stat-chip"><div class="stat-n">97.44%</div><div class="stat-l">Best Recall</div></div>
-            <div class="stat-chip"><div class="stat-n">3</div><div class="stat-l">ML Algorithms</div></div>
-            <div class="stat-chip"><div class="stat-n">11</div><div class="stat-l">Features</div></div>
-        </div>
+# ══════════════════════════════════════════════════════════════
+# NAVIGATION CARDS — using Streamlit columns + containers
+# ══════════════════════════════════════════════════════════════
+st.subheader("Navigate to a Section")
+st.caption("Click any button below to explore the system")
 
-    </div>
-</div>
-""", unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
 
-# ── Real Streamlit nav buttons below hero ─────────────────────
-st.markdown("""
-<div style="background:#12152A;padding:28px 40px;
-            border-top:1px solid rgba(255,255,255,0.06);">
-    <div style="font-size:12px;color:rgba(255,255,255,0.3);
-                text-align:center;margin-bottom:16px;letter-spacing:0.5px;">
-        Quick Navigation
-    </div>
-</div>
-""", unsafe_allow_html=True)
+# Row 1
+c1, c2, c3 = st.columns(3)
 
-c1,c2,c3,c4,c5,c6 = st.columns(6)
 with c1:
-    if st.button("EDA", key="qn_eda", width='stretch'):
-        st.switch_page("pages/1_EDA.py")
+    with st.container(border=True):
+        st.markdown("### 📊 EDA")
+        st.caption("Exploratory Data Analysis")
+        st.write("Explore dataset visualizations, distributions, and correlations.")
+        if st.button("Open EDA", key="nc_eda", use_container_width=True):
+            st.switch_page("pages/1_EDA.py")
+
 with c2:
-    if st.button("KNN", key="qn_knn", width='stretch'):
-        st.switch_page("pages/2_KNN.py")
+    with st.container(border=True):
+        st.markdown("### 🔵 KNN Model")
+        st.caption("Member 1 — Ho Jun Yon")
+        st.write("K-Nearest Neighbor · **95.83% accuracy** · K = 5 · Target: Depression")
+        if st.button("Open KNN", key="nc_knn", use_container_width=True):
+            st.switch_page("pages/2_KNN.py")
+
 with c3:
-    if st.button("Decision Tree", key="qn_dt", width='stretch'):
-        st.switch_page("pages/3_Decision_Tree.py")
+    with st.container(border=True):
+        st.markdown("### 🌳 Decision Tree")
+        st.caption("Member 2 — Irvin Tan Wei Shen")
+        st.write("CART Algorithm · **85.50% accuracy** · Depth 5 · Target: Depression")
+        if st.button("Open Decision Tree", key="nc_dt", use_container_width=True):
+            st.switch_page("pages/3_Decision_Tree.py")
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# Row 2
+c4, c5, c6 = st.columns(3)
+
 with c4:
-    if st.button("SVM", key="qn_svm", width='stretch'):
-        st.switch_page("pages/4_SVM.py")
+    with st.container(border=True):
+        st.markdown("### 🔴 SVM Model")
+        st.caption("Member 3 — Chiang Jun Hang")
+        st.write("Support Vector Machine · RBF Kernel · Target: Panic Attack")
+        if st.button("Open SVM", key="nc_svm", use_container_width=True):
+            st.switch_page("pages/4_SVM.py")
+
 with c5:
-    if st.button("Compare", key="qn_cmp", width='stretch'):
-        st.switch_page("pages/5_Comparison.py")
+    with st.container(border=True):
+        st.markdown("### 📈 Compare Models")
+        st.caption("All 3 Algorithms")
+        st.write("Side-by-side performance comparison of KNN, Decision Tree, and SVM.")
+        if st.button("Open Comparison", key="nc_cmp", use_container_width=True):
+            st.switch_page("pages/5_Comparison.py")
+
 with c6:
-    if st.button("Dataset", key="qn_ds", width='stretch'):
-        st.switch_page("pages/6_Dataset.py")
+    with st.container(border=True):
+        st.markdown("### 📋 Dataset")
+        st.caption("Kaggle — IIUM Malaysia")
+        st.write("600 student records · 11 features · Preprocessing steps and summary.")
+        if st.button("Open Dataset", key="nc_ds", use_container_width=True):
+            st.switch_page("pages/6_Dataset.py")
+
+st.markdown("---")
+
+# ══════════════════════════════════════════════════════════════
+# ABOUT SECTION
+# ══════════════════════════════════════════════════════════════
+st.subheader("About This Project")
+
+ab1, ab2, ab3 = st.columns(3)
+
+with ab1:
+    with st.container(border=True):
+        st.markdown("**🎯 Problem Statement**")
+        st.write(
+            "Mental health issues among university students are increasing globally. "
+            "Many students do not seek help early due to stigma and limited screening tools. "
+            "This system uses AI to enable early detection."
+        )
+
+with ab2:
+    with st.container(border=True):
+        st.markdown("**📊 Our Approach**")
+        st.write(
+            "We implement and compare three supervised classification algorithms — "
+            "KNN, Decision Tree, and SVM — on 600 IIUM student records. "
+            "Each member independently builds and evaluates a different algorithm."
+        )
+
+with ab3:
+    with st.container(border=True):
+        st.markdown("**🚀 Impact**")
+        st.write(
+            "The system gives university counsellors an early-warning tool "
+            "to flag at-risk students using academic and demographic features, "
+            "enabling timely mental health support and intervention."
+        )
+
+st.markdown("---")
+
+# ══════════════════════════════════════════════════════════════
+# SYSTEM PIPELINE
+# ══════════════════════════════════════════════════════════════
+st.subheader("System Pipeline")
+st.caption("Five stages from raw data to real-time prediction")
+
+p1, p2, p3, p4, p5 = st.columns(5)
+
+steps = [
+    ("1️⃣", "Data Collection", "600 records from Kaggle IIUM student survey"),
+    ("2️⃣", "Preprocessing", "Clean, encode, scale and engineer features"),
+    ("3️⃣", "Model Training", "KNN (K=5), Decision Tree (depth 5), SVM (RBF)"),
+    ("4️⃣", "Evaluation", "Accuracy, Precision, Recall, F1, Confusion Matrix, CV"),
+    ("5️⃣", "Deployment", "Interactive Streamlit multi-page web application"),
+]
+
+for col, (icon, title, desc) in zip([p1, p2, p3, p4, p5], steps):
+    with col:
+        with st.container(border=True):
+            st.markdown(f"### {icon}")
+            st.markdown(f"**{title}**")
+            st.caption(desc)
+
+st.markdown("---")
+
+# ══════════════════════════════════════════════════════════════
+# TEAM SECTION
+# ══════════════════════════════════════════════════════════════
+st.subheader("Group Members")
+st.caption("Tutorial Group 3 | Tutor: Dr Goh | BMCS2003 AI | 202605 Session")
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+t1, t2, t3 = st.columns(3)
+
+with t1:
+    with st.container(border=True):
+        st.markdown("#### 🔵 Member 1")
+        st.markdown("**Ho Jun Yon**")
+        st.caption("Student ID: 2612634")
+        st.divider()
+        st.write("**Algorithm:** K-Nearest Neighbor (KNN)")
+        st.write("**Target:** Depression Prediction")
+        col_a, col_b = st.columns(2)
+        col_a.metric("Accuracy", "95.83%")
+        col_b.metric("Recall", "97.44%")
+        st.write("**Best K:** 5 | **Scaling:** MinMax | **Split:** 80/20")
+        if st.button("View KNN Page", key="tm_knn", use_container_width=True):
+            st.switch_page("pages/2_KNN.py")
+
+with t2:
+    with st.container(border=True):
+        st.markdown("#### 🌳 Member 2")
+        st.markdown("**Irvin Tan Wei Shen**")
+        st.caption("Student ID: 2612638")
+        st.divider()
+        st.write("**Algorithm:** Decision Tree (CART)")
+        st.write("**Target:** Depression Prediction")
+        col_a, col_b = st.columns(2)
+        col_a.metric("Accuracy", "85.50%")
+        col_b.metric("Recall", "89.18%")
+        st.write("**Max Depth:** 5 | **Criterion:** Gini | **Root:** Marital Status")
+        if st.button("View DT Page", key="tm_dt", use_container_width=True):
+            st.switch_page("pages/3_Decision_Tree.py")
+
+with t3:
+    with st.container(border=True):
+        st.markdown("#### 🔴 Member 3")
+        st.markdown("**Chiang Jun Hang**")
+        st.caption("Student ID: 2612610")
+        st.divider()
+        st.write("**Algorithm:** Support Vector Machine (SVM)")
+        st.write("**Target:** Panic Attack Prediction")
+        col_a, col_b = st.columns(2)
+        col_a.metric("Accuracy", "TBD")
+        col_b.metric("Recall", "TBD")
+        st.write("**Kernel:** RBF | **Scaling:** Standard | **Split:** 75/25")
+        if st.button("View SVM Page", key="tm_svm", use_container_width=True):
+            st.switch_page("pages/4_SVM.py")
+
+st.markdown("---")
+
+# ══════════════════════════════════════════════════════════════
+# FAQ
+# ══════════════════════════════════════════════════════════════
+st.subheader("Frequently Asked Questions")
+
+with st.expander("What is KNN (K-Nearest Neighbor)?"):
+    st.write(
+        "KNN classifies a student's mental health status by finding the K most similar "
+        "students in the training data and taking a majority vote. K=5 was selected as "
+        "optimal through testing K=1 to K=20. Distance is measured using Euclidean "
+        "distance after MinMax scaling to normalize all features to [0,1]."
+    )
+
+with st.expander("What is Decision Tree (CART)?"):
+    st.write(
+        "Decision Tree CART recursively splits data based on the feature with the highest "
+        "Gini impurity reduction at each node. It builds an interpretable tree where each "
+        "path from root to leaf represents a decision rule. Our tree has max depth 5, "
+        "with Marital Status as the root split — the most discriminative feature."
+    )
+
+with st.expander("What is SVM (Support Vector Machine)?"):
+    st.write(
+        "SVM finds the optimal hyperplane that maximally separates two classes in "
+        "high-dimensional space. The RBF (Radial Basis Function) kernel is used to "
+        "handle non-linear data. Standard Scaling is applied before training. "
+        "It targets Panic Attack prediction."
+    )
+
+with st.expander("Why does Recall matter most for mental health screening?"):
+    st.write(
+        "In mental health screening, missing a depressed student (false negative) is more "
+        "serious than a false alarm (false positive). KNN achieved 97.44% recall — "
+        "meaning it correctly identified 97.44% of all depressed students in the test set. "
+        "A high recall minimizes the risk of failing to identify at-risk students."
+    )
+
+with st.expander("What is 5-Fold Cross Validation?"):
+    st.write(
+        "Instead of testing the model once, 5-Fold CV splits training data into 5 equal "
+        "parts. It trains and tests 5 times — each time using a different part as the test "
+        "set — then averages the accuracy. KNN achieved 86.67% CV mean with only 2.12% "
+        "standard deviation, confirming the model is stable and not overfitting."
+    )
+
+with st.expander("Why three different algorithms for the same project?"):
+    st.write(
+        "Each member independently implements a different algorithm to enable a rigorous "
+        "side-by-side comparison on the same dataset. By keeping dataset, preprocessing, "
+        "and evaluation metrics consistent, any performance difference can be attributed "
+        "purely to the algorithm choice — which is good experimental design in ML research."
+    )
+
+st.markdown("---")
+st.caption("MindCheck · BMCS2003 Artificial Intelligence · 202605 Session · Tutorial Group 3 · Tutor: Dr Goh · TARUMT")
