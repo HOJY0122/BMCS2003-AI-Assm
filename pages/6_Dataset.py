@@ -19,7 +19,11 @@ st.markdown("""
 html, body, [data-testid="stAppViewContainer"] { background: #F0F4FF !important; font-family: 'Inter', sans-serif; }
 [data-testid="stAppViewContainer"] > .main { background: #F0F4FF !important; padding: 0 !important; }
 .block-container { padding: 0 !important; max-width: 100% !important; }
-#MainMenu, footer, header { visibility: hidden; }
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
+header { visibility: hidden; }
+[data-testid="collapsedControl"] { display: flex !important; visibility: visible !important; }
+[data-testid="stSidebarCollapseButton"] { display: flex !important; visibility: visible !important; }
 [data-testid="stSidebar"] { background: #1A1D2E !important; }
 [data-testid="stSidebar"] * { color: rgba(255,255,255,0.85) !important; }
 [data-testid="stSidebarNav"] { display: none !important; }
