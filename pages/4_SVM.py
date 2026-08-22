@@ -202,15 +202,15 @@ if submitted:
     year_num = t_year.split()[-1]
 
     input_data = pd.DataFrame([{
-        'Age'                                        : t_age,
-        'Choose your gender'                         : t_gender,
-        'Your current year of Study'                 : f'year {year_num}',
-        'What is your CGPA?'                         : t_cgpa,
-        'Marital status'                             : t_marital,
-        'Do you have Anxiety?'                       : t_anxiety,
-        'Do you have Panic attack?'                  : t_panic,
+        'Choose your gender'                          : t_gender,
+        'Age'                                         : t_age,
+        'Your current year of Study'                  : f'year {year_num}',
+        'What is your CGPA?'                          : t_cgpa,
+        'Marital status'                              : t_marital,
+        'Do you have Anxiety?'                        : t_anxiety,
+        'Do you have Panic attack?'                   : t_panic,
         'Did you seek any specialist for a treatment?': t_treat,
-        'Course_Category'                            : categorize_course(t_course),
+        'Course_Category'                             : categorize_course(t_course),
     }])
 
     try:
