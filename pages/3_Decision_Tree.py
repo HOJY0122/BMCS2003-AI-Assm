@@ -178,5 +178,36 @@ if st.session_state.dt_result:
         st.session_state.dt_result = None
         st.rerun()
 
+# ── Always show tree diagram ───────────────────────────────────
+st.divider()
+st.subheader("Decision Tree Structure")
+st.caption("Visual structure of the trained Decision Tree (Depth 5). "
+           "Orange = tends to Depression, Blue = tends to No Depression.")
+
+from sklearn.tree import plot_tree
+import matplotlib.pyplot as plt
+
+@st.cache_resource
+def get_tree_fig(_model, feat_names):
+    fig, ax = plt.subplots(figsize=(22, 9))
+    plot_tree(
+        _model,
+        feature_names=feat_names,
+        class_names=['No Depression', 'Depression'],
+        filled=True, rounded=True,
+        fontsize=7, ax=ax,
+        impurity=True, proportion=False
+    )
+    ax.set_title("Decision Tree Structure — Live Trained (Depth 5)",
+                 fontsize=13, fontweight='bold', pad=16)
+    plt.tight_layout()
+    return fig
+
+feat_display = ['Gender','Age','Course','Year','CGPA',
+                'Anxiety','Panic Attack','Marital Status']
+tree_fig = get_tree_fig(M['model'], feat_display)
+st.pyplot(tree_fig, use_container_width=True)
+plt.close('all')
+
 st.divider()
 st.caption("MindCheck · BMCS2003 AI · 202605 · Group 3 · Dr Goh · TARUMT")
