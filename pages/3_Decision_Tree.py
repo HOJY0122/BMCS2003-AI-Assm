@@ -2,415 +2,177 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-import re
-import os
-import sys
+import sys, os, warnings
+warnings.filterwarnings('ignore')
 
-from sklearn.tree import DecisionTreeClassifier, plot_tree
-from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score,
-    f1_score, confusion_matrix, classification_report
-)
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.preprocessing import load_and_clean_dataset
 from utils.sidebar import sidebar
 
-# ── Page Config ────────────────────────────────────────────────
-st.set_page_config(
-    page_title="Decision Tree - Depression Prediction",
-    page_icon="🌳",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+st.set_page_config(page_title="Decision Tree Predictor", page_icon="🌳",
+                   layout="wide", initial_sidebar_state="expanded")
 sidebar("dt")
 
-# ── Custom CSS ─────────────────────────────────────────────────
-st.markdown("""
-<style>
-    h1 { color: #1a1a2e; font-family: Arial, sans-serif; }
-    h2 { color: #16213e; font-family: Arial, sans-serif; }
-    h3 { color: #0f3460; font-family: Arial, sans-serif; }
-    .section-title {
-        font-size: 18px;
-        font-weight: bold;
-        color: #0f3460;
-        border-bottom: 2px solid #0f3460;
-        padding-bottom: 6px;
-        margin-bottom: 12px;
-    }
-    div[data-testid="metric-container"] {
-        background-color: #ffffff;
-        border-radius: 8px;
-        padding: 12px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.06);
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# ── Title ──────────────────────────────────────────────────────
-st.title("Decision Tree - Depression Prediction")
-st.markdown("**Member 2: Irvin Tan Wei Shen**")
-st.markdown("---")
-
-# ══════════════════════════════════════════════════════════════
-# HELPER FUNCTIONS & DATA PARSING
-# ══════════════════════════════════════════════════════════════
-def parse_year(val):
-    if pd.isna(val): return 1
-    numbers = re.findall(r'\d+', str(val))
-    return int(numbers[0]) if numbers else 1
-
-def encode_binary(val):
-    if pd.isna(val):
-        return 0
-    val_str = str(val).strip().lower()
-    return 1 if val_str in ['yes', '1', 'true', '1.0'] else 0
-
-CGPA_MAP = {
-    '0 - 1.99'   : 1.00,
-    '2.00 - 2.49': 2.25,
-    '2.50 - 2.99': 2.75,
-    '3.00 - 3.49': 3.25,
-    '3.50 - 4.00': 3.75,
-}
-
-# Raw dynamic feature set
-FEATURE_COLS = ['marital', 'anxiety', 'treatment', 'cgpa', 'year', 'age', 'panic']
-
-# Feature names for matplotlib/scikit-learn visualization
-FEATURE_NAMES_DISPLAY = ['Marital Status', 'Anxiety', 'Treatment', 'CGPA', 'Year of Study', 'Age', 'Panic Attack']
-
-# ══════════════════════════════════════════════════════════════
-# FULLY DYNAMIC MODEL TRAINING (NO HARDCODED RULES)
-# ══════════════════════════════════════════════════════════════
+# ── Train model (live) ─────────────────────────────────────────
 @st.cache_resource
-def train_and_evaluate_model():
-    try:
-        df_raw = load_and_clean_dataset()
-    except Exception:
-        df_raw = pd.read_csv('dataset/Student_Mental_health.csv')
+def get_dt():
+    df = load_and_clean_dataset('dataset/Student_Mental_health.csv')
+    df['CGPA_Numeric'] = df['CGPA_Numeric'].fillna(df['CGPA_Numeric'].median())
+    le_c = LabelEncoder(); le_y = LabelEncoder()
+    df['Course_Enc'] = le_c.fit_transform(df['Course'])
+    df['Year_Enc']   = le_y.fit_transform(df['Year_of_Study'])
 
-    def find_col(candidates):
-        for col in df_raw.columns:
-            cleaned_col = str(col).strip().lower()
-            for cand in candidates:
-                if cand.lower() in cleaned_col:
-                    return col
-        return None
+    feat = ['Gender','Age','Course_Enc','Year_Enc','CGPA_Numeric',
+            'Anxiety','Panic_Attack','Marital_Status']
+    X = df[feat]; y = df['Depression']
+    Xtr,Xte,ytr,yte = train_test_split(X,y,test_size=0.3,random_state=42,stratify=y)
 
-    age_col       = find_col(['age'])
-    cgpa_col      = find_col(['cgpa', 'what is your cgpa'])
-    year_col      = find_col(['year', 'your current year of study'])
-    marital_col   = find_col(['marital'])
-    anxiety_col   = find_col(['anxiety'])
-    panic_col     = find_col(['panic'])
-    treatment_col = find_col(['treatment', 'specialist'])
-    target_col    = find_col(['depression', 'depress'])
+    model = DecisionTreeClassifier(max_depth=5,criterion='gini',random_state=42)
+    model.fit(Xtr, ytr)
+    yp = model.predict(Xte)
 
-    def parse_cgpa(val):
-        val_str = str(val).strip()
-        if val_str in CGPA_MAP:
-            return CGPA_MAP[val_str]
-        try:
-            return float(val_str)
-        except ValueError:
-            return 3.0
-
-    df_proc = pd.DataFrame()
-    
-    # Process continuous raw values without forcing hardcoded boundaries
-    df_proc['age']       = df_raw[age_col].apply(lambda x: int(re.findall(r'\d+', str(x))[0]) if pd.notna(x) and re.findall(r'\d+', str(x)) else 20) if age_col else 20
-    df_proc['cgpa']      = df_raw[cgpa_col].apply(parse_cgpa) if cgpa_col else 3.0
-    df_proc['year']      = df_raw[year_col].apply(parse_year) if year_col else 1
-    df_proc['marital']   = df_raw[marital_col].apply(encode_binary) if marital_col else 0
-    df_proc['anxiety']   = df_raw[anxiety_col].apply(encode_binary) if anxiety_col else 0
-    df_proc['treatment'] = df_raw[treatment_col].apply(encode_binary) if treatment_col else 0
-    df_proc['panic']     = df_raw[panic_col].apply(encode_binary) if panic_col else 0
-    df_proc['target']    = df_raw[target_col].apply(encode_binary) if target_col else 0
-
-    X = df_proc[FEATURE_COLS]
-    y = df_proc['target']
-
-    # Trained dynamically using Gini impurity across max depth 5 to let CGPA split naturally
-    clf = DecisionTreeClassifier(
-        criterion='gini',
-        max_depth=5,
-        min_samples_split=4,
-        class_weight='balanced',
-        random_state=42
-    )
-    clf.fit(X, y)
-
-    preds = clf.predict(X)
-    actuals = y.values
-
-    return clf, X, actuals, preds, df_raw
-
-clf, X_data, actuals, preds, df_raw = train_and_evaluate_model()
-
-def trace_decision_path(model, sample_df):
-    node_indicator = model.decision_path(sample_df)
-    leaf_id = model.apply(sample_df)
-    node_index = node_indicator.indices[node_indicator.indptr[0]:node_indicator.indptr[1]]
-    
-    feature = model.tree_.feature
-    threshold = model.tree_.threshold
-    
-    path_steps = []
-    for node_id in node_index:
-        if leaf_id[0] == node_id:
-            continue
-        
-        feat_idx = feature[node_id]
-        feat_label = FEATURE_NAMES_DISPLAY[feat_idx]
-        val = sample_df[FEATURE_COLS[feat_idx]].iloc[0]
-        thresh = threshold[node_id]
-        
-        cond = f"{feat_label} ({val:.2f}) <= {thresh:.2f}" if val <= thresh else f"{feat_label} ({val:.2f}) > {thresh:.2f}"
-        path_steps.append(cond)
-        
-    return path_steps
-
-# ══════════════════════════════════════════════════════════════
-# SECTION 1: ALGORITHM OVERVIEW
-# ══════════════════════════════════════════════════════════════
-st.markdown('<div class="section-title">Step 1: Algorithm Overview</div>', unsafe_allow_html=True)
-
-c1, c2, c3 = st.columns(3)
-c1.info("**Algorithm:** DecisionTreeClassifier (scikit-learn)\n\n**Type:** Supervised Learning (CART)")
-c2.info("**Target:** Depression Prediction\n\n**Output:** Depress (1) / No Depress (0)")
-c3.info(f"**Dataset Size:** {len(actuals)} records\n\n**Max Depth:** 5 Levels")
-
-st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("""
-**Model Training Strategy:**
-
-The decision tree is dynamically fit using scikit-learn CART classifier on raw continuous features:
-
-1. **Academic & Age Attributes:** CGPA, Year of Study, Age.
-2. **Clinical & Behavioral Factors:** Marital Status, Anxiety, Treatment, and Panic Attacks.
-3. **Dynamic CART Fitting:** Thresholds (e.g., `CGPA <= 3.12`, `Age <= 20.5`) are derived purely by maximizing Gini impurity reduction.
-""")
-
-st.markdown("---")
-
-# ══════════════════════════════════════════════════════════════
-# SECTION 2: DECISION TREE STRUCTURE DIAGRAM
-# ══════════════════════════════════════════════════════════════
-st.markdown('<div class="section-title">Step 2: Decision Tree Structure</div>', unsafe_allow_html=True)
-st.write("Visual structure of the fitted dynamic decision tree:")
-
-fig_tree, ax_tree = plt.subplots(figsize=(22, 10))
-plot_tree(
-    clf, 
-    feature_names=FEATURE_NAMES_DISPLAY, 
-    class_names=["No Depress", "Depress"], 
-    filled=True, 
-    rounded=True, 
-    fontsize=8,
-    ax=ax_tree
-)
-st.pyplot(fig_tree)
-plt.close(fig_tree)
-
-st.markdown("---")
-
-# ══════════════════════════════════════════════════════════════
-# SECTION 3: MODEL EVALUATION
-# ══════════════════════════════════════════════════════════════
-st.markdown('<div class="section-title">Step 3: Model Evaluation</div>', unsafe_allow_html=True)
-st.write(f"Evaluation metrics computed across all {len(actuals)} dataset records.")
-
-acc  = accuracy_score(actuals, preds)
-prec = precision_score(actuals, preds, zero_division=0)
-rec  = recall_score(actuals, preds, zero_division=0)
-f1   = f1_score(actuals, preds, zero_division=0)
-
-m1, m2, m3, m4 = st.columns(4)
-m1.metric("Accuracy",  f"{acc*100:.2f}%")
-m2.metric("Precision", f"{prec*100:.2f}%")
-m3.metric("Recall",    f"{rec*100:.2f}%")
-m4.metric("F1 Score",  f"{f1*100:.2f}%")
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-col_cm, col_cr = st.columns(2)
-
-with col_cm:
-    st.markdown("**Confusion Matrix**")
-    cm = confusion_matrix(actuals, preds, labels=[0, 1])
-    fig_cm, ax_cm = plt.subplots(figsize=(5, 4))
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax_cm,
-                xticklabels=['No Depression', 'Depression'],
-                yticklabels=['No Depression', 'Depression'])
-    ax_cm.set_xlabel('Predicted')
-    ax_cm.set_ylabel('Actual')
-    ax_cm.set_title('Decision Tree Confusion Matrix')
-    st.pyplot(fig_cm)
-    plt.close(fig_cm)
-
-with col_cr:
-    st.markdown("**Classification Report**")
-    report = classification_report(
-        actuals, 
-        preds,
-        labels=[0, 1],
-        target_names=['No Depression', 'Depression'],
-        output_dict=True,
-        zero_division=0
-    )
-    report_df = pd.DataFrame(report).transpose()
-    st.dataframe(report_df.style.format("{:.2f}"), use_container_width=True)
-
-st.markdown("---")
-
-# ══════════════════════════════════════════════════════════════
-# SECTION 4: PREDICTION DISTRIBUTION
-# ══════════════════════════════════════════════════════════════
-st.markdown('<div class="section-title">Step 4: Prediction Distribution on Dataset</div>', unsafe_allow_html=True)
-
-p1, p2 = st.columns(2)
-
-with p1:
-    pred_counts   = pd.Series(preds).value_counts()
-    actual_counts = pd.Series(actuals).value_counts()
-    
-    pred_0 = pred_counts.get(0, 0)
-    pred_1 = pred_counts.get(1, 0)
-    act_0  = actual_counts.get(0, 0)
-    act_1  = actual_counts.get(1, 0)
-
-    x = np.arange(2)
-    w = 0.35
-    fig_bar, ax_bar = plt.subplots(figsize=(6, 4))
-    ax_bar.bar(x - w/2, [act_0, act_1], w, label='Actual',    color='#2874A6', edgecolor='white')
-    ax_bar.bar(x + w/2, [pred_0, pred_1], w, label='Predicted', color='#E74C3C', edgecolor='white')
-    ax_bar.set_xticks(x)
-    ax_bar.set_xticklabels(['No Depression', 'Depression'])
-    ax_bar.set_ylabel('Count')
-    ax_bar.set_title('Actual vs Predicted Distribution')
-    ax_bar.legend()
-    ax_bar.spines['top'].set_visible(False)
-    ax_bar.spines['right'].set_visible(False)
-    st.pyplot(fig_bar)
-    plt.close(fig_bar)
-
-with p2:
-    labels_pie = ['True Negative', 'False Positive', 'False Negative', 'True Positive']
-    cm_flat    = confusion_matrix(actuals, preds, labels=[0, 1]).ravel()
-    colors_pie = ['#2ecc71', '#e74c3c', '#f39c12', '#2874A6']
-    fig_pie, ax_pie = plt.subplots(figsize=(5, 4))
-    wedges, texts, autotexts = ax_pie.pie(
-        cm_flat, labels=labels_pie, colors=colors_pie,
-        autopct='%1.1f%%', startangle=90, pctdistance=0.75,
-        wedgeprops=dict(edgecolor='white', linewidth=2)
-    )
-    for at in autotexts:
-        at.set_fontsize(9)
-        at.set_fontweight('bold')
-    ax_pie.set_title('Prediction Breakdown', fontsize=11, fontweight='bold')
-    st.pyplot(fig_pie)
-    plt.close(fig_pie)
-
-st.markdown("---")
-
-# ══════════════════════════════════════════════════════════════
-# SECTION 5: STUDENT PREDICTION FORM
-# ══════════════════════════════════════════════════════════════
-st.markdown('<div class="section-title">Step 5: Student Depression Prediction</div>', unsafe_allow_html=True)
-st.write("Fill in the student information below to run dynamic inference through the trained model.")
-
-with st.form("dt_prediction_form"):
-    st.markdown("**Student Information**")
-
-    col_a, col_b = st.columns(2)
-
-    with col_a:
-        name      = st.text_input("Name")
-        age       = st.slider("Age", 17, 30, 20)
-        cgpa_str  = st.selectbox("CGPA Range", list(CGPA_MAP.keys()))
-        year_str  = st.selectbox("Year of Study", ["Year 1", "Year 2", "Year 3", "Year 4"])
-
-    with col_b:
-        marital   = st.selectbox("Marital Status", ["No", "Yes"])
-        anxiety   = st.selectbox("Do you have Anxiety?", ["No", "Yes"])
-        panic     = st.selectbox("Do you have Panic Attack?", ["No", "Yes"])
-        treatment = st.selectbox("Did you seek Specialist Treatment?", ["No", "Yes"])
-
-    submitted = st.form_submit_button("Predict", use_container_width=True)
-
-if submitted:
-    input_df = pd.DataFrame([{
-        'marital'  : encode_binary(marital),
-        'anxiety'  : encode_binary(anxiety),
-        'treatment': encode_binary(treatment),
-        'cgpa'     : CGPA_MAP[cgpa_str],
-        'year'     : parse_year(year_str),
-        'age'      : age,
-        'panic'    : encode_binary(panic)
-    }])[FEATURE_COLS]
-
-    pred_class = clf.predict(input_df)[0]
-    pred_probs = clf.predict_proba(input_df)[0]
-    pred_prob  = pred_probs[1] if len(pred_probs) > 1 else pred_probs[0]
-    
-    display_name = name.strip() if name.strip() != '' else 'Student'
-
-    st.markdown("---")
-    st.subheader("Prediction Result")
-
-    res1, res2 = st.columns(2)
-    with res1:
-        if pred_class == 1:
-            st.error(
-                f"Result for **{display_name}**: DEPRESSION DETECTED "
-                f"(Probability: {pred_prob:.0%})\n\n"
-                "The Decision Tree model predicts this student may show signs of depression. "
-                "Consider reaching out to university counseling services or a health specialist."
-            )
-        else:
-            st.success(
-                f"Result for **{display_name}**: NO DEPRESSION DETECTED "
-                f"(Probability: {pred_prob:.0%})\n\n"
-                "The Decision Tree model predicts this student does not show signs "
-                "of depression. Continue maintaining academic balance and physical well-being."
-            )
-
-    with res2:
-        st.markdown("**Decision Path Traversal**")
-        path_steps = trace_decision_path(clf, input_df)
-        for i, step in enumerate(path_steps):
-            st.markdown(f"**Node {i+1}:** Evaluated `{step}`")
-        st.markdown(f"**Final Decision Node:** Predicted Class = `{ 'Depress' if pred_class == 1 else 'No Depress' }`")
-
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("**Input Summary**")
-    summary = {
-        'Name'          : display_name,
-        'Age'           : age,
-        'CGPA Range'    : cgpa_str,
-        'Year of Study' : year_str,
-        'Marital Status': marital,
-        'Anxiety'       : anxiety,
-        'Panic Attack'  : panic,
-        'Seek Treatment': treatment,
+    return {
+        'model': model, 'feat': feat,
+        'le_c': le_c, 'le_y': le_y,
+        'acc' : accuracy_score(yte,yp)*100,
+        'prec': precision_score(yte,yp,zero_division=0)*100,
+        'rec' : recall_score(yte,yp,zero_division=0)*100,
+        'f1'  : f1_score(yte,yp,zero_division=0)*100,
+        'feature_importances': dict(zip(feat, model.feature_importances_)),
     }
-    st.table(pd.DataFrame(summary, index=['Value']).T)
 
-    # Render Tree Diagram
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("**Decision Tree Model Diagram**")
-    fig_pred_tree, ax_pred_tree = plt.subplots(figsize=(22, 10))
-    plot_tree(
-        clf, 
-        feature_names=FEATURE_NAMES_DISPLAY, 
-        class_names=["No Depress", "Depress"], 
-        filled=True, 
-        rounded=True, 
-        fontsize=8,
-        ax=ax_pred_tree
-    )
-    st.pyplot(fig_pred_tree)
-    plt.close(fig_pred_tree)
+M = get_dt()
+
+# ── Header ─────────────────────────────────────────────────────
+st.markdown("##### DECISION TREE PREDICTOR")
+st.title("Depression Risk Predictor")
+st.caption("Decision Tree (CART, Depth 5) · Member 2: Irvin Tan Wei Shen · Live trained on 600 records")
+st.divider()
+
+# ── Live metrics strip ─────────────────────────────────────────
+c1,c2,c3,c4 = st.columns(4)
+c1.metric("Accuracy",  f"{M['acc']:.2f}%",  help="Live model accuracy on test set")
+c2.metric("Precision", f"{M['prec']:.2f}%", help="Of predicted depression, how many correct")
+c3.metric("Recall",    f"{M['rec']:.2f}%",  help="Of actual depression cases, how many caught")
+c4.metric("F1 Score",  f"{M['f1']:.2f}%",   help="Harmonic mean of precision and recall")
+st.divider()
+
+# ── Input form ─────────────────────────────────────────────────
+st.subheader("Student Information")
+st.caption("Fill in the details below and click Predict")
+
+CGPA_MAP = {'0 - 1.99':1.0,'2.00 - 2.49':2.25,'2.50 - 2.99':2.75,
+            '3.00 - 3.49':3.25,'3.50 - 4.00':3.75}
+
+with st.form("dt_form"):
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        name    = st.text_input("Name", placeholder="e.g. Siti")
+        gender  = st.selectbox("Gender", ["Female","Male"])
+        age     = st.slider("Age", 17, 30, 20)
+    with col2:
+        course  = st.selectbox("Course", [
+                    "Computer Science","Information Technology","Engineering",
+                    "Law","Psychology","Language","Islamic Studies",
+                    "Health Sciences","Business","Science & Math","Arts & Social","Others"])
+        year    = st.selectbox("Year of Study", ["Year 1","Year 2","Year 3","Year 4"])
+        cgpa    = st.selectbox("CGPA Range", list(CGPA_MAP.keys()))
+    with col3:
+        marital = st.selectbox("Marital Status",              ["No","Yes"])
+        anxiety = st.selectbox("Do you have Anxiety?",        ["No","Yes"])
+        panic   = st.selectbox("Do you have Panic Attack?",   ["No","Yes"])
+        predict_btn = st.form_submit_button("Predict Depression Risk",
+                                             use_container_width=True)
+
+# ── Prediction result ──────────────────────────────────────────
+if predict_btn:
+    g  = 1 if gender  == "Male" else 0
+    ax = 1 if anxiety == "Yes"  else 0
+    pa = 1 if panic   == "Yes"  else 0
+    ma = 1 if marital == "Yes"  else 0
+    le_c = M['le_c']; le_y = M['le_y']
+    ce = le_c.transform([course])[0] if course in le_c.classes_ else 0
+    ye = le_y.transform([year])[0]   if year   in le_y.classes_ else 0
+    cn = CGPA_MAP[cgpa]
+
+    inp  = pd.DataFrame([[g,age,ce,ye,cn,ax,pa,ma]], columns=M['feat'])
+    pred = M['model'].predict(inp)[0]
+    prob = M['model'].predict_proba(inp)[0]
+    name_lbl = name.strip() or "Student"
+
+    st.divider()
+
+    if pred == 1:
+        st.error(f"## ⚠️ {name_lbl} — Depression Risk Detected")
+        st.write("The Decision Tree model predicts a **high risk of depression**. "
+                 "Please consider speaking with a counsellor or mental health professional.")
+    else:
+        st.success(f"## ✅ {name_lbl} — No Depression Detected")
+        st.write("The Decision Tree model predicts **low depression risk**. "
+                 "Keep maintaining a healthy academic and social lifestyle.")
+
+    st.write("")
+    r1, r2, r3 = st.columns(3)
+
+    with r1:
+        st.markdown("**Prediction Confidence**")
+        fig, ax2 = plt.subplots(figsize=(4, 0.7))
+        ax2.barh([""], [prob[0]*100], color="#10B981", height=0.5)
+        ax2.barh([""], [prob[1]*100], left=[prob[0]*100],
+                 color="#EF4444", height=0.5)
+        ax2.set_xlim(0,100); ax2.axis('off')
+        for x, val, lbl in [
+            (prob[0]*50, prob[0], "No Risk"),
+            (prob[0]*100+prob[1]*50, prob[1], "At Risk")
+        ]:
+            if val > 0.12:
+                ax2.text(x, 0, f"{lbl}\n{val*100:.0f}%",
+                         ha='center', va='center',
+                         fontsize=8, color='white', fontweight='bold')
+        plt.tight_layout(pad=0)
+        st.pyplot(fig, use_container_width=True); plt.close()
+        pa_col, pb_col = st.columns(2)
+        pa_col.metric("No Depression", f"{prob[0]*100:.1f}%")
+        pb_col.metric("Depression",    f"{prob[1]*100:.1f}%")
+
+    with r2:
+        st.markdown("**Input Summary**")
+        st.dataframe(pd.DataFrame({
+            "Field": ["Name","Gender","Age","Course","Year","CGPA","Marital","Anxiety","Panic Attack"],
+            "Value": [name_lbl, gender, age, course, year, cgpa, marital, anxiety, panic]
+        }).set_index("Field"), use_container_width=True)
+
+    with r3:
+        st.markdown("**Model Info**")
+        with st.container(border=True):
+            st.write("**Algorithm:** Decision Tree (CART)")
+            st.write("**Max Depth:** 5")
+            st.write("**Criterion:** Gini Impurity")
+            st.write("**Split:** 70% train / 30% test")
+            st.write(f"**Live Accuracy:** {M['acc']:.2f}%")
+
+    # Feature importance (live from model)
+    st.write("")
+    st.markdown("**Live Feature Importance** (what the model learned matters most)")
+    fi = M['feature_importances']
+    fi_df = pd.DataFrame({'Feature': list(fi.keys()),
+                          'Importance': list(fi.values())})
+    fi_df = fi_df.sort_values('Importance', ascending=True)
+    fig2, ax3 = plt.subplots(figsize=(7, 3))
+    colors = ['#10B981' if v > fi_df['Importance'].mean() else '#6B7280'
+              for v in fi_df['Importance']]
+    ax3.barh(fi_df['Feature'], fi_df['Importance'], color=colors, edgecolor='none')
+    ax3.set_xlabel("Importance Score")
+    ax3.set_title("Feature Importance — Decision Tree (Live)", fontweight='bold')
+    ax3.spines['top'].set_visible(False)
+    ax3.spines['right'].set_visible(False)
+    plt.tight_layout()
+    st.pyplot(fig2, use_container_width=True); plt.close()
+
+st.divider()
+st.caption("MindCheck · BMCS2003 AI · 202605 · Group 3 · Dr Goh · TARUMT")
