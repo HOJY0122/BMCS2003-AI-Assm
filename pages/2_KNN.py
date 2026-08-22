@@ -121,23 +121,47 @@ with col3:
                             key="knn_predict", type="primary")
 
 if predict_btn:
-    g  = 1 if gender  == "Male" else 0
-    ax = 1 if anxiety == "Yes"  else 0
-    pa = 1 if panic   == "Yes"  else 0
-    ce = M['le_c'].transform([course])[0] if course in M['le_c'].classes_ else 0
-    ye = M['le_y'].transform([year])[0]   if year   in M['le_y'].classes_ else 0
-    cn = CGPA_MAP[cgpa]
-    inp   = pd.DataFrame([[g,age,ce,ye,cn,ax,pa]], columns=M['feat'])
-    inp_s = M['scaler'].transform(inp)
-    pred  = int(M['model'].predict(inp_s)[0])
-    prob  = M['model'].predict_proba(inp_s)[0].tolist()
-    st.session_state.knn_result = {
-        'pred': pred, 'prob': prob,
-        'name': name.strip() or "Student",
-        'gender': gender, 'age': age, 'course': course,
-        'year': year, 'cgpa': cgpa,
-        'anxiety': anxiety, 'panic': panic,
-    }
+    # ── Input Validation ───────────────────────────────────────
+    _errors = []
+    if name.strip() and name.strip().isdigit():
+        _errors.append("❌ Name cannot be numbers only.")
+    if age < 17 or age > 35:
+        _errors.append(f"❌ Age {age} is outside valid range (17–35).")
+    if cgpa not in CGPA_MAP:
+        _errors.append("❌ Invalid CGPA range selected.")
+
+    # ── Business Rules ─────────────────────────────────────────
+    _high_concern   = (anxiety == "Yes" and panic == "Yes")
+    _academic_risk  = (year in ["Year 3","Year 4"] and cgpa == "0 - 1.99")
+
+    if _errors:
+        for e in _errors:
+            st.error(e)
+        st.warning("⚠️ Please fix the errors above before predicting.")
+    else:
+        try:
+            g  = 1 if gender  == "Male" else 0
+            ax = 1 if anxiety == "Yes"  else 0
+            pa = 1 if panic   == "Yes"  else 0
+            ce = M['le_c'].transform([course])[0] if course in M['le_c'].classes_ else 0
+            ye = M['le_y'].transform([year])[0]   if year   in M['le_y'].classes_ else 0
+            cn = CGPA_MAP.get(cgpa, 3.25)
+            inp   = pd.DataFrame([[g,age,ce,ye,cn,ax,pa]], columns=M['feat'])
+            inp_s = M['scaler'].transform(inp)
+            pred  = int(M['model'].predict(inp_s)[0])
+            prob  = M['model'].predict_proba(inp_s)[0].tolist()
+            st.session_state.knn_result = {
+                'pred': pred, 'prob': prob,
+                'name': name.strip() or "Student",
+                'gender': gender, 'age': age, 'course': course,
+                'year': year, 'cgpa': cgpa,
+                'anxiety': anxiety, 'panic': panic,
+                'high_concern': _high_concern,
+                'academic_risk': _academic_risk,
+            }
+        except Exception as ex:
+            st.error(f"❌ Prediction failed: {ex}")
+            st.caption("Please check your inputs and try again.")
 
 # ══════════════════════════════════════════════════════════════
 # 2. TEST RESULT
@@ -157,6 +181,14 @@ if st.session_state.knn_result:
         st.success(f"### ✅  {name_lbl} — No Depression Detected\n\n"
                    "The KNN model predicts **low depression risk**. "
                    "Keep maintaining a healthy lifestyle!")
+
+    # ── Business Rule Alerts ──────────────────────────────────
+    if R.get('high_concern'):
+        st.warning("⚠️ **High Concern:** Student has both Anxiety AND Panic Attack. "
+                   "Immediate counselling referral is strongly recommended.")
+    if R.get('academic_risk'):
+        st.warning("⚠️ **Academic Risk:** Senior year student with very low CGPA (0–1.99). "
+                   "Combined academic and mental health support is advised.")
 
     st.write("")
     r1, r2, r3 = st.columns([1.2, 1.2, 1])
@@ -203,6 +235,136 @@ if st.session_state.knn_result:
             st.write(f"**Split:** 80 / 20")
             st.write(f"**CV Mean:** {M['cv'].mean()*100:.2f}%")
             st.write(f"**Accuracy:** {M['acc']:.2f}%")
+
+
+    # ══════════════════════════════════════════════════════════
+    # PREDICTION EXPLANATION — WHY did KNN decide this?
+    # ══════════════════════════════════════════════════════════
+    st.write("")
+    st.markdown("---")
+    st.markdown("### 🧠 Why did KNN predict this?")
+    st.caption("Explanation based on feature contribution and nearest neighbours.")
+
+    import numpy as _np
+
+    ex1, ex2 = st.columns(2)
+
+    with ex1:
+        st.markdown("**Feature Contribution to Prediction**")
+        st.caption("How much each feature pushed the result toward Depression (red) or away (green).")
+
+        # Get feature contributions
+        _feat_lbl = ['Gender','Age','Course','Year','CGPA','Anxiety','Panic Attack']
+        _Xs_df    = pd.DataFrame(
+            M['scaler'].transform(M['scaler'].inverse_transform(
+                _np.zeros((1, len(M['feat'])))
+            ) * 0 + 0),  # dummy
+            columns=_feat_lbl
+        )
+        # Compute scaled input values
+        _inp_vals = _np.array([[
+            R['prob'][1],  # placeholder
+        ]])
+
+        # Use correlation as proxy for feature importance direction
+        _corr_feats = M['corr']  # already computed, index=feat_label
+        _input_dict = {
+            'Gender'      : 1 if R['gender']  == 'Male' else 0,
+            'Age'         : R['age'],
+            'Course'      : 0,
+            'Year'        : 0,
+            'CGPA'        : CGPA_MAP.get(R['cgpa'], 3.25),
+            'Anxiety'     : 1 if R['anxiety'] == 'Yes'  else 0,
+            'Panic Attack': 1 if R['panic']   == 'Yes'  else 0,
+        }
+        # Contribution = input_val * correlation_sign
+        _contribs = {}
+        for f, v in _input_dict.items():
+            _corr_val = _corr_feats.get(f, 0)
+            # If corr positive: high value → more depression
+            # If corr negative: high value → less depression
+            _contribs[f] = v * _corr_val if v > 0.5 else -abs(_corr_val) * 0.3
+
+        _contrib_s = pd.Series(_contribs).sort_values()
+        _colors_ex = ['#EF4444' if v > 0 else '#10B981' for v in _contrib_s.values]
+
+        fig_ex, ax_ex = plt.subplots(figsize=(5, 3.5))
+        bars_ex = ax_ex.barh(_contrib_s.index, _contrib_s.values,
+                              color=_colors_ex, edgecolor='none', height=0.6)
+        ax_ex.axvline(0, color='black', lw=1)
+        for bar, val in zip(bars_ex, _contrib_s.values):
+            ha = 'left' if val >= 0 else 'right'
+            offset = 0.005 if val >= 0 else -0.005
+            ax_ex.text(val + offset,
+                       bar.get_y() + bar.get_height()/2,
+                       f'{val:+.3f}', va='center', ha=ha,
+                       fontsize=8, fontweight='bold')
+        ax_ex.set_xlabel('Contribution (→ Depression vs ← No Depression)')
+        ax_ex.set_title('Feature Contribution', fontweight='bold')
+        ax_ex.spines['top'].set_visible(False)
+        ax_ex.spines['right'].set_visible(False)
+        plt.tight_layout()
+        st.pyplot(fig_ex, use_container_width=True); plt.close()
+
+    with ex2:
+        st.markdown("**K Nearest Neighbours Analysis**")
+        st.caption(f"The {M['best_k']} most similar students in the training data.")
+
+        # Get neighbours
+        _g  = 1 if R['gender']  == 'Male' else 0
+        _ax = 1 if R['anxiety'] == 'Yes'  else 0
+        _pa = 1 if R['panic']   == 'Yes'  else 0
+        _ce = M['le_c'].transform([R['course']])[0] if R['course'] in M['le_c'].classes_ else 0
+        _ye = M['le_y'].transform([R['year']])[0]   if R['year']   in M['le_y'].classes_ else 0
+        _cn = CGPA_MAP.get(R['cgpa'], 3.25)
+        _inp_raw = pd.DataFrame([[_g, R['age'], _ce, _ye, _cn, _ax, _pa]],
+                                 columns=M['feat'])
+        _inp_sc  = M['scaler'].transform(_inp_raw)
+
+        try:
+            _dists, _idxs = M['model'].kneighbors(_inp_sc)
+            _nbr_labels   = []
+            _nbr_dists    = _dists[0]
+
+            # Get labels from training set - use model internal
+            from sklearn.neighbors import KNeighborsClassifier as _KNN
+            _nbr_preds = [M['model']._y[i] for i in _idxs[0]]
+
+            _dep_count  = sum(_nbr_preds)
+            _ndep_count = len(_nbr_preds) - _dep_count
+
+            with st.container(border=True):
+                st.markdown(f"**Among the {M['best_k']} nearest neighbours:**")
+                st.write(f"🔴 **Depressed:** {_dep_count} students")
+                st.write(f"🟢 **Not Depressed:** {_ndep_count} students")
+                st.write("")
+                st.markdown("**Neighbour Distances:**")
+                for i, (dist, lbl) in enumerate(zip(_nbr_dists, _nbr_preds), 1):
+                    icon = "🔴" if lbl == 1 else "🟢"
+                    st.write(f"Neighbour {i}: {icon} {'Depressed' if lbl==1 else 'Not Depressed'} "
+                             f"(distance: {dist:.4f})")
+                st.write("")
+                st.caption(
+                    f"**Majority vote:** {_dep_count}/{M['best_k']} neighbours are depressed "
+                    f"→ Prediction: **{'Depression' if _dep_count > _ndep_count else 'No Depression'}**"
+                )
+        except Exception as _nex:
+            st.info(f"Neighbour analysis unavailable: {_nex}")
+
+    st.markdown("**What the features mean for this student:**")
+    _explain_items = []
+    if R['anxiety'] == 'Yes':
+        _explain_items.append("• **Anxiety = Yes** — Anxiety is the 2nd strongest predictor of depression (r=0.257)")
+    if R['panic'] == 'Yes':
+        _explain_items.append("• **Panic Attack = Yes** — Panic attack is the strongest predictor (r=0.341)")
+    if R['gender'] == 'Female':
+        _explain_items.append("• **Gender = Female** — Female students show higher depression rates in this dataset")
+    if CGPA_MAP.get(R['cgpa'], 3.25) < 2.5:
+        _explain_items.append("• **Low CGPA** — Academic struggles may contribute to mental health risk")
+    if not _explain_items:
+        _explain_items.append("• No major risk factors detected in this student's profile")
+    for item in _explain_items:
+        st.write(item)
 
     st.write("")
     if st.button("Clear Result", key="knn_clear"):

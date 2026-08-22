@@ -96,23 +96,49 @@ with col3:
                             key="dt_predict", type="primary")
 
 if predict_btn:
-    g  = 1 if gender  == "Male" else 0
-    ax = 1 if anxiety == "Yes"  else 0
-    pa = 1 if panic   == "Yes"  else 0
-    ma = 1 if marital == "Yes"  else 0
-    ce = M['le_c'].transform([course])[0] if course in M['le_c'].classes_ else 0
-    ye = M['le_y'].transform([year])[0]   if year   in M['le_y'].classes_ else 0
-    cn = CGPA_MAP[cgpa]
-    inp  = pd.DataFrame([[g,age,ce,ye,cn,ax,pa,ma]], columns=M['feat'])
-    pred = int(M['model'].predict(inp)[0])
-    prob = M['model'].predict_proba(inp)[0].tolist()
-    st.session_state.dt_result = {
-        'pred': pred, 'prob': prob,
-        'name': name.strip() or "Student",
-        'gender': gender, 'age': age, 'course': course,
-        'year': year, 'cgpa': cgpa,
-        'marital': marital, 'anxiety': anxiety, 'panic': panic,
-    }
+    # ── Input Validation ───────────────────────────────────────
+    _errors = []
+    if name.strip() and name.strip().isdigit():
+        _errors.append("❌ Name cannot be numbers only.")
+    if age < 17 or age > 35:
+        _errors.append(f"❌ Age {age} is outside valid range (17–35).")
+    if cgpa not in CGPA_MAP:
+        _errors.append("❌ Invalid CGPA range selected.")
+
+    # ── Business Rules ─────────────────────────────────────────
+    _high_concern  = (anxiety == "Yes" and panic == "Yes")
+    _married_risk  = (marital == "Yes" and age < 21)
+    _academic_risk = (year in ["Year 3","Year 4"] and cgpa == "0 - 1.99")
+
+    if _errors:
+        for e in _errors:
+            st.error(e)
+        st.warning("⚠️ Please fix the errors above before predicting.")
+    else:
+        try:
+            g  = 1 if gender  == "Male" else 0
+            ax = 1 if anxiety == "Yes"  else 0
+            pa = 1 if panic   == "Yes"  else 0
+            ma = 1 if marital == "Yes"  else 0
+            ce = M['le_c'].transform([course])[0] if course in M['le_c'].classes_ else 0
+            ye = M['le_y'].transform([year])[0]   if year   in M['le_y'].classes_ else 0
+            cn = CGPA_MAP.get(cgpa, 3.25)
+            inp  = pd.DataFrame([[g,age,ce,ye,cn,ax,pa,ma]], columns=M['feat'])
+            pred = int(M['model'].predict(inp)[0])
+            prob = M['model'].predict_proba(inp)[0].tolist()
+            st.session_state.dt_result = {
+                'pred': pred, 'prob': prob,
+                'name': name.strip() or "Student",
+                'gender': gender, 'age': age, 'course': course,
+                'year': year, 'cgpa': cgpa,
+                'marital': marital, 'anxiety': anxiety, 'panic': panic,
+                'high_concern': _high_concern,
+                'married_risk': _married_risk,
+                'academic_risk': _academic_risk,
+            }
+        except Exception as ex:
+            st.error(f"❌ Prediction failed: {ex}")
+            st.caption("Please check your inputs and try again.")
 
 # ══════════════════════════════════════════════════════════════
 # 2. TEST RESULT
@@ -132,6 +158,17 @@ if st.session_state.dt_result:
         st.success(f"### ✅  {name_lbl} — No Depression Detected\n\n"
                    "The Decision Tree model predicts **low depression risk**. "
                    "Keep maintaining a healthy lifestyle!")
+
+    # ── Business Rule Alerts ──────────────────────────────────
+    if R.get('high_concern'):
+        st.warning("⚠️ **High Concern:** Student has both Anxiety AND Panic Attack. "
+                   "Immediate counselling referral is strongly recommended.")
+    if R.get('married_risk'):
+        st.warning("⚠️ **Married Student Alert:** Student is married and under 21. "
+                   "Additional personal support may be needed.")
+    if R.get('academic_risk'):
+        st.warning("⚠️ **Academic Risk:** Senior year with very low CGPA (0–1.99). "
+                   "Combined academic and mental health support is advised.")
 
     st.write("")
     r1, r2, r3 = st.columns([1.2, 1.2, 1])
@@ -176,6 +213,96 @@ if st.session_state.dt_result:
             st.write("**Criterion:** Gini")
             st.write("**Split:** 70 / 30")
             st.write(f"**Accuracy:** {M['acc']:.2f}%")
+
+
+    # ══════════════════════════════════════════════════════════
+    # PREDICTION EXPLANATION — WHY did DT decide this?
+    # ══════════════════════════════════════════════════════════
+    st.write("")
+    st.markdown("---")
+    st.markdown("### 🧠 Why did the Decision Tree predict this?")
+    st.caption("Decision path traced through the live trained tree.")
+
+    ex1, ex2 = st.columns(2)
+
+    with ex1:
+        st.markdown("**Decision Path Traced**")
+        st.caption("Which nodes the tree evaluated for this student.")
+        try:
+            from sklearn.tree import _tree as _sk_tree
+            _tree   = M['model'].tree_
+            _f_names = ['Gender','Age','Course','Year','CGPA',
+                        'Anxiety','Panic Attack','Marital Status']
+            _g  = 1 if R['gender']  == 'Male' else 0
+            _ax = 1 if R['anxiety'] == 'Yes'  else 0
+            _pa = 1 if R['panic']   == 'Yes'  else 0
+            _ma = 1 if R['marital'] == 'Yes'  else 0
+            _ce = M['le_c'].transform([R['course']])[0] if R['course'] in M['le_c'].classes_ else 0
+            _ye = M['le_y'].transform([R['year']])[0]   if R['year']   in M['le_y'].classes_ else 0
+            _cn = CGPA_MAP.get(R['cgpa'], 3.25)
+            _inp = [[_g, R['age'], _ce, _ye, _cn, _ax, _pa, _ma]]
+
+            _node = 0
+            _path = []
+            while _tree.children_left[_node] != _sk_tree.TREE_LEAF:
+                _feat_i  = _tree.feature[_node]
+                _thresh  = _tree.threshold[_node]
+                _val     = _inp[0][_feat_i]
+                _go_left = _val <= _thresh
+                _direction = "≤" if _go_left else ">"
+                _path.append({
+                    'Feature'  : _f_names[_feat_i],
+                    'Condition': f"{_direction} {_thresh:.2f}",
+                    'Value'    : f"{_val:.2f}",
+                    'Decision' : "→ Left" if _go_left else "→ Right",
+                })
+                _node = _tree.children_left[_node] if _go_left else _tree.children_right[_node]
+
+            _leaf_vals = _tree.value[_node][0]
+            _leaf_lbl  = "Depression" if _leaf_vals[1] > _leaf_vals[0] else "No Depression"
+
+            for i, step in enumerate(_path, 1):
+                with st.container(border=True):
+                    st.write(f"**Node {i}:** {step['Feature']} {step['Condition']}")
+                    st.caption(f"Student value: {step['Value']} {step['Decision']}")
+
+            st.success(f"**Leaf Node:** {int(_leaf_vals[0])} No Depression / "
+                       f"{int(_leaf_vals[1])} Depression → **{_leaf_lbl}**")
+        except Exception as _dtex:
+            st.info(f"Path tracing unavailable: {_dtex}")
+
+    with ex2:
+        st.markdown("**Feature Importance in This Decision**")
+        st.caption("Which features the tree relied on most (from trained model).")
+        _fi_df2 = pd.DataFrame({
+            'Feature'   : M['fi_labels'],
+            'Importance': M['fi_vals']
+        }).sort_values('Importance', ascending=True)
+        fig_ex2, ax_ex2 = plt.subplots(figsize=(5, 3.5))
+        _mean_fi = _fi_df2['Importance'].mean()
+        _ex_colors = ['#EF4444' if v >= _mean_fi else '#9CA3AF'
+                      for v in _fi_df2['Importance']]
+        ax_ex2.barh(_fi_df2['Feature'], _fi_df2['Importance'],
+                    color=_ex_colors, edgecolor='none', height=0.6)
+        ax_ex2.axvline(_mean_fi, color='red', ls='--', lw=1.2,
+                       alpha=0.7, label=f'Mean = {_mean_fi:.3f}')
+        ax_ex2.set_xlabel('Gini Importance Score')
+        ax_ex2.set_title('What the Tree Relies On (Live)', fontweight='bold')
+        ax_ex2.legend(fontsize=8)
+        ax_ex2.spines['top'].set_visible(False)
+        ax_ex2.spines['right'].set_visible(False)
+        plt.tight_layout()
+        st.pyplot(fig_ex2, use_container_width=True); plt.close()
+
+        st.markdown("**Key factors for this student:**")
+        if R['marital'] == 'Yes':
+            st.write("• **Married** — Root split feature; married = higher risk branch")
+        if R['anxiety'] == 'Yes':
+            st.write("• **Anxiety = Yes** — Tree splits on this early in the path")
+        if R['panic'] == 'Yes':
+            st.write("• **Panic Attack = Yes** — Strong branch predictor")
+        if CGPA_MAP.get(R['cgpa'], 3.25) >= 3.0:
+            st.write("• **High CGPA** — Suggests academic stability, lower risk")
 
     st.write("")
     if st.button("Clear Result", key="dt_clear"):

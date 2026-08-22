@@ -124,28 +124,52 @@ with col3:
                             key="svm_predict", type="primary")
 
 if predict_btn:
-    year_num = year.split()[-1]
-    inp = pd.DataFrame([{
-        'Choose your gender'                           : gender,
-        'Age'                                          : age,
-        'Your current year of Study'                   : f'year {year_num}',
-        'What is your CGPA?'                           : cgpa,
-        'Marital status'                               : marital,
-        'Do you have Anxiety?'                         : anxiety,
-        'Do you have Panic attack?'                    : panic,
-        'Did you seek any specialist for a treatment?' : treat,
-        'Course_Category'                              : M['cat'](course),
-    }])[M['col_order']]
-    pred = int(M['pipe'].predict(inp)[0])
-    prob = M['pipe'].predict_proba(inp)[0].tolist()
-    st.session_state.svm_result = {
-        'pred': pred, 'prob': prob,
-        'inp': inp,
-        'name': name.strip() or "Student",
-        'gender': gender, 'age': age, 'course': course,
-        'year': year, 'cgpa': cgpa, 'marital': marital,
-        'anxiety': anxiety, 'panic': panic, 'treat': treat,
-    }
+    # ── Input Validation ───────────────────────────────────────
+    _errors = []
+    if name.strip() and name.strip().isdigit():
+        _errors.append("❌ Name cannot be numbers only.")
+    if age < 15 or age > 40:
+        _errors.append(f"❌ Age {age} is outside valid range (15–40).")
+
+    # ── Business Rules ─────────────────────────────────────────
+    _high_concern  = (anxiety == "Yes" and panic == "Yes")
+    _treat_flag    = (treat == "Yes")
+    _academic_risk = (year in ["Year 3","Year 4"] and cgpa == "0 - 1.99")
+
+    if _errors:
+        for e in _errors:
+            st.error(e)
+        st.warning("⚠️ Please fix the errors above before predicting.")
+    else:
+        try:
+            year_num = year.split()[-1]
+            inp = pd.DataFrame([{
+                'Choose your gender'                           : gender,
+                'Age'                                          : age,
+                'Your current year of Study'                   : f'year {year_num}',
+                'What is your CGPA?'                           : cgpa,
+                'Marital status'                               : marital,
+                'Do you have Anxiety?'                         : anxiety,
+                'Do you have Panic attack?'                    : panic,
+                'Did you seek any specialist for a treatment?' : treat,
+                'Course_Category'                              : M['cat'](course),
+            }])[M['col_order']]
+            pred = int(M['pipe'].predict(inp)[0])
+            prob = M['pipe'].predict_proba(inp)[0].tolist()
+            st.session_state.svm_result = {
+                'pred': pred, 'prob': prob,
+                'inp': inp,
+                'name': name.strip() or "Student",
+                'gender': gender, 'age': age, 'course': course,
+                'year': year, 'cgpa': cgpa, 'marital': marital,
+                'anxiety': anxiety, 'panic': panic, 'treat': treat,
+                'high_concern': _high_concern,
+                'treat_flag': _treat_flag,
+                'academic_risk': _academic_risk,
+            }
+        except Exception as ex:
+            st.error(f"❌ Prediction failed: {ex}")
+            st.caption("Please check your inputs and try again.")
 
 # ══════════════════════════════════════════════════════════════
 # 2. TEST RESULT
@@ -165,6 +189,17 @@ if st.session_state.svm_result:
         st.success(f"### ✅  {name_lbl} — No Depression Detected\n\n"
                    "The SVM model predicts **low depression risk**. "
                    "Keep maintaining a healthy lifestyle!")
+
+    # ── Business Rule Alerts ──────────────────────────────────
+    if R.get('high_concern'):
+        st.warning("⚠️ **High Concern:** Student has both Anxiety AND Panic Attack. "
+                   "Immediate counselling referral is strongly recommended.")
+    if R.get('treat_flag'):
+        st.info("ℹ️ **Treatment Noted:** This student has already sought specialist help. "
+                "Consider follow-up support and progress monitoring.")
+    if R.get('academic_risk'):
+        st.warning("⚠️ **Academic Risk:** Senior year with very low CGPA (0–1.99). "
+                   "Combined academic and mental health support is advised.")
 
     st.write("")
     r1, r2, r3 = st.columns([1.2, 1.2, 1])
@@ -258,6 +293,84 @@ if st.session_state.svm_result:
         st.pyplot(fig3, use_container_width=True); plt.close()
     except Exception as e:
         st.warning(f"Visualization unavailable: {e}")
+
+
+    # ══════════════════════════════════════════════════════════
+    # PREDICTION EXPLANATION — WHY did SVM decide this?
+    # ══════════════════════════════════════════════════════════
+    st.write("")
+    st.markdown("---")
+    st.markdown("### 🧠 Why did SVM predict this?")
+    st.caption("Feature importance and confidence breakdown for this prediction.")
+
+    ex1, ex2 = st.columns(2)
+
+    with ex1:
+        st.markdown("**Permutation Feature Importance**")
+        st.caption("Which features matter most to the SVM model overall.")
+        _fi_svm = M['fi_df'].sort_values('Importance', ascending=True)
+        _mean_sv = _fi_svm['Importance'].mean()
+        fig_sv, ax_sv = plt.subplots(figsize=(5, 3.5))
+        _sv_colors = ['#EF4444' if v >= _mean_sv else '#9CA3AF'
+                      for v in _fi_svm['Importance']]
+        ax_sv.barh(_fi_svm['Feature'], _fi_svm['Importance'],
+                   color=_sv_colors, edgecolor='none', height=0.6)
+        ax_sv.axvline(_mean_sv, color='red', ls='--', lw=1.2,
+                      alpha=0.7, label=f'Mean = {_mean_sv:.4f}')
+        ax_sv.set_xlabel('Mean Accuracy Decrease')
+        ax_sv.set_title('SVM Feature Importance (Live)', fontweight='bold')
+        ax_sv.legend(fontsize=8)
+        ax_sv.spines['top'].set_visible(False)
+        ax_sv.spines['right'].set_visible(False)
+        plt.tight_layout()
+        st.pyplot(fig_sv, use_container_width=True); plt.close()
+
+    with ex2:
+        st.markdown("**Risk Factor Analysis for This Student**")
+        st.caption("How this student's profile compares to key risk indicators.")
+
+        _risk_factors = []
+        _protect_factors = []
+
+        if R['anxiety'] == 'Yes':
+            _risk_factors.append(("Anxiety", "Strong predictor of depression"))
+        if R['panic'] == 'Yes':
+            _risk_factors.append(("Panic Attack", "Strongest predictor (r=0.341)"))
+        if R['marital'] == 'Yes':
+            _risk_factors.append(("Marital Status", "Decision tree root feature"))
+        if R['treat'] == 'Yes':
+            _risk_factors.append(("Sought Treatment", "Indicates awareness of condition"))
+        if CGPA_MAP.get(R['cgpa'], 3.25) < 2.5:
+            _risk_factors.append(("Low CGPA", "Academic difficulty may increase risk"))
+
+        if CGPA_MAP.get(R['cgpa'], 3.25) >= 3.0:
+            _protect_factors.append(("High CGPA", "Academic success is a protective factor"))
+        if R['anxiety'] == 'No' and R['panic'] == 'No':
+            _protect_factors.append(("No Anxiety/Panic", "Absence of co-morbid conditions"))
+
+        if _risk_factors:
+            st.markdown("**⚠️ Risk Factors Present:**")
+            for factor, reason in _risk_factors:
+                st.write(f"• **{factor}** — {reason}")
+        if _protect_factors:
+            st.write("")
+            st.markdown("**✅ Protective Factors:**")
+            for factor, reason in _protect_factors:
+                st.write(f"• **{factor}** — {reason}")
+
+        st.write("")
+        _total_risk = len(_risk_factors)
+        _risk_pct   = prob[1] * 100
+        with st.container(border=True):
+            st.markdown(f"**Risk Summary**")
+            st.write(f"Risk Factors Detected: **{_total_risk}**")
+            st.write(f"SVM Depression Probability: **{_risk_pct:.1f}%**")
+            if _risk_pct > 70:
+                st.error("High confidence — multiple risk factors confirmed")
+            elif _risk_pct > 40:
+                st.warning("Moderate confidence — some risk factors present")
+            else:
+                st.success("Low confidence of depression — few risk factors")
 
     st.write("")
     if st.button("Clear Result", key="svm_clear"):
