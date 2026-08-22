@@ -2,13 +2,15 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 import sys, os, warnings
 warnings.filterwarnings('ignore')
 
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import (accuracy_score, precision_score,
+                             recall_score, f1_score, confusion_matrix)
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.preprocessing import load_and_clean_dataset
@@ -31,34 +33,46 @@ def get_dt():
     Xtr,Xte,ytr,yte = train_test_split(X,y,test_size=0.3,random_state=42,stratify=y)
     model = DecisionTreeClassifier(max_depth=5,criterion='gini',random_state=42)
     model.fit(Xtr,ytr); yp = model.predict(Xte)
+    fi_labels = ['Gender','Age','Course','Year','CGPA',
+                 'Anxiety','Panic Attack','Marital Status']
     return {
-        'model': model, 'feat': feat, 'le_c': le_c, 'le_y': le_y,
+        'model': model, 'feat': feat,
+        'le_c': le_c, 'le_y': le_y,
+        'fi_labels': fi_labels,
+        'fi_vals': model.feature_importances_,
         'acc' : accuracy_score(yte,yp)*100,
         'prec': precision_score(yte,yp,zero_division=0)*100,
         'rec' : recall_score(yte,yp,zero_division=0)*100,
         'f1'  : f1_score(yte,yp,zero_division=0)*100,
-        'fi'  : dict(zip(feat, model.feature_importances_)),
+        'cm'  : confusion_matrix(yte,yp),
     }
 
 M = get_dt()
 CGPA_MAP = {'0 - 1.99':1.0,'2.00 - 2.49':2.25,'2.50 - 2.99':2.75,
             '3.00 - 3.49':3.25,'3.50 - 4.00':3.75}
+COURSES = ["Computer Science","Information Technology","Engineering",
+           "Law","Psychology","Language","Islamic Studies",
+           "Health Sciences","Business","Science & Math","Arts & Social","Others"]
 
 if 'dt_result' not in st.session_state:
     st.session_state.dt_result = None
 
-st.markdown("##### DECISION TREE PREDICTOR")
+# ── Header ─────────────────────────────────────────────────────
+st.markdown("##### 🌳 DECISION TREE PREDICTOR")
 st.title("Depression Risk Predictor")
 st.caption("Decision Tree (CART, Depth 5) · Member 2: Irvin Tan Wei Shen · Live trained on 600 records")
 st.divider()
 
 c1,c2,c3,c4 = st.columns(4)
-c1.metric("Accuracy",  f"{M['acc']:.2f}%",  help="Live model accuracy on test set")
-c2.metric("Precision", f"{M['prec']:.2f}%", help="Of predicted depression, how many correct")
-c3.metric("Recall",    f"{M['rec']:.2f}%",  help="Of actual depression cases, how many caught")
-c4.metric("F1 Score",  f"{M['f1']:.2f}%",   help="Harmonic mean of precision and recall")
+c1.metric("Accuracy",  f"{M['acc']:.2f}%")
+c2.metric("Precision", f"{M['prec']:.2f}%")
+c3.metric("Recall",    f"{M['rec']:.2f}%")
+c4.metric("F1 Score",  f"{M['f1']:.2f}%")
 st.divider()
 
+# ══════════════════════════════════════════════════════════════
+# 1. USER INPUT
+# ══════════════════════════════════════════════════════════════
 st.subheader("Student Information")
 st.caption("Fill in the details below and click Predict")
 
@@ -68,21 +82,18 @@ with col1:
     gender  = st.selectbox("Gender", ["Female","Male"], key="dt_gender")
     age     = st.slider("Age", 17, 30, 20, key="dt_age")
 with col2:
-    course  = st.selectbox("Course", [
-                "Computer Science","Information Technology","Engineering",
-                "Law","Psychology","Language","Islamic Studies",
-                "Health Sciences","Business","Science & Math","Arts & Social","Others"],
-                key="dt_course")
+    course  = st.selectbox("Course", COURSES, key="dt_course")
     year    = st.selectbox("Year of Study",
                 ["Year 1","Year 2","Year 3","Year 4"], key="dt_year")
     cgpa    = st.selectbox("CGPA Range", list(CGPA_MAP.keys()), key="dt_cgpa")
 with col3:
-    marital = st.selectbox("Marital Status",              ["No","Yes"], key="dt_marital")
-    anxiety = st.selectbox("Do you have Anxiety?",        ["No","Yes"], key="dt_anxiety")
-    panic   = st.selectbox("Do you have Panic Attack?",   ["No","Yes"], key="dt_panic")
+    marital = st.selectbox("Marital Status",            ["No","Yes"], key="dt_marital")
+    anxiety = st.selectbox("Do you have Anxiety?",      ["No","Yes"], key="dt_anxiety")
+    panic   = st.selectbox("Do you have Panic Attack?", ["No","Yes"], key="dt_panic")
     st.write("")
-    predict_btn = st.button("Predict Depression Risk",
-                            use_container_width=True, key="dt_predict")
+    predict_btn = st.button("🔍  Predict Depression Risk",
+                            use_container_width=True,
+                            key="dt_predict", type="primary")
 
 if predict_btn:
     g  = 1 if gender  == "Male" else 0
@@ -93,121 +104,184 @@ if predict_btn:
     ye = M['le_y'].transform([year])[0]   if year   in M['le_y'].classes_ else 0
     cn = CGPA_MAP[cgpa]
     inp  = pd.DataFrame([[g,age,ce,ye,cn,ax,pa,ma]], columns=M['feat'])
-    pred = M['model'].predict(inp)[0]
-    prob = M['model'].predict_proba(inp)[0]
+    pred = int(M['model'].predict(inp)[0])
+    prob = M['model'].predict_proba(inp)[0].tolist()
     st.session_state.dt_result = {
-        'pred': int(pred), 'prob': prob.tolist(),
+        'pred': pred, 'prob': prob,
         'name': name.strip() or "Student",
         'gender': gender, 'age': age, 'course': course,
-        'year': year, 'cgpa': cgpa, 'marital': marital,
-        'anxiety': anxiety, 'panic': panic,
+        'year': year, 'cgpa': cgpa,
+        'marital': marital, 'anxiety': anxiety, 'panic': panic,
     }
 
+# ══════════════════════════════════════════════════════════════
+# 2. TEST RESULT
+# ══════════════════════════════════════════════════════════════
 if st.session_state.dt_result:
     R = st.session_state.dt_result
     pred = R['pred']; prob = R['prob']; name_lbl = R['name']
+
     st.divider()
+    st.subheader("Prediction Result")
 
     if pred == 1:
-        st.error(f"## ⚠️ {name_lbl} — Depression Risk Detected")
-        st.write("The Decision Tree model predicts a **high risk of depression**. "
-                 "Please consider speaking with a counsellor or mental health professional.")
+        st.error(f"### ⚠️  {name_lbl} — Depression Risk Detected\n\n"
+                 "The Decision Tree model predicts a **high risk of depression**. "
+                 "Please consider seeking professional support.")
     else:
-        st.success(f"## ✅ {name_lbl} — No Depression Detected")
-        st.write("The Decision Tree model predicts **low depression risk**. "
-                 "Keep maintaining a healthy academic and social lifestyle.")
+        st.success(f"### ✅  {name_lbl} — No Depression Detected\n\n"
+                   "The Decision Tree model predicts **low depression risk**. "
+                   "Keep maintaining a healthy lifestyle!")
 
     st.write("")
-    r1, r2, r3 = st.columns(3)
+    r1, r2, r3 = st.columns([1.2, 1.2, 1])
 
     with r1:
         st.markdown("**Prediction Confidence**")
         fig, ax2 = plt.subplots(figsize=(4, 0.8))
         ax2.barh([""], [prob[0]*100], color="#10B981", height=0.5)
-        ax2.barh([""], [prob[1]*100], left=[prob[0]*100], color="#EF4444", height=0.5)
+        ax2.barh([""], [prob[1]*100], left=[prob[0]*100],
+                 color="#EF4444", height=0.5)
         ax2.set_xlim(0,100); ax2.axis('off')
-        for x, val, lbl in [
-            (prob[0]*50, prob[0], "No Risk"),
+        for xp, val, lbl in [
+            (prob[0]*50,             prob[0], "No Risk"),
             (prob[0]*100+prob[1]*50, prob[1], "At Risk"),
         ]:
             if val > 0.12:
-                ax2.text(x, 0, f"{lbl}\n{val*100:.0f}%", ha='center', va='center',
+                ax2.text(xp, 0, f"{lbl}\n{val*100:.0f}%",
+                         ha='center', va='center',
                          fontsize=8, color='white', fontweight='bold')
         plt.tight_layout(pad=0)
         st.pyplot(fig, use_container_width=True); plt.close()
-        pa_col, pb_col = st.columns(2)
-        pa_col.metric("No Depression", f"{prob[0]*100:.1f}%")
-        pb_col.metric("Depression",    f"{prob[1]*100:.1f}%")
+        st.write("")
+        pa_c, pb_c = st.columns(2)
+        pa_c.metric("No Depression", f"{prob[0]*100:.1f}%")
+        pb_c.metric("Depression",    f"{prob[1]*100:.1f}%")
 
     with r2:
         st.markdown("**Input Summary**")
-        st.dataframe(pd.DataFrame({
-            "Field": ["Name","Gender","Age","Course","Year","CGPA",
-                      "Marital","Anxiety","Panic Attack"],
-            "Value": [R['name'], R['gender'], R['age'], R['course'],
-                      R['year'], R['cgpa'], R['marital'], R['anxiety'], R['panic']]
-        }).set_index("Field"), use_container_width=True)
+        st.table(pd.DataFrame({
+            "Field": ["Name","Gender","Age","Course","Year",
+                      "CGPA","Marital","Anxiety","Panic Attack"],
+            "Value": [R['name'], R['gender'], str(R['age']),
+                      R['course'], R['year'], R['cgpa'],
+                      R['marital'], R['anxiety'], R['panic']]
+        }).set_index("Field"))
 
     with r3:
         st.markdown("**Model Info**")
         with st.container(border=True):
-            st.write("**Algorithm:** Decision Tree (CART)")
+            st.write("**Algorithm:** Decision Tree")
             st.write("**Max Depth:** 5")
-            st.write("**Criterion:** Gini Impurity")
-            st.write("**Split:** 70% / 30%")
-            st.write(f"**Live Accuracy:** {M['acc']:.2f}%")
-
-    # Feature importance
-    st.write("")
-    st.markdown("**Live Feature Importance**")
-    fi_df = pd.DataFrame({'Feature': list(M['fi'].keys()),
-                          'Importance': list(M['fi'].values())
-                         }).sort_values('Importance', ascending=True)
-    fig2, ax3 = plt.subplots(figsize=(7, 3))
-    colors = ['#10B981' if v >= fi_df['Importance'].mean() else '#6B7280'
-              for v in fi_df['Importance']]
-    ax3.barh(fi_df['Feature'], fi_df['Importance'], color=colors, edgecolor='none')
-    ax3.set_xlabel("Importance Score")
-    ax3.set_title("Feature Importance (Live)", fontweight='bold')
-    ax3.spines['top'].set_visible(False); ax3.spines['right'].set_visible(False)
-    plt.tight_layout()
-    st.pyplot(fig2, use_container_width=True); plt.close()
+            st.write("**Criterion:** Gini")
+            st.write("**Split:** 70 / 30")
+            st.write(f"**Accuracy:** {M['acc']:.2f}%")
 
     st.write("")
     if st.button("Clear Result", key="dt_clear"):
         st.session_state.dt_result = None
         st.rerun()
 
-# ── Always show tree diagram ───────────────────────────────────
 st.divider()
-st.subheader("Decision Tree Structure")
-st.caption("Visual structure of the trained Decision Tree (Depth 5). "
-           "Orange = tends to Depression, Blue = tends to No Depression.")
 
-from sklearn.tree import plot_tree
-import matplotlib.pyplot as plt
+# ══════════════════════════════════════════════════════════════
+# 3. LIVE FEATURE IMPORTANCE
+# ══════════════════════════════════════════════════════════════
+st.subheader("Live Feature Importance")
+st.caption("Gini impurity reduction per feature. "
+           "Computed live from the trained model — no hardcode.")
+
+fi_df = pd.DataFrame({
+    'Feature': M['fi_labels'],
+    'Importance': M['fi_vals']
+}).sort_values('Importance', ascending=True)
+
+fi_c1, fi_c2 = st.columns([2, 1])
+with fi_c1:
+    fig_fi, ax_fi = plt.subplots(figsize=(7, 3.5))
+    mean_v = fi_df['Importance'].mean()
+    colors = ['#10B981' if v >= mean_v else '#9CA3AF'
+              for v in fi_df['Importance']]
+    bars = ax_fi.barh(fi_df['Feature'], fi_df['Importance'],
+                      color=colors, edgecolor='none', height=0.6)
+    ax_fi.axvline(mean_v, color='red', linestyle='--',
+                  linewidth=1.2, alpha=0.7, label=f'Mean = {mean_v:.3f}')
+    for bar, val in zip(bars, fi_df['Importance']):
+        ax_fi.text(val+0.005, bar.get_y()+bar.get_height()/2,
+                   f'{val:.3f}', va='center', fontsize=9, fontweight='bold')
+    ax_fi.set_xlabel('Feature Importance (Gini Reduction)')
+    ax_fi.set_title('Decision Tree Feature Importance (Live)', fontweight='bold')
+    ax_fi.legend(fontsize=9)
+    ax_fi.spines['top'].set_visible(False)
+    ax_fi.spines['right'].set_visible(False)
+    ax_fi.grid(axis='x', alpha=0.3)
+    plt.tight_layout()
+    st.pyplot(fig_fi, use_container_width=True); plt.close()
+
+with fi_c2:
+    with st.container(border=True):
+        st.markdown("**Feature Ranking**")
+        for _, row in fi_df.sort_values('Importance', ascending=False).iterrows():
+            icon = "🟢" if row['Importance'] >= mean_v else "⚪"
+            st.write(f"{icon} **{row['Feature']}** — {row['Importance']:.3f}")
+        st.caption("🟢 Above average importance")
+
+st.divider()
+
+# ══════════════════════════════════════════════════════════════
+# 4. DECISION TREE DIAGRAM
+# ══════════════════════════════════════════════════════════════
+st.subheader("Decision Tree Structure")
+st.caption("Visual tree trained live on the dataset. "
+           "Orange = Depression, Blue = No Depression.")
 
 @st.cache_resource
-def get_tree_fig(_model, feat_names):
+def get_tree_fig(_model):
     fig, ax = plt.subplots(figsize=(22, 9))
-    plot_tree(
-        _model,
-        feature_names=feat_names,
-        class_names=['No Depression', 'Depression'],
-        filled=True, rounded=True,
-        fontsize=7, ax=ax,
-        impurity=True, proportion=False
-    )
-    ax.set_title("Decision Tree Structure — Live Trained (Depth 5)",
+    plot_tree(_model,
+              feature_names=['Gender','Age','Course','Year','CGPA',
+                             'Anxiety','Panic Attack','Marital Status'],
+              class_names=['No Depression','Depression'],
+              filled=True, rounded=True, fontsize=7, ax=ax)
+    ax.set_title("Decision Tree — Live Trained (Depth 5)",
                  fontsize=13, fontweight='bold', pad=16)
     plt.tight_layout()
     return fig
 
-feat_display = ['Gender','Age','Course','Year','CGPA',
-                'Anxiety','Panic Attack','Marital Status']
-tree_fig = get_tree_fig(M['model'], feat_display)
-st.pyplot(tree_fig, use_container_width=True)
+st.pyplot(get_tree_fig(M['model']), use_container_width=True)
 plt.close('all')
+
+st.divider()
+
+# ══════════════════════════════════════════════════════════════
+# 5. LEARN MORE — Confusion Matrix
+# ══════════════════════════════════════════════════════════════
+with st.expander("📚  Learn More — Confusion Matrix & Classification Report"):
+    st.markdown("### Confusion Matrix")
+    fig_cm, ax_cm = plt.subplots(figsize=(5, 4))
+    sns.heatmap(M['cm'], annot=True, fmt='d', cmap='Greens', ax=ax_cm,
+                xticklabels=['No Depression','Depression'],
+                yticklabels=['No Depression','Depression'],
+                linewidths=0.5, annot_kws={'size':12,'weight':'bold'})
+    ax_cm.set_xlabel('Predicted'); ax_cm.set_ylabel('Actual')
+    ax_cm.set_title('Decision Tree Confusion Matrix', fontweight='bold')
+    plt.tight_layout()
+    st.pyplot(fig_cm, use_container_width=True); plt.close()
+
+    tn,fp,fn,tp = M['cm'].ravel()
+    a,b,c,d = st.columns(4)
+    a.metric("TN", str(tn)); b.metric("FP", str(fp))
+    c.metric("FN", str(fn)); d.metric("TP", str(tp))
+
+    st.write("")
+    st.markdown("### How Decision Tree Works")
+    st.write(
+        "CART (Classification and Regression Trees) builds a binary tree by "
+        "recursively splitting data on the feature that maximizes **Gini impurity reduction**. "
+        "The tree stops splitting when it reaches **max depth = 5**. "
+        "The root split feature (**Marital Status**) was automatically selected "
+        "as the most discriminative feature in the dataset."
+    )
 
 st.divider()
 st.caption("MindCheck · BMCS2003 AI · 202605 · Group 3 · Dr Goh · TARUMT")
