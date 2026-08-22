@@ -233,10 +233,11 @@ def color_pval(val):
         else: return 'background-color: #FEE2E2'
     except: return ''
 
-st.dataframe(
-    pval_df.style.applymap(color_pval, subset=['p-value']),
-    use_container_width=True
-)
+try:
+    styled_pval = pval_df.style.map(color_pval, subset=['p-value'])
+except AttributeError:
+    styled_pval = pval_df.style.applymap(color_pval, subset=['p-value'])
+st.dataframe(styled_pval, use_container_width=True)
 sig_count = sum(1 for v in D['pvals'].values() if v < 0.05)
 st.info(f"**{sig_count} out of {len(D['pvals'])} features** are statistically "
         f"significant (p < 0.05). These features show a meaningful difference "
