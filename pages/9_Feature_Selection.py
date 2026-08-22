@@ -228,10 +228,14 @@ pval_df = pd.DataFrame({
 def color_pval(val):
     try:
         v = float(val)
-        if v < 0.001: return 'background-color: #DCFCE7'
-        elif v < 0.05: return 'background-color: #FEF9C3'
-        else: return 'background-color: #FEE2E2'
-    except: return ''
+        if v < 0.001:
+            return 'background-color: #16A34A; color: #FFFFFF; font-weight: bold'
+        elif v < 0.05:
+            return 'background-color: #CA8A04; color: #FFFFFF; font-weight: bold'
+        else:
+            return 'background-color: #DC2626; color: #FFFFFF; font-weight: bold'
+    except:
+        return 'color: #1A1A1A'
 
 try:
     styled_pval = pval_df.style.map(color_pval, subset=['p-value'])
