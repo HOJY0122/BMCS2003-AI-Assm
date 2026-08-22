@@ -1,0 +1,52 @@
+{
+  "target": "Do you have Depression?",
+  "feature_columns": [
+    "Choose your gender",
+    "Age",
+    "Your current year of Study",
+    "What is your CGPA?",
+    "Marital status",
+    "Do you have Anxiety?",
+    "Do you have Panic attack?",
+    "Did you seek any specialist for a treatment?"
+  ],
+  "options": {
+    "Choose your gender": [
+      "Female",
+      "Male"
+    ],
+    "Marital status": [
+      "No",
+      "Yes"
+    ],
+    "Do you have Anxiety?": [
+      "No",
+      "Yes"
+    ],
+    "Do you have Panic attack?": [
+      "No",
+      "Yes"
+    ],
+    "Did you seek any specialist for a treatment?": [
+      "No",
+      "Yes"
+    ],
+    "What is your CGPA?": [
+      "0 - 1.99",
+      "2.00 - 2.49",
+      "2.50 - 2.99",
+      "3.00 - 3.49",
+      "3.50 - 4.00"
+    ],
+    "Your current year of Study": [
+      "year 1",
+      "year 2",
+      "year 3",
+      "year 4"
+    ]
+  },
+  "age_range": [
+    18,
+    24
+  ]
+}
