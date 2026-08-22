@@ -119,6 +119,11 @@ def sidebar(active="home"):
         st.markdown("""
         <div style="height:1px; background:#1A1F35; margin: 20px 16px 16px;"></div>
         <div style="padding: 0 20px 24px;">
+            <div style="font-size:11px; color:#2E3447; line-height:1.9;">
+                Tutorial Group 3<br>
+                Tutor: Dr Goh · 202605<br>
+                TARUMT
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -152,4 +157,7 @@ def _nav_btn(icon, label, key, active, page):
     else:
         if st.button(f"{icon}  {label}", key=f"sb_{key}",
                      use_container_width=True):
-            st.switch_page(page)
+            try:
+                st.switch_page(page)
+            except Exception:
+                st.error(f"Page not found: {page}")
