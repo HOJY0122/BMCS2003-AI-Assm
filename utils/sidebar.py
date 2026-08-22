@@ -97,8 +97,9 @@ def sidebar(active="home"):
 
         # ── ANALYSIS ───────────────────────────────────────────
         _section("ANALYSIS")
-        _nav_btn("📊", "EDA",           "eda",     active, "pages/1_EDA.py")
-        _nav_btn("📋", "Dataset",       "dataset", active, "pages/6_Dataset.py")
+        _nav_btn("📊", "EDA",              "eda",     active, "pages/1_EDA.py")
+        _nav_btn("🔬", "Feature Selection","feature", active, "pages/9_Feature_Selection.py")
+        _nav_btn("📋", "Dataset",          "dataset", active, "pages/6_Dataset.py")
 
         # ── MODELS ─────────────────────────────────────────────
         _section("MODELS")
