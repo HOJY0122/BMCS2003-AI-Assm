@@ -62,7 +62,8 @@ def get_svm():
         'Std': perm.importances_std
     })
 
-    return {
+    return {'svm_col_order': list(X_s.columns),
+            'svm': svm_pipe, 'cat': cat,
         'pipe': pipe, 'col_order': col_order, 'cat': cat,
         'X_all': X, 'y_all': y,
         'fi_df': fi_df,
@@ -339,6 +340,150 @@ with st.expander("📚  Learn More — Confusion Matrix & How SVM Works"):
         "The PCA visualization above projects the high-dimensional SVM boundary "
         "into 2D for visualization."
     )
+
+
+# ══════════════════════════════════════════════════════════════
+# BATCH PREDICTION — SVM
+# ══════════════════════════════════════════════════════════════
+st.divider()
+st.subheader("Batch Prediction — 🔴 SVM")
+st.caption("Upload a CSV with multiple students. SVM predicts each one instantly.")
+
+_svm_sample = pd.DataFrame({
+    'Name':           ['Ahmad','Siti','Wei Ming'],
+    'Gender':         ['Male','Female','Male'],
+    'Age':            [20,21,19],
+    'Course':         ['Computer Science','Engineering','Information Technology'],
+    'Year_of_Study':  ['Year 2','Year 3','Year 1'],
+    'CGPA':           ['3.00 - 3.49','2.50 - 2.99','3.50 - 4.00'],
+    'Marital_Status': ['No','No','No'],
+    'Anxiety':        ['Yes','No','No'],
+    'Panic_Attack':   ['No','Yes','No'],
+    'Seek_Treatment': ['No','No','No'],
+})
+
+with st.expander("📋  View / Download CSV Template"):
+    st.dataframe(_svm_sample, use_container_width=True, hide_index=True)
+    st.download_button("⬇️  Download SVM Template",
+        data=_svm_sample.to_csv(index=False).encode(),
+        file_name="svm_batch_template.csv", mime="text/csv",
+        use_container_width=True, key="svm_tmpl_dl")
+
+_svm_file = st.file_uploader("Upload CSV for SVM Batch",
+                               type=["csv"], key="svm_batch_file")
+if _svm_file:
+    try:
+        _sdf = pd.read_csv(_svm_file)
+        _sdf.columns = _sdf.columns.str.strip()
+        st.success(f"✅ {len(_sdf)} students loaded")
+        _sresults = []
+        for _si, _srow in _sdf.iterrows():
+            try:
+                _sname = str(_srow.get('Name', f'Student {_si+1}')).strip()
+                _sgender  = str(_srow.get('Gender','Male'))
+                _smarital = str(_srow.get('Marital_Status','No'))
+                _sanxiety = str(_srow.get('Anxiety','No'))
+                _spanic   = str(_srow.get('Panic_Attack','No'))
+                _streat   = str(_srow.get('Seek_Treatment','No'))
+                try: _sage = int(float(_srow.get('Age',20)))
+                except: _sage = 20
+                _scourse = str(_srow.get('Course','Others'))
+                _syear   = str(_srow.get('Year_of_Study','Year 1'))
+                _scgpa   = str(_srow.get('CGPA','3.00 - 3.49')).strip()
+                _syear_n = ''.join(filter(str.isdigit, _syear)) or '1'
+                _sinp = pd.DataFrame([{
+                    'Choose your gender'                           : _sgender,
+                    'Age'                                          : _sage,
+                    'Your current year of Study'                   : f'year {_syear_n}',
+                    'What is your CGPA?'                           : _scgpa,
+                    'Marital status'                               : _smarital,
+                    'Do you have Anxiety?'                         : _sanxiety,
+                    'Do you have Panic attack?'                    : _spanic,
+                    'Did you seek any specialist for a treatment?' : _streat,
+                    'Course_Category'                              : M['cat'](_scourse),
+                }])[M['svm_col_order']]
+                _spred = int(M['svm'].predict(_sinp)[0])
+                _sprob = M['svm'].predict_proba(_sinp)[0][1]
+                _sresults.append({
+                    'Name': _sname, 'Gender': _sgender, 'Age': _sage,
+                    'Course': _scourse, 'Year': _syear, 'CGPA': _scgpa,
+                    'Marital': _smarital, 'Anxiety': _sanxiety,
+                    'Panic': _spanic, 'Treatment': _streat,
+                    'Result':     '⚠️ Depression' if _spred==1 else '✅ No Depression',
+                    'Confidence': f"{_sprob*100:.1f}%",
+                    'Risk':       'HIGH' if _spred==1 else 'LOW',
+                    '_pred': _spred, '_prob': _sprob,
+                })
+            except Exception as _se:
+                _sresults.append({'Name': str(_srow.get('Name','')), 'Error': str(_se)})
+
+        _sres = pd.DataFrame(_sresults)
+        _stotal = len(_sres)
+        _sdep   = int(_sres['_pred'].sum()) if '_pred' in _sres else 0
+        _snodep = _stotal - _sdep
+
+        _sm1,_sm2,_sm3 = st.columns(3)
+        _sm1.metric("Total Students", str(_stotal))
+        _sm2.metric("⚠️ At Risk",     str(_sdep),
+                    delta=f"{_sdep/_stotal*100:.0f}%", delta_color="inverse")
+        _sm3.metric("✅ No Risk",      str(_snodep),
+                    delta=f"{_snodep/_stotal*100:.0f}%")
+
+        _sc1,_sc2 = st.columns(2)
+        with _sc1:
+            _sfig,_sax2 = plt.subplots(figsize=(4,3))
+            _sax2.pie([_sdep,_snodep],
+                labels=[f'Depression ({_sdep})',f'No Depression ({_snodep})'],
+                colors=['#EF4444','#10B981'], autopct='%1.1f%%', startangle=90,
+                wedgeprops={'edgecolor':'white','linewidth':2},
+                textprops={'fontsize':10,'fontweight':'bold'})
+            _sax2.set_title('SVM Batch Results', fontweight='bold')
+            plt.tight_layout(); st.pyplot(_sfig, use_container_width=True); plt.close()
+        with _sc2:
+            _sfig2,_sax3 = plt.subplots(figsize=(4,3))
+            _sax3.hist(_sres['_prob']*100, bins=10, color='#EF4444', edgecolor='white', alpha=0.85)
+            _sax3.axvline(50, color='navy', ls='--', lw=1.5, label='Threshold 50%')
+            _sax3.set_xlabel('Depression Probability (%)'); _sax3.set_ylabel('Count')
+            _sax3.set_title('Confidence Distribution', fontweight='bold'); _sax3.legend(fontsize=9)
+            _sax3.spines['top'].set_visible(False); _sax3.spines['right'].set_visible(False)
+            plt.tight_layout(); st.pyplot(_sfig2, use_container_width=True); plt.close()
+
+        _sdisp = _sres[['Name','Gender','Age','Course','Year','CGPA',
+                         'Anxiety','Panic','Result','Confidence','Risk']]
+        def _sstyle(val):
+            if '⚠️' in str(val) or val=='HIGH': return 'background-color:#FEE2E2;color:#991B1B;font-weight:bold'
+            if '✅' in str(val) or val=='LOW':  return 'background-color:#DCFCE7;color:#166534;font-weight:bold'
+            return ''
+        try:    _sstyled = _sdisp.style.map(_sstyle, subset=['Result','Risk'])
+        except: _sstyled = _sdisp.style.applymap(_sstyle, subset=['Result','Risk'])
+        st.dataframe(_sstyled, use_container_width=True, hide_index=True)
+
+        st.write("")
+        st.markdown("**Individual Student Cards**")
+        for _, _sr in _sres.iterrows():
+            if '_pred' not in _sr: continue
+            _sicon = "⚠️" if _sr['_pred']==1 else "✅"
+            with st.expander(f"{_sicon} {_sr['Name']} — {_sr['Result']} ({_sr['Confidence']})"):
+                if _sr['_pred']==1: st.error(f"**Depression Risk** | SVM Confidence: {_sr['Confidence']}")
+                else:               st.success(f"**No Depression** | SVM Confidence: {_sr['Confidence']}")
+
+        _sdl1,_sdl2 = st.columns(2)
+        with _sdl1:
+            st.download_button("⬇️  Download All Results",
+                data=_sdisp.to_csv(index=False).encode(),
+                file_name="svm_batch_results.csv", mime="text/csv",
+                use_container_width=True, key="svm_dl_all")
+        with _sdl2:
+            _shigh = _sres[_sres['_pred']==1][['Name','Gender','Age','Course',
+                'Year','CGPA','Anxiety','Panic','Result','Confidence']]
+            if len(_shigh):
+                st.download_button(f"⬇️  At-Risk Only ({len(_shigh)})",
+                    data=_shigh.to_csv(index=False).encode(),
+                    file_name="svm_at_risk.csv", mime="text/csv",
+                    use_container_width=True, key="svm_dl_risk")
+    except Exception as _serr:
+        st.error(f"Error processing file: {str(_serr)}")
+        st.caption("Please check your CSV matches the template format.")
 
 st.divider()
 st.caption("MindCheck · BMCS2003 AI · 202605 · Group 3 · Dr Goh · TARUMT")

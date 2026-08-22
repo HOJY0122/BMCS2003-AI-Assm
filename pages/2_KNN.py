@@ -314,5 +314,144 @@ with st.expander("📚  Learn More — K-Value Optimization, Cross Validation & 
     a.metric("TN", str(tn)); b.metric("FP", str(fp))
     c.metric("FN", str(fn)); d.metric("TP", str(tp))
 
+
+# ══════════════════════════════════════════════════════════════
+# BATCH PREDICTION — KNN
+# ══════════════════════════════════════════════════════════════
+st.divider()
+st.subheader("Batch Prediction — 🔵 KNN")
+st.caption("Upload a CSV with multiple students. KNN predicts each one instantly using the live trained model.")
+
+_knn_sample = pd.DataFrame({
+    'Name':          ['Ahmad','Siti','Wei Ming'],
+    'Gender':        ['Male','Female','Male'],
+    'Age':           [20, 21, 19],
+    'Course':        ['Computer Science','Engineering','Information Technology'],
+    'Year_of_Study': ['Year 2','Year 3','Year 1'],
+    'CGPA':          ['3.00 - 3.49','2.50 - 2.99','3.50 - 4.00'],
+    'Anxiety':       ['Yes','No','No'],
+    'Panic_Attack':  ['No','Yes','No'],
+})
+
+with st.expander("📋  View / Download CSV Template"):
+    st.dataframe(_knn_sample, use_container_width=True, hide_index=True)
+    st.download_button("⬇️  Download KNN Template",
+        data=_knn_sample.to_csv(index=False).encode(),
+        file_name="knn_batch_template.csv", mime="text/csv",
+        use_container_width=True, key="knn_tmpl_dl")
+
+_knn_file = st.file_uploader("Upload CSV for KNN Batch",
+                              type=["csv"], key="knn_batch_file")
+if _knn_file:
+    try:
+        _kdf = pd.read_csv(_knn_file)
+        _kdf.columns = _kdf.columns.str.strip()
+        st.success(f"✅ {len(_kdf)} students loaded")
+        _kresults = []
+        for _ki, _krow in _kdf.iterrows():
+            try:
+                _kname  = str(_krow.get('Name', f'Student {_ki+1}')).strip()
+                _kg     = 1 if str(_krow.get('Gender','')).lower()=='male' else 0
+                _kax    = 1 if str(_krow.get('Anxiety','')).lower()=='yes' else 0
+                _kpa    = 1 if str(_krow.get('Panic_Attack','')).lower()=='yes' else 0
+                try: _kage = int(float(_krow.get('Age',20)))
+                except: _kage = 20
+                _kcourse = str(_krow.get('Course','Others'))
+                _kyear   = str(_krow.get('Year_of_Study','Year 1'))
+                _kcgpa   = str(_krow.get('CGPA','3.00 - 3.49')).strip()
+                _kce = M['le_c'].transform([_kcourse])[0] if _kcourse in M['le_c'].classes_ else 0
+                _kye = M['le_y'].transform([_kyear])[0]   if _kyear   in M['le_y'].classes_ else 0
+                _kcn = CGPA_MAP.get(_kcgpa, 3.25)
+                _kinp   = pd.DataFrame([[_kg,_kage,_kce,_kye,_kcn,_kax,_kpa]],columns=M['feat'])
+                _kinp_s = M['scaler'].transform(_kinp)
+                _kpred  = int(M['model'].predict(_kinp_s)[0])
+                _kprob  = M['model'].predict_proba(_kinp_s)[0][1]
+                _kresults.append({
+                    'Name': _kname, 'Gender': _krow.get('Gender',''),
+                    'Age': _kage, 'Course': _kcourse, 'Year': _kyear,
+                    'CGPA': _kcgpa, 'Anxiety': _krow.get('Anxiety',''),
+                    'Panic Attack': _krow.get('Panic_Attack',''),
+                    'Result':     '⚠️ Depression' if _kpred==1 else '✅ No Depression',
+                    'Confidence': f"{_kprob*100:.1f}%",
+                    'Risk':       'HIGH' if _kpred==1 else 'LOW',
+                    '_pred': _kpred, '_prob': _kprob,
+                })
+            except Exception as _ke:
+                _kresults.append({'Name': str(_krow.get('Name','')), 'Error': str(_ke)})
+
+        _kres = pd.DataFrame(_kresults)
+        _ktotal = len(_kres)
+        _kdep   = int(_kres['_pred'].sum()) if '_pred' in _kres else 0
+        _knodep = _ktotal - _kdep
+
+        _km1,_km2,_km3 = st.columns(3)
+        _km1.metric("Total Students",  str(_ktotal))
+        _km2.metric("⚠️ At Risk",      str(_kdep),
+                    delta=f"{_kdep/_ktotal*100:.0f}%", delta_color="inverse")
+        _km3.metric("✅ No Risk",       str(_knodep),
+                    delta=f"{_knodep/_ktotal*100:.0f}%")
+
+        _kc1, _kc2 = st.columns(2)
+        with _kc1:
+            _kfig, _kax2 = plt.subplots(figsize=(4,3))
+            _kax2.pie([_kdep, _knodep],
+                labels=[f'Depression ({_kdep})',f'No Depression ({_knodep})'],
+                colors=['#EF4444','#10B981'], autopct='%1.1f%%', startangle=90,
+                wedgeprops={'edgecolor':'white','linewidth':2},
+                textprops={'fontsize':10,'fontweight':'bold'})
+            _kax2.set_title('KNN Batch Results', fontweight='bold')
+            plt.tight_layout(); st.pyplot(_kfig, use_container_width=True); plt.close()
+        with _kc2:
+            _kfig2, _kax3 = plt.subplots(figsize=(4,3))
+            _kax3.hist(_kres['_prob']*100, bins=10,
+                color='#3B82F6', edgecolor='white', alpha=0.85)
+            _kax3.axvline(50, color='red', ls='--', lw=1.5, label='Threshold 50%')
+            _kax3.set_xlabel('Depression Probability (%)'); _kax3.set_ylabel('Count')
+            _kax3.set_title('Confidence Distribution', fontweight='bold')
+            _kax3.legend(fontsize=9)
+            _kax3.spines['top'].set_visible(False); _kax3.spines['right'].set_visible(False)
+            plt.tight_layout(); st.pyplot(_kfig2, use_container_width=True); plt.close()
+
+        _kdisp = _kres[['Name','Gender','Age','Course','Year','CGPA',
+                         'Anxiety','Panic Attack','Result','Confidence','Risk']]
+        def _kstyle(val):
+            if '⚠️' in str(val) or val=='HIGH':
+                return 'background-color:#FEE2E2;color:#991B1B;font-weight:bold'
+            if '✅' in str(val) or val=='LOW':
+                return 'background-color:#DCFCE7;color:#166534;font-weight:bold'
+            return ''
+        try:    _kstyled = _kdisp.style.map(_kstyle, subset=['Result','Risk'])
+        except: _kstyled = _kdisp.style.applymap(_kstyle, subset=['Result','Risk'])
+        st.dataframe(_kstyled, use_container_width=True, hide_index=True)
+
+        st.write("")
+        st.markdown("**Individual Student Cards**")
+        for _, _kr in _kres.iterrows():
+            if '_pred' not in _kr: continue
+            _kicon = "⚠️" if _kr['_pred']==1 else "✅"
+            with st.expander(f"{_kicon} {_kr['Name']} — {_kr['Result']} ({_kr['Confidence']})"):
+                if _kr['_pred']==1:
+                    st.error(f"**Depression Risk Detected** | KNN Confidence: {_kr['Confidence']}")
+                else:
+                    st.success(f"**No Depression Detected** | KNN Confidence: {_kr['Confidence']}")
+
+        _kdl1, _kdl2 = st.columns(2)
+        with _kdl1:
+            st.download_button("⬇️  Download All Results",
+                data=_kdisp.to_csv(index=False).encode(),
+                file_name="knn_batch_results.csv", mime="text/csv",
+                use_container_width=True, key="knn_dl_all")
+        with _kdl2:
+            _khigh = _kres[_kres['_pred']==1][['Name','Gender','Age',
+                'Course','Year','CGPA','Anxiety','Panic Attack','Result','Confidence']]
+            if len(_khigh):
+                st.download_button(f"⬇️  At-Risk Only ({len(_khigh)})",
+                    data=_khigh.to_csv(index=False).encode(),
+                    file_name="knn_at_risk.csv", mime="text/csv",
+                    use_container_width=True, key="knn_dl_risk")
+    except Exception as _kerr:
+        st.error(f"Error processing file: {str(_kerr)}")
+        st.caption("Please check your CSV matches the template format.")
+
 st.divider()
 st.caption("MindCheck · BMCS2003 AI · 202605 · Group 3 · Dr Goh · TARUMT")

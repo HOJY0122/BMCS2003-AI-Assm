@@ -109,7 +109,7 @@ def sidebar(active="home"):
 
         # ── RESULTS ────────────────────────────────────────────
         _section("RESULTS")
-        _nav_btn("📈", "Compare Models","compare", active, "pages/5_Comparison.py")
+        _nav_btn("📈", "Compare Models", "compare", active, "pages/5_Comparison.py")
 
         # ── INFO ───────────────────────────────────────────────
         _section("INFO")

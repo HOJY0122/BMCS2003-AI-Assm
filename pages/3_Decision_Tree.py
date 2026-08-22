@@ -283,5 +283,139 @@ with st.expander("📚  Learn More — Confusion Matrix & Classification Report"
         "as the most discriminative feature in the dataset."
     )
 
+
+# ══════════════════════════════════════════════════════════════
+# BATCH PREDICTION — DECISION TREE
+# ══════════════════════════════════════════════════════════════
+st.divider()
+st.subheader("Batch Prediction — 🌳 Decision Tree")
+st.caption("Upload a CSV with multiple students. Decision Tree predicts each one instantly.")
+
+_dt_sample = pd.DataFrame({
+    'Name':          ['Ahmad','Siti','Wei Ming'],
+    'Gender':        ['Male','Female','Male'],
+    'Age':           [20,21,19],
+    'Course':        ['Computer Science','Engineering','Information Technology'],
+    'Year_of_Study': ['Year 2','Year 3','Year 1'],
+    'CGPA':          ['3.00 - 3.49','2.50 - 2.99','3.50 - 4.00'],
+    'Marital_Status':['No','No','No'],
+    'Anxiety':       ['Yes','No','No'],
+    'Panic_Attack':  ['No','Yes','No'],
+})
+
+with st.expander("📋  View / Download CSV Template"):
+    st.dataframe(_dt_sample, use_container_width=True, hide_index=True)
+    st.download_button("⬇️  Download DT Template",
+        data=_dt_sample.to_csv(index=False).encode(),
+        file_name="dt_batch_template.csv", mime="text/csv",
+        use_container_width=True, key="dt_tmpl_dl")
+
+_dt_file = st.file_uploader("Upload CSV for Decision Tree Batch",
+                              type=["csv"], key="dt_batch_file")
+if _dt_file:
+    try:
+        _ddf = pd.read_csv(_dt_file)
+        _ddf.columns = _ddf.columns.str.strip()
+        st.success(f"✅ {len(_ddf)} students loaded")
+        _dresults = []
+        for _di, _drow in _ddf.iterrows():
+            try:
+                _dname = str(_drow.get('Name', f'Student {_di+1}')).strip()
+                _dg  = 1 if str(_drow.get('Gender','')).lower()=='male' else 0
+                _dax = 1 if str(_drow.get('Anxiety','')).lower()=='yes' else 0
+                _dpa = 1 if str(_drow.get('Panic_Attack','')).lower()=='yes' else 0
+                _dma = 1 if str(_drow.get('Marital_Status','')).lower()=='yes' else 0
+                try: _dage = int(float(_drow.get('Age',20)))
+                except: _dage = 20
+                _dcourse = str(_drow.get('Course','Others'))
+                _dyear   = str(_drow.get('Year_of_Study','Year 1'))
+                _dcgpa   = str(_drow.get('CGPA','3.00 - 3.49')).strip()
+                _dce = M['le_c'].transform([_dcourse])[0] if _dcourse in M['le_c'].classes_ else 0
+                _dye = M['le_y'].transform([_dyear])[0]   if _dyear   in M['le_y'].classes_ else 0
+                _dcn = CGPA_MAP.get(_dcgpa, 3.25)
+                _dinp = pd.DataFrame([[_dg,_dage,_dce,_dye,_dcn,_dax,_dpa,_dma]],columns=M['feat'])
+                _dpred = int(M['model'].predict(_dinp)[0])
+                _dprob = M['model'].predict_proba(_dinp)[0][1]
+                _dresults.append({
+                    'Name': _dname, 'Gender': _drow.get('Gender',''),
+                    'Age': _dage, 'Course': _dcourse, 'Year': _dyear,
+                    'CGPA': _dcgpa, 'Marital': _drow.get('Marital_Status',''),
+                    'Anxiety': _drow.get('Anxiety',''), 'Panic': _drow.get('Panic_Attack',''),
+                    'Result':     '⚠️ Depression' if _dpred==1 else '✅ No Depression',
+                    'Confidence': f"{_dprob*100:.1f}%",
+                    'Risk':       'HIGH' if _dpred==1 else 'LOW',
+                    '_pred': _dpred, '_prob': _dprob,
+                })
+            except Exception as _de:
+                _dresults.append({'Name': str(_drow.get('Name','')), 'Error': str(_de)})
+
+        _dres = pd.DataFrame(_dresults)
+        _dtotal = len(_dres)
+        _ddep   = int(_dres['_pred'].sum()) if '_pred' in _dres else 0
+        _dnodep = _dtotal - _ddep
+
+        _dm1,_dm2,_dm3 = st.columns(3)
+        _dm1.metric("Total Students", str(_dtotal))
+        _dm2.metric("⚠️ At Risk",     str(_ddep),
+                    delta=f"{_ddep/_dtotal*100:.0f}%", delta_color="inverse")
+        _dm3.metric("✅ No Risk",      str(_dnodep),
+                    delta=f"{_dnodep/_dtotal*100:.0f}%")
+
+        _dc1,_dc2 = st.columns(2)
+        with _dc1:
+            _dfig,_dax2 = plt.subplots(figsize=(4,3))
+            _dax2.pie([_ddep,_dnodep],
+                labels=[f'Depression ({_ddep})',f'No Depression ({_dnodep})'],
+                colors=['#EF4444','#10B981'], autopct='%1.1f%%', startangle=90,
+                wedgeprops={'edgecolor':'white','linewidth':2},
+                textprops={'fontsize':10,'fontweight':'bold'})
+            _dax2.set_title('Decision Tree Batch Results', fontweight='bold')
+            plt.tight_layout(); st.pyplot(_dfig, use_container_width=True); plt.close()
+        with _dc2:
+            _dfig2,_dax3 = plt.subplots(figsize=(4,3))
+            _dax3.hist(_dres['_prob']*100, bins=10, color='#10B981', edgecolor='white', alpha=0.85)
+            _dax3.axvline(50, color='red', ls='--', lw=1.5, label='Threshold 50%')
+            _dax3.set_xlabel('Depression Probability (%)'); _dax3.set_ylabel('Count')
+            _dax3.set_title('Confidence Distribution', fontweight='bold'); _dax3.legend(fontsize=9)
+            _dax3.spines['top'].set_visible(False); _dax3.spines['right'].set_visible(False)
+            plt.tight_layout(); st.pyplot(_dfig2, use_container_width=True); plt.close()
+
+        _ddisp = _dres[['Name','Gender','Age','Course','Year','CGPA',
+                         'Anxiety','Panic','Result','Confidence','Risk']]
+        def _dstyle(val):
+            if '⚠️' in str(val) or val=='HIGH': return 'background-color:#FEE2E2;color:#991B1B;font-weight:bold'
+            if '✅' in str(val) or val=='LOW':  return 'background-color:#DCFCE7;color:#166534;font-weight:bold'
+            return ''
+        try:    _dstyled = _ddisp.style.map(_dstyle, subset=['Result','Risk'])
+        except: _dstyled = _ddisp.style.applymap(_dstyle, subset=['Result','Risk'])
+        st.dataframe(_dstyled, use_container_width=True, hide_index=True)
+
+        st.write("")
+        st.markdown("**Individual Student Cards**")
+        for _, _dr in _dres.iterrows():
+            if '_pred' not in _dr: continue
+            _dicon = "⚠️" if _dr['_pred']==1 else "✅"
+            with st.expander(f"{_dicon} {_dr['Name']} — {_dr['Result']} ({_dr['Confidence']})"):
+                if _dr['_pred']==1: st.error(f"**Depression Risk** | DT Confidence: {_dr['Confidence']}")
+                else:               st.success(f"**No Depression** | DT Confidence: {_dr['Confidence']}")
+
+        _ddl1,_ddl2 = st.columns(2)
+        with _ddl1:
+            st.download_button("⬇️  Download All Results",
+                data=_ddisp.to_csv(index=False).encode(),
+                file_name="dt_batch_results.csv", mime="text/csv",
+                use_container_width=True, key="dt_dl_all")
+        with _ddl2:
+            _dhigh = _dres[_dres['_pred']==1][['Name','Gender','Age','Course',
+                'Year','CGPA','Anxiety','Panic','Result','Confidence']]
+            if len(_dhigh):
+                st.download_button(f"⬇️  At-Risk Only ({len(_dhigh)})",
+                    data=_dhigh.to_csv(index=False).encode(),
+                    file_name="dt_at_risk.csv", mime="text/csv",
+                    use_container_width=True, key="dt_dl_risk")
+    except Exception as _derr:
+        st.error(f"Error processing file: {str(_derr)}")
+        st.caption("Please check your CSV matches the template format.")
+
 st.divider()
 st.caption("MindCheck · BMCS2003 AI · 202605 · Group 3 · Dr Goh · TARUMT")
