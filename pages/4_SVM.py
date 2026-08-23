@@ -62,8 +62,7 @@ def get_svm():
         'Std': perm.importances_std
     })
 
-    return {'svm_col_order': list(X_s.columns),
-            'svm': svm_pipe, 'cat': cat,
+    return {
         'pipe': pipe, 'col_order': col_order, 'cat': cat,
         'X_all': X, 'y_all': y,
         'fi_df': fi_df,
