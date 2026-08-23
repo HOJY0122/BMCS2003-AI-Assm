@@ -6,6 +6,10 @@ import seaborn as sns
 import warnings, sys, os
 warnings.filterwarnings('ignore')
 
+import plotly.graph_objects as go
+import plotly.express as px
+from plotly.subplots import make_subplots
+
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
