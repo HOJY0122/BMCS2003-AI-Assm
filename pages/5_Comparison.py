@@ -425,84 +425,224 @@ else:
 st.divider()
 
 # ══════════════════════════════════════════════════════════════
-# SECTION 4 — TRAINED METRIC CHARTS
+# SECTION 4 — INTERACTIVE METRIC CHARTS (Plotly)
 # ══════════════════════════════════════════════════════════════
-st.subheader("Trained Metric Charts")
+st.subheader("Interactive Metric Charts")
+st.caption("Hover over bars for details · Click legend to show/hide models · "
+           "Double-click to isolate · Drag to zoom · Click metric tabs to drill down")
 
 metric_names = ["Accuracy","Precision","Recall","F1 Score"]
 knn_v = [M['knn_m']['acc'], M['knn_m']['prec'], M['knn_m']['rec'], M['knn_m']['f1']]
 dt_v  = [M['dt_m']['acc'],  M['dt_m']['prec'],  M['dt_m']['rec'],  M['dt_m']['f1']]
 svm_v = [M['svm_m']['acc'], M['svm_m']['prec'], M['svm_m']['rec'], M['svm_m']['f1']]
 
-ch1, ch2 = st.columns(2)
+# ── Tabs for each metric drill-down ───────────────────────────
+tab_all, tab_acc, tab_prec, tab_rec, tab_f1 = st.tabs([
+    "📊 All Metrics", "🎯 Accuracy", "🔬 Precision", "📡 Recall", "⚖️ F1 Score"
+])
 
-with ch1:
-    x = np.arange(len(metric_names)); w = 0.25
-    fig, ax = plt.subplots(figsize=(7, 4))
-    b1 = ax.bar(x-w,   knn_v, w, label='KNN',           color='#5B7FFF', alpha=0.9)
-    b2 = ax.bar(x,     dt_v,  w, label='Decision Tree', color='#10B981', alpha=0.9)
-    b3 = ax.bar(x+w,   svm_v, w, label='SVM',           color='#EF4444', alpha=0.9)
-    for bars, vals in [(b1,knn_v),(b2,dt_v),(b3,svm_v)]:
-        for bar, val in zip(bars, vals):
-            ax.text(bar.get_x()+bar.get_width()/2, bar.get_height()+0.8,
-                    f'{val:.1f}', ha='center', fontsize=7.5, fontweight='bold')
-    ax.set_xticks(x); ax.set_xticklabels(metric_names, fontsize=10)
-    ax.set_ylim(0, 118); ax.set_ylabel("Score (%)")
-    ax.set_title("All 3 Models — Metric Comparison", fontsize=12, fontweight='bold')
-    ax.legend(fontsize=9); ax.grid(axis='y', alpha=0.3)
-    ax.spines['top'].set_visible(False); ax.spines['right'].set_visible(False)
-    plt.tight_layout()
-    st.pyplot(fig, use_container_width=True); plt.close()
+with tab_all:
+    ic1, ic2 = st.columns(2)
 
-with ch2:
-    N = len(metric_names)
-    angles = [n/float(N)*2*np.pi for n in range(N)] + [0]
-    fig2, ax2 = plt.subplots(figsize=(5,5), subplot_kw=dict(polar=True))
-    for vals, color, label in [
-        (knn_v,'#5B7FFF','KNN'),
-        (dt_v, '#10B981','Decision Tree'),
-        (svm_v,'#EF4444','SVM'),
-    ]:
-        r = vals + [vals[0]]
-        ax2.plot(angles, r, 'o-', lw=2, color=color, label=label)
-        ax2.fill(angles, r, alpha=0.08, color=color)
-    ax2.set_xticks(angles[:-1])
-    ax2.set_xticklabels(metric_names, fontsize=10)
-    ax2.set_ylim(0, 110); ax2.set_yticks([20,40,60,80,100])
-    ax2.tick_params(axis='y', labelsize=7)
-    ax2.set_title("Radar Chart — All 3 Models", fontsize=12,
-                  fontweight='bold', pad=20)
-    ax2.legend(loc='upper right', bbox_to_anchor=(1.35,1.15), fontsize=9)
-    st.pyplot(fig2, use_container_width=True); plt.close()
+    with ic1:
+        # Interactive grouped bar chart
+        fig_bar = go.Figure()
+        for name, vals, color in [
+            ('🔵 KNN',           knn_v, '#3B82F6'),
+            ('🌳 Decision Tree', dt_v,  '#10B981'),
+            ('🔴 SVM',           svm_v, '#EF4444'),
+        ]:
+            fig_bar.add_trace(go.Bar(
+                name=name, x=metric_names, y=vals,
+                marker_color=color, opacity=0.9,
+                hovertemplate='<b>%{x}</b><br>Score: <b>%{y:.2f}%</b><extra>' + name + '</extra>',
+                text=[f'{v:.1f}%' for v in vals],
+                textposition='outside',
+                textfont=dict(size=10, color='white'),
+            ))
+        fig_bar.update_layout(
+            barmode='group',
+            title=dict(text='All 3 Models — Click legend to toggle',
+                      font=dict(size=14)),
+            yaxis=dict(range=[0,115], title='Score (%)',
+                      gridcolor='rgba(255,255,255,0.1)'),
+            xaxis=dict(title='Metric'),
+            legend=dict(orientation='h', yanchor='bottom',
+                       y=1.02, xanchor='right', x=1),
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'),
+            hovermode='x unified',
+            height=380,
+        )
+        fig_bar.update_xaxes(showgrid=False)
+        st.plotly_chart(fig_bar, use_container_width=True)
+
+    with ic2:
+        # Interactive radar chart
+        fig_radar = go.Figure()
+        for name, vals, color in [
+            ('🔵 KNN',           knn_v, '#3B82F6'),
+            ('🌳 Decision Tree', dt_v,  '#10B981'),
+            ('🔴 SVM',           svm_v, '#EF4444'),
+        ]:
+            fig_radar.add_trace(go.Scatterpolar(
+                r=vals + [vals[0]],
+                theta=metric_names + [metric_names[0]],
+                fill='toself', fillcolor=color,
+                opacity=0.25, name=name,
+                line=dict(color=color, width=2),
+                hovertemplate='<b>%{theta}</b><br>%{r:.2f}%<extra>' + name + '</extra>',
+            ))
+        fig_radar.update_layout(
+            polar=dict(
+                radialaxis=dict(visible=True, range=[0,110],
+                               gridcolor='rgba(255,255,255,0.15)',
+                               tickfont=dict(size=9, color='grey')),
+                angularaxis=dict(gridcolor='rgba(255,255,255,0.15)'),
+                bgcolor='rgba(0,0,0,0)',
+            ),
+            title=dict(text='Radar Chart — Hover to compare',
+                      font=dict(size=14)),
+            legend=dict(orientation='h', yanchor='bottom',
+                       y=-0.15, xanchor='center', x=0.5),
+            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(color='white'),
+            height=380,
+        )
+        st.plotly_chart(fig_radar, use_container_width=True)
+
+# ── Metric drill-down tabs ─────────────────────────────────────
+for tab, metric, idx in [
+    (tab_acc,  'Accuracy',  0),
+    (tab_prec, 'Precision', 1),
+    (tab_rec,  'Recall',    2),
+    (tab_f1,   'F1 Score',  3),
+]:
+    with tab:
+        vals_3 = {'KNN': knn_v[idx], 'Decision Tree': dt_v[idx], 'SVM': svm_v[idx]}
+        best   = max(vals_3, key=vals_3.get)
+        colors_3 = {'KNN':'#3B82F6','Decision Tree':'#10B981','SVM':'#EF4444'}
+
+        dd1, dd2 = st.columns([2, 1])
+        with dd1:
+            fig_dd = go.Figure(go.Bar(
+                x=list(vals_3.keys()),
+                y=list(vals_3.values()),
+                marker_color=[colors_3[k] for k in vals_3],
+                text=[f'{v:.2f}%' for v in vals_3.values()],
+                textposition='outside',
+                textfont=dict(size=13, color='white', family='bold'),
+                hovertemplate='<b>%{x}</b><br>' + metric + ': <b>%{y:.2f}%</b><extra></extra>',
+                width=0.5,
+            ))
+            fig_dd.update_layout(
+                title=dict(text=f'{metric} — Click bar for details',
+                          font=dict(size=13)),
+                yaxis=dict(range=[0,115], title=f'{metric} (%)',
+                          gridcolor='rgba(255,255,255,0.1)'),
+                xaxis=dict(title='Model'),
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white'),
+                height=300,
+            )
+            fig_dd.update_xaxes(showgrid=False)
+            st.plotly_chart(fig_dd, use_container_width=True)
+
+        with dd2:
+            with st.container(border=True):
+                st.markdown(f"**{metric} Analysis**")
+                st.write(f"🏆 Best: **{best}** ({vals_3[best]:.2f}%)")
+                st.write("")
+                for model, val in sorted(vals_3.items(),
+                                          key=lambda x: -x[1]):
+                    diff = val - list(vals_3.values())[0]
+                    icon = "🥇" if model==best else "🥈" if val==sorted(vals_3.values())[-2] else "🥉"
+                    st.write(f"{icon} {model}: **{val:.2f}%**")
+                st.write("")
+                # Metric explanation
+                explanations = {
+                    'Accuracy':  'Overall correct predictions out of all predictions.',
+                    'Precision': 'Of all Depression predictions, how many were correct.',
+                    'Recall':    'Of all actual Depression cases, how many were caught. Most critical for mental health!',
+                    'F1 Score':  'Balance between Precision and Recall.',
+                }
+                st.caption(explanations[metric])
 
 st.divider()
 
 # ══════════════════════════════════════════════════════════════
-# SECTION 5 — CONFUSION MATRICES
+# SECTION 5 — INTERACTIVE CONFUSION MATRICES (Plotly)
 # ══════════════════════════════════════════════════════════════
-st.subheader("Confusion Matrices")
-cm1, cm2, cm3 = st.columns(3)
+st.subheader("Interactive Confusion Matrices")
+st.caption("Hover over each cell for details · Click model tabs to switch")
 
-for col, title, cm, color, detail in [
-    (cm1,"🔵 KNN",          M['knn_m']['cm'],'Blues',  "Test set (80/20)"),
-    (cm2,"🌳 Decision Tree", M['dt_m']['cm'], 'Greens', "Test set (70/30)"),
-    (cm3,"🔴 SVM",           M['svm_m']['cm'],'Reds',   "Test set (75/25)"),
+cm_tab1, cm_tab2, cm_tab3 = st.tabs(["🔵 KNN", "🌳 Decision Tree", "🔴 SVM"])
+
+for cm_tab, title, cm_data, color, split, member in [
+    (cm_tab1, "KNN",           M['knn_m']['cm'], "#3B82F6", "80/20", "Ho Jun Yon"),
+    (cm_tab2, "Decision Tree", M['dt_m']['cm'],  "#10B981", "70/30", "Irvin Tan"),
+    (cm_tab3, "SVM",           M['svm_m']['cm'], "#EF4444", "75/25", "Chiang Jun Hang"),
 ]:
-    with col:
-        st.markdown(f"**{title}** · {detail}")
-        fig, ax = plt.subplots(figsize=(3.5, 2.8))
-        sns.heatmap(cm, annot=True, fmt='d', cmap=color, ax=ax,
-                    xticklabels=['No','Yes'], yticklabels=['No','Yes'],
-                    annot_kws={'size':12,'weight':'bold'}, linewidths=0.5)
-        ax.set_xlabel('Predicted', fontsize=9)
-        ax.set_ylabel('Actual',    fontsize=9)
-        plt.tight_layout()
-        st.pyplot(fig, use_container_width=True); plt.close()
-        tn,fp,fn,tp = cm.ravel()
-        a,b,c,d = st.columns(4)
-        a.metric("TN",str(tn)); b.metric("FP",str(fp))
-        c.metric("FN",str(fn)); d.metric("TP",str(tp))
+    with cm_tab:
+        tn,fp,fn,tp = cm_data.ravel()
+        acc  = (tn+tp)/(tn+fp+fn+tp)*100
+        prec = tp/(tp+fp)*100 if (tp+fp)>0 else 0
+        rec  = tp/(tp+fn)*100 if (tp+fn)>0 else 0
+        f1   = 2*prec*rec/(prec+rec) if (prec+rec)>0 else 0
 
+        cmt1, cmt2 = st.columns([1.5, 1])
+        with cmt1:
+            # Interactive heatmap
+            z   = [[tn, fp], [fn, tp]]
+            txt = [
+                [f'TN = {tn}<br>Correctly identified<br>as No Depression',
+                 f'FP = {fp}<br>Incorrectly predicted<br>as Depression'],
+                [f'FN = {fn}<br>Missed Depression<br>cases (most costly!)',
+                 f'TP = {tp}<br>Correctly identified<br>Depression cases'],
+            ]
+            fig_cm = go.Figure(go.Heatmap(
+                z=z, x=['Predicted: No', 'Predicted: Yes'],
+                y=['Actual: No', 'Actual: Yes'],
+                text=[[str(tn), str(fp)],[str(fn), str(tp)]],
+                texttemplate='<b>%{text}</b>',
+                textfont=dict(size=20, color='white'),
+                hovertext=txt,
+                hovertemplate='%{hovertext}<extra></extra>',
+                colorscale=[[0,'rgba(30,30,50,1)'],[1,color]],
+                showscale=False,
+            ))
+            fig_cm.update_layout(
+                title=dict(text=f'{title} Confusion Matrix — {member} · Split {split}',
+                          font=dict(size=13)),
+                xaxis=dict(title='Predicted', side='bottom'),
+                yaxis=dict(title='Actual', autorange='reversed'),
+                plot_bgcolor='rgba(0,0,0,0)',
+                paper_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='white', size=12),
+                height=320,
+            )
+            st.plotly_chart(fig_cm, use_container_width=True)
+
+        with cmt2:
+            with st.container(border=True):
+                st.markdown(f"**{title} Results**")
+                st.metric("Accuracy",  f"{acc:.2f}%")
+                st.metric("Precision", f"{prec:.2f}%")
+                st.metric("Recall",    f"{rec:.2f}%")
+                st.metric("F1 Score",  f"{f1:.2f}%")
+            st.write("")
+            with st.container(border=True):
+                st.markdown("**Cell Breakdown**")
+                st.write(f"✅ **TN = {tn}** — Correctly no depression")
+                st.write(f"⚠️ **FP = {fp}** — False alarm")
+                st.write(f"❌ **FN = {fn}** — Missed depression")
+                st.write(f"✅ **TP = {tp}** — Caught depression")
+                st.write("")
+                if fn > 0:
+                    st.error(f"Missed {fn} depressed student(s)! "
+                             f"False Negative Rate: {fn/(fn+tp)*100:.1f}%")
 
 # ══════════════════════════════════════════════════════════════
 # MODEL AUTO-SELECTOR
