@@ -76,6 +76,9 @@ def get_svm():
 with st.spinner("Training SVM model..."):
     M = get_svm()
 
+CGPA_MAP = {'0 - 1.99':1.0,'2.00 - 2.49':2.25,'2.50 - 2.99':2.75,
+            '3.00 - 3.49':3.25,'3.50 - 4.00':3.75}
+
 if 'svm_result' not in st.session_state:
     st.session_state.svm_result = None
 

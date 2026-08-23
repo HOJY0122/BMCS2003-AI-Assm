@@ -6,9 +6,13 @@ import seaborn as sns
 import warnings, sys, os
 warnings.filterwarnings('ignore')
 
-import plotly.graph_objects as go
-import plotly.express as px
-from plotly.subplots import make_subplots
+try:
+    import plotly.graph_objects as go
+    import plotly.express as px
+    from plotly.subplots import make_subplots
+    PLOTLY_OK = True
+except ImportError:
+    PLOTLY_OK = False
 
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
