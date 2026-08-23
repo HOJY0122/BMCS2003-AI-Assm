@@ -90,6 +90,7 @@ def load_all_models():
 
     return {
         'knn': knn, 'sc_knn': sc_knn, 'knn_feat': knn_feat,
+        'svm_col_order': list(X_s.columns),
         'best_k': best_k, 'knn_m': _m(yte_k, knn_p),
         'dt' : dt,  'dt_feat': dt_feat, 'dt_m': _m(yte_d, dt_p),
         'svm': svm, 'sc_svm': sc_svm, 'svm_feat': svm_feat,
@@ -553,8 +554,8 @@ if as_btn:
     _ma = 1 if as_marital == "Yes"  else 0
     _sk = 1 if as_treat   == "Yes"  else 0
     _cn = CGPA_NUM.get(as_cgpa, 3.25)
-    _ce = M['le_c'].transform([as_course])[0] if as_course in M['le_c'].classes_ else 0
-    _ye = M['le_y'].transform([as_year])[0]   if as_year   in M['le_y'].classes_ else 0
+    _ce = M['le_course'].transform([as_course])[0] if as_course in M['le_course'].classes_ else 0
+    _ye = M['le_year'].transform([as_year])[0] if as_year   in M['le_year'].classes_ else 0
 
     # KNN
     _knn_inp   = pd.DataFrame([[_g,as_age,_ce,_ye,_cn,_ax,_pa]], columns=M['knn_feat'])
@@ -580,7 +581,10 @@ if as_btn:
         'Did you seek any specialist for a treatment?' : as_treat,
         'Course_Category': 'STEM/IT' if any(x in as_course.lower() for x in
             ['technology','it','computer','cs','system','software','se']) else 'Other',
-    }])[M['svm_col_order']]
+    }])
+    # Ensure column order matches training
+    if 'svm_col_order' in M:
+        _svm_inp = _svm_inp[M['svm_col_order']]
     _svm_pred = int(M['svm'].predict(_svm_inp)[0])
     _svm_prob = M['svm'].predict_proba(_svm_inp)[0]
 
