@@ -554,6 +554,7 @@ if as_btn:
     _ma = 1 if as_marital == "Yes"  else 0
     _sk = 1 if as_treat   == "Yes"  else 0
     _cn = CGPA_NUM.get(as_cgpa, 3.25)
+    # Year and course encoding for SVM (same as KNN/DT)
     _ce = M['le_course'].transform([as_course])[0] if as_course in M['le_course'].classes_ else 0
     _ye = M['le_year'].transform([as_year])[0] if as_year   in M['le_year'].classes_ else 0
 
@@ -568,25 +569,13 @@ if as_btn:
     _dt_pred = int(M['dt'].predict(_dt_inp)[0])
     _dt_prob = M['dt'].predict_proba(_dt_inp)[0]
 
-    # SVM
-    _yr_n = as_year.split()[-1]
-    _svm_inp = pd.DataFrame([{
-        'Choose your gender'                           : as_gender,
-        'Age'                                          : as_age,
-        'Your current year of Study'                   : f'year {_yr_n}',
-        'What is your CGPA?'                           : as_cgpa,
-        'Marital status'                               : as_marital,
-        'Do you have Anxiety?'                         : as_anxiety,
-        'Do you have Panic attack?'                    : as_panic,
-        'Did you seek any specialist for a treatment?' : as_treat,
-        'Course_Category': 'STEM/IT' if any(x in as_course.lower() for x in
-            ['technology','it','computer','cs','system','software','se']) else 'Other',
-    }])
-    # Ensure column order matches training
-    if 'svm_col_order' in M:
-        _svm_inp = _svm_inp[M['svm_col_order']]
-    _svm_pred = int(M['svm'].predict(_svm_inp)[0])
-    _svm_prob = M['svm'].predict_proba(_svm_inp)[0]
+    # SVM — uses same encoded features as comparison model
+    _svm_raw = pd.DataFrame([[
+        _g, as_age, _ce, _ye, _cn, _ax, _ma, _sk
+    ]], columns=M['svm_feat'])
+    _svm_scaled = M['sc_svm'].transform(_svm_raw)
+    _svm_pred = int(M['svm'].predict(_svm_scaled)[0])
+    _svm_prob = M['svm'].predict_proba(_svm_scaled)[0]
 
     # ── Scoring logic — find best model ───────────────────────
     # Score each model based on profile characteristics
