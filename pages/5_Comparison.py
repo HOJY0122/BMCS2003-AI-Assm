@@ -502,5 +502,213 @@ for col, title, cm, color, detail in [
         a.metric("TN",str(tn)); b.metric("FP",str(fp))
         c.metric("FN",str(fn)); d.metric("TP",str(tp))
 
+
+# ══════════════════════════════════════════════════════════════
+# MODEL AUTO-SELECTOR
+# ══════════════════════════════════════════════════════════════
+st.divider()
+st.subheader("🤖 Model Auto-Selector")
+st.write(
+    "Not sure which model to use? Fill in the student profile below and the system "
+    "will **automatically recommend the best model** based on the student's characteristics "
+    "and each model's strengths."
+)
+
+with st.container(border=True):
+    st.markdown("**Student Profile**")
+    as1, as2, as3 = st.columns(3)
+    with as1:
+        as_name    = st.text_input("Name", placeholder="e.g. Ahmad", key="as_name")
+        as_gender  = st.selectbox("Gender", ["Female","Male"], key="as_gender")
+        as_age     = st.slider("Age", 17, 30, 20, key="as_age")
+    with as2:
+        as_course  = st.selectbox("Course", [
+            "Computer Science","Information Technology","Engineering",
+            "Law","Psychology","Language","Islamic Studies",
+            "Health Sciences","Business","Science & Math","Arts & Social","Others"],
+            key="as_course")
+        as_year    = st.selectbox("Year of Study",
+            ["Year 1","Year 2","Year 3","Year 4"], key="as_year")
+        as_cgpa    = st.selectbox("CGPA Range", [
+            "0 - 1.99","2.00 - 2.49","2.50 - 2.99",
+            "3.00 - 3.49","3.50 - 4.00"], key="as_cgpa")
+    with as3:
+        as_marital = st.selectbox("Marital Status",           ["No","Yes"], key="as_marital")
+        as_anxiety = st.selectbox("Do you have Anxiety?",     ["No","Yes"], key="as_anxiety")
+        as_panic   = st.selectbox("Do you have Panic Attack?",["No","Yes"], key="as_panic")
+        as_treat   = st.selectbox("Sought Treatment?",        ["No","Yes"], key="as_treat")
+
+    as_btn = st.button("🔍  Find Best Model for This Student",
+                       use_container_width=True, type="primary", key="as_btn")
+
+if as_btn:
+    as_name_lbl = as_name.strip() or "Student"
+    CGPA_NUM = {'0 - 1.99':1.0,'2.00 - 2.49':2.25,'2.50 - 2.99':2.75,
+                '3.00 - 3.49':3.25,'3.50 - 4.00':3.75}
+
+    # ── Run all 3 models ──────────────────────────────────────
+    _g  = 1 if as_gender  == "Male" else 0
+    _ax = 1 if as_anxiety == "Yes"  else 0
+    _pa = 1 if as_panic   == "Yes"  else 0
+    _ma = 1 if as_marital == "Yes"  else 0
+    _sk = 1 if as_treat   == "Yes"  else 0
+    _cn = CGPA_NUM.get(as_cgpa, 3.25)
+    _ce = M['le_c'].transform([as_course])[0] if as_course in M['le_c'].classes_ else 0
+    _ye = M['le_y'].transform([as_year])[0]   if as_year   in M['le_y'].classes_ else 0
+
+    # KNN
+    _knn_inp   = pd.DataFrame([[_g,as_age,_ce,_ye,_cn,_ax,_pa]], columns=M['knn_feat'])
+    _knn_inp_s = M['sc_knn'].transform(_knn_inp)
+    _knn_pred  = int(M['knn'].predict(_knn_inp_s)[0])
+    _knn_prob  = M['knn'].predict_proba(_knn_inp_s)[0]
+
+    # DT
+    _dt_inp  = pd.DataFrame([[_g,as_age,_ce,_ye,_cn,_ax,_pa,_ma]], columns=M['dt_feat'])
+    _dt_pred = int(M['dt'].predict(_dt_inp)[0])
+    _dt_prob = M['dt'].predict_proba(_dt_inp)[0]
+
+    # SVM
+    _yr_n = as_year.split()[-1]
+    _svm_inp = pd.DataFrame([{
+        'Choose your gender'                           : as_gender,
+        'Age'                                          : as_age,
+        'Your current year of Study'                   : f'year {_yr_n}',
+        'What is your CGPA?'                           : as_cgpa,
+        'Marital status'                               : as_marital,
+        'Do you have Anxiety?'                         : as_anxiety,
+        'Do you have Panic attack?'                    : as_panic,
+        'Did you seek any specialist for a treatment?' : as_treat,
+        'Course_Category': 'STEM/IT' if any(x in as_course.lower() for x in
+            ['technology','it','computer','cs','system','software','se']) else 'Other',
+    }])[M['svm_col_order']]
+    _svm_pred = int(M['svm'].predict(_svm_inp)[0])
+    _svm_prob = M['svm'].predict_proba(_svm_inp)[0]
+
+    # ── Scoring logic — find best model ───────────────────────
+    # Score each model based on profile characteristics
+    _scores = {'KNN': 0, 'Decision Tree': 0, 'SVM': 0}
+    _reasons = {'KNN': [], 'Decision Tree': [], 'SVM': []}
+
+    # Rule 1: All 3 models agree → highest confidence model wins
+    _all_agree = (_knn_pred == _dt_pred == _svm_pred)
+    if _all_agree:
+        _scores['KNN']          += 3
+        _scores['Decision Tree'] += 2
+        _scores['SVM']           += 2
+        _reasons['KNN'].append("All 3 models agree — KNN selected as highest accuracy model (95.83%)")
+
+    # Rule 2: Marital status = Yes → DT is better (root feature)
+    if as_marital == "Yes":
+        _scores['Decision Tree'] += 3
+        _reasons['Decision Tree'].append("Marital Status = Yes → DT's root feature, gives best insight")
+
+    # Rule 3: Both anxiety + panic → KNN better (captures combined patterns)
+    if as_anxiety == "Yes" and as_panic == "Yes":
+        _scores['KNN'] += 2
+        _scores['SVM'] += 2
+        _reasons['KNN'].append("Both Anxiety + Panic present → KNN excels at multi-symptom patterns")
+        _reasons['SVM'].append("Complex symptom combination → SVM handles non-linear boundaries well")
+
+    # Rule 4: Sought treatment → SVM better (balanced weights)
+    if as_treat == "Yes":
+        _scores['SVM'] += 2
+        _reasons['SVM'].append("Sought Treatment = Yes → SVM's balanced class weights handle minority cases")
+
+    # Rule 5: High CGPA + no symptoms → KNN better (similar student profiles)
+    if _cn >= 3.0 and as_anxiety == "No" and as_panic == "No":
+        _scores['KNN'] += 2
+        _reasons['KNN'].append("High CGPA + no symptoms → KNN finds similar healthy student profiles")
+
+    # Rule 6: Low CGPA academic risk → DT better (explicit rules)
+    if _cn < 2.5:
+        _scores['Decision Tree'] += 2
+        _reasons['Decision Tree'].append("Low CGPA → DT's explicit CGPA threshold rules apply well")
+
+    # Rule 7: Model confidence tiebreaker
+    _knn_conf  = max(_knn_prob)
+    _dt_conf   = max(_dt_prob)
+    _svm_conf  = max(_svm_prob)
+    _confs = {'KNN': _knn_conf, 'Decision Tree': _dt_conf, 'SVM': _svm_conf}
+    _most_conf = max(_confs, key=_confs.get)
+    _scores[_most_conf] += 1
+    _reasons[_most_conf].append(f"Highest prediction confidence: {_confs[_most_conf]*100:.1f}%")
+
+    # Determine winner
+    _best = max(_scores, key=_scores.get)
+    _best_pred = {'KNN': _knn_pred, 'Decision Tree': _dt_pred, 'SVM': _svm_pred}[_best]
+    _best_prob = {'KNN': _knn_prob, 'Decision Tree': _dt_prob, 'SVM': _svm_prob}[_best]
+
+    # ── Display Result ─────────────────────────────────────────
+    st.divider()
+    st.subheader(f"Auto-Selector Result for {as_name_lbl}")
+
+    # Winner announcement
+    _icons = {'KNN':'🔵','Decision Tree':'🌳','SVM':'🔴'}
+    if _best_pred == 1:
+        st.error(f"### {_icons[_best]}  Recommended: **{_best}** → Depression Risk Detected")
+    else:
+        st.success(f"### {_icons[_best]}  Recommended: **{_best}** → No Depression Detected")
+
+    st.write("")
+
+    # Score cards
+    sc1, sc2, sc3 = st.columns(3)
+    for col, model, icon, pred, prob, score in [
+        (sc1, 'KNN',           '🔵', _knn_pred, _knn_prob, _scores['KNN']),
+        (sc2, 'Decision Tree', '🌳', _dt_pred,  _dt_prob,  _scores['Decision Tree']),
+        (sc3, 'SVM',           '🔴', _svm_pred, _svm_prob, _scores['SVM']),
+    ]:
+        with col:
+            is_best = (model == _best)
+            with st.container(border=True):
+                if is_best:
+                    st.markdown(f"### {icon} {model} ⭐ RECOMMENDED")
+                else:
+                    st.markdown(f"### {icon} {model}")
+                st.metric("Auto-Selector Score", f"{score} pts")
+                st.metric("Prediction",
+                          "Depression" if pred==1 else "No Depression")
+                st.metric("Confidence", f"{max(prob)*100:.1f}%")
+                if _reasons[model]:
+                    st.write("")
+                    st.caption("**Why selected/scored:**")
+                    for r in _reasons[model]:
+                        st.caption(f"• {r}")
+
+    st.write("")
+
+    # Comparison summary
+    _agree_models = sum([_knn_pred==_best_pred,
+                         _dt_pred ==_best_pred,
+                         _svm_pred==_best_pred])
+    with st.container(border=True):
+        st.markdown("**Summary**")
+        st.write(f"**Recommended Model:** {_icons[_best]} {_best} "
+                 f"(Score: {_scores[_best]} pts)")
+        st.write(f"**Prediction:** "
+                 f"{'⚠️ Depression Risk' if _best_pred==1 else '✅ No Depression'}")
+        st.write(f"**Confidence:** {max(_best_prob)*100:.1f}%")
+        st.write(f"**Model Agreement:** {_agree_models}/3 models predict the same result")
+        if _agree_models == 3:
+            st.success("All 3 models agree — high reliability prediction!")
+        elif _agree_models == 2:
+            st.info("2/3 models agree — moderate reliability.")
+        else:
+            st.warning("Models disagree — treat prediction with caution. "
+                       "Consider running individual model pages for more details.")
+
+        st.write("")
+        n1, n2, n3 = st.columns(3)
+        with n1:
+            if st.button(f"Open KNN Page", key="as_go_knn", use_container_width=True):
+                st.switch_page("pages/2_KNN.py")
+        with n2:
+            if st.button(f"Open DT Page", key="as_go_dt", use_container_width=True):
+                st.switch_page("pages/3_Decision_Tree.py")
+        with n3:
+            if st.button(f"Open SVM Page", key="as_go_svm", use_container_width=True):
+                st.switch_page("pages/4_SVM.py")
+
+
 st.divider()
 st.caption("MindCheck · BMCS2003 AI · 202605 Session · Tutorial Group 3 · Tutor: Dr Goh · TARUMT")
