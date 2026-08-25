@@ -14,6 +14,7 @@ from sklearn.metrics import (accuracy_score, precision_score,
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.preprocessing import load_and_clean_dataset
 from utils.sidebar import sidebar
+from utils.pdf_report import generate_pdf
 
 st.set_page_config(page_title="KNN Predictor", page_icon="🔵",
                    layout="wide", initial_sidebar_state="expanded")
@@ -365,6 +366,48 @@ if st.session_state.knn_result:
         _explain_items.append("• No major risk factors detected in this student's profile")
     for item in _explain_items:
         st.write(item)
+
+    st.write("")
+    # ── PDF Export ────────────────────────────────────────────
+    _alerts = []
+    if R.get('high_concern'):
+        _alerts.append("High Concern: Student has both Anxiety and Panic Attack.")
+    if R.get('academic_risk'):
+        _alerts.append("Academic Risk: Senior year student with very low CGPA.")
+    _notes = []
+    if R['anxiety'] == 'Yes':
+        _notes.append("Anxiety = Yes — 2nd strongest predictor of depression (r=0.257)")
+    if R['panic'] == 'Yes':
+        _notes.append("Panic Attack = Yes — strongest predictor (r=0.341)")
+    try:
+        _pdf_buf = generate_pdf(
+            model_name   = f"KNN (K={M['best_k']})",
+            student_name = R['name'],
+            result       = R['pred'],
+            prob         = R['prob'],
+            input_data   = {
+                "Gender":       R['gender'],
+                "Age":          str(R['age']),
+                "Course":       R['course'],
+                "Year":         R['year'],
+                "CGPA":         R['cgpa'],
+                "Anxiety":      R['anxiety'],
+                "Panic Attack": R['panic'],
+            },
+            metrics        = {'acc':M['acc'],'prec':M['prec'],'rec':M['rec'],'f1':M['f1']},
+            business_alerts = _alerts,
+            explanation_notes = _notes,
+        )
+        st.download_button(
+            label="📥  Download PDF Report",
+            data=_pdf_buf,
+            file_name=f"mindcheck_knn_{R['name'].replace(' ','_')}.pdf",
+            mime="application/pdf",
+            use_container_width=True,
+            key="knn_pdf_dl",
+        )
+    except Exception as _pdfe:
+        st.caption(f"PDF export unavailable: {_pdfe}")
 
     st.write("")
     if st.button("Clear Result", key="knn_clear"):
