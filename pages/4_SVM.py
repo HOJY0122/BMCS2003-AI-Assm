@@ -136,7 +136,8 @@ with st.spinner("Training all 3 models..."):
     M = load_all_models()
 
 # Session state
-for k, v in [('log',[]),('n',0),('knn_c',0),('dt_c',0),('svm_c',0)]:
+for k, v in [('log',[]),('n',0),('knn_c',0),('dt_c',0),('svm_c',0),
+                ('as_result', None)]:
     if k not in st.session_state:
         st.session_state[k] = v
 
@@ -930,6 +931,20 @@ if as_btn:
             st.warning("Models disagree — treat prediction with caution. "
                        "Consider running individual model pages for more details.")
 
+        # ── Save results to session state so nav buttons can use them ──
+        st.session_state['as_result'] = {
+            'name'      : as_name_lbl,
+            'gender'    : as_gender, 'age'    : as_age,
+            'course'    : as_course, 'year'   : as_year, 'cgpa': as_cgpa,
+            'marital'   : as_marital,'anxiety': as_anxiety,
+            'panic'     : as_panic,  'treat'  : as_treat,
+            'knn_pred'  : int(_knn_pred), 'knn_prob': _knn_prob.tolist(),
+            'dt_pred'   : int(_dt_pred),  'dt_prob' : _dt_prob.tolist(),
+            'svm_pred'  : int(_svm_pred), 'svm_prob': _svm_prob.tolist(),
+            'svm_inp'   : _svm_inp2,
+            'best'      : _best,
+        }
+
         st.write("")
         st.caption("Click below to open that model's page — data and prediction result will be carried over automatically.")
         n1, n2, n3 = st.columns(3)
@@ -996,6 +1011,96 @@ if as_btn:
                 }
                 st.switch_page("pages/4_SVM.py")
 
+
+# ══════════════════════════════════════════════════════════════
+# AUTO-SELECTOR RESULT DISPLAY (persists via session state)
+# ══════════════════════════════════════════════════════════════
+if st.session_state.get('as_result'):
+    _ar = st.session_state['as_result']
+    st.divider()
+    st.subheader(f"Quick Navigate — {_ar['name']}")
+    st.caption("Result already computed — click to open page with result pre-loaded. No need to predict again!")
+
+    _icons = {'KNN':'🔵','Decision Tree':'🌳','SVM':'🔴'}
+    _best_label = _ar['best']
+
+    qn1, qn2, qn3 = st.columns(3)
+
+    with qn1:
+        _kpred = _ar['knn_pred']; _kprob = _ar['knn_prob']
+        _klbl  = "⚠️ Depression" if _kpred==1 else "✅ No Depression"
+        is_best = (_best_label == 'KNN')
+        with st.container(border=True):
+            st.markdown(f"### 🔵 KNN {'⭐ BEST' if is_best else ''}")
+            if _kpred==1: st.error(f"**{_klbl}** — {_kprob[1]*100:.1f}%")
+            else:         st.success(f"**{_klbl}** — {_kprob[0]*100:.1f}%")
+            if st.button("🔵 Open KNN with Result →", key="ar_nav_knn",
+                         use_container_width=True,
+                         type="primary" if is_best else "secondary"):
+                st.session_state['knn_result'] = {
+                    'pred': _kpred, 'prob': _kprob,
+                    'name': _ar['name'], 'gender': _ar['gender'],
+                    'age': _ar['age'], 'course': _ar['course'],
+                    'year': _ar['year'], 'cgpa': _ar['cgpa'],
+                    'anxiety': _ar['anxiety'], 'panic': _ar['panic'],
+                    'high_concern': (_ar['anxiety']=="Yes" and _ar['panic']=="Yes"),
+                    'academic_risk': (_ar['year'] in ["Year 3","Year 4"] and _ar['cgpa']=="0 - 1.99"),
+                }
+                st.switch_page("pages/2_KNN.py")
+
+    with qn2:
+        _dpred = _ar['dt_pred']; _dprob = _ar['dt_prob']
+        _dlbl  = "⚠️ Depression" if _dpred==1 else "✅ No Depression"
+        is_best = (_best_label == 'Decision Tree')
+        with st.container(border=True):
+            st.markdown(f"### 🌳 Decision Tree {'⭐ BEST' if is_best else ''}")
+            if _dpred==1: st.error(f"**{_dlbl}** — {_dprob[1]*100:.1f}%")
+            else:         st.success(f"**{_dlbl}** — {_dprob[0]*100:.1f}%")
+            if st.button("🌳 Open DT with Result →", key="ar_nav_dt",
+                         use_container_width=True,
+                         type="primary" if is_best else "secondary"):
+                st.session_state['dt_result'] = {
+                    'pred': _dpred, 'prob': _dprob,
+                    'name': _ar['name'], 'gender': _ar['gender'],
+                    'age': _ar['age'], 'course': _ar['course'],
+                    'year': _ar['year'], 'cgpa': _ar['cgpa'],
+                    'marital': _ar['marital'],
+                    'anxiety': _ar['anxiety'], 'panic': _ar['panic'],
+                    'high_concern': (_ar['anxiety']=="Yes" and _ar['panic']=="Yes"),
+                    'married_risk': (_ar['marital']=="Yes" and _ar['age']<21),
+                    'academic_risk': (_ar['year'] in ["Year 3","Year 4"] and _ar['cgpa']=="0 - 1.99"),
+                }
+                st.switch_page("pages/3_Decision_Tree.py")
+
+    with qn3:
+        _spred = _ar['svm_pred']; _sprob = _ar['svm_prob']
+        _slbl  = "⚠️ Depression" if _spred==1 else "✅ No Depression"
+        is_best = (_best_label == 'SVM')
+        with st.container(border=True):
+            st.markdown(f"### 🔴 SVM {'⭐ BEST' if is_best else ''}")
+            if _spred==1: st.error(f"**{_slbl}** — {_sprob[1]*100:.1f}%")
+            else:         st.success(f"**{_slbl}** — {_sprob[0]*100:.1f}%")
+            if st.button("🔴 Open SVM with Result →", key="ar_nav_svm",
+                         use_container_width=True,
+                         type="primary" if is_best else "secondary"):
+                st.session_state['svm_result'] = {
+                    'pred': _spred, 'prob': _sprob,
+                    'inp': _ar.get('svm_inp'),
+                    'name': _ar['name'], 'gender': _ar['gender'],
+                    'age': _ar['age'], 'course': _ar['course'],
+                    'year': _ar['year'], 'cgpa': _ar['cgpa'],
+                    'marital': _ar['marital'],
+                    'anxiety': _ar['anxiety'], 'panic': _ar['panic'],
+                    'treat': _ar['treat'],
+                    'high_concern': (_ar['anxiety']=="Yes" and _ar['panic']=="Yes"),
+                    'treat_flag': (_ar['treat']=="Yes"),
+                    'academic_risk': (_ar['year'] in ["Year 3","Year 4"] and _ar['cgpa']=="0 - 1.99"),
+                }
+                st.switch_page("pages/4_SVM.py")
+
+    if st.button("Clear Auto-Selector Result", key="ar_clear"):
+        st.session_state['as_result'] = None
+        st.rerun()
 
 st.divider()
 st.caption("MindCheck · BMCS2003 AI · 202605 Session · Tutorial Group 3 · Tutor: Dr Goh · TARUMT")
