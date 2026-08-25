@@ -165,6 +165,7 @@ _SECTION_MAP = {
     "feature": "analysis",
     "dataset": "analysis",
     "stats"  : "analysis",
+    "split"  : "analysis",
     "knn"    : "models",
     "dt"     : "models",
     "svm"    : "models",
@@ -208,6 +209,7 @@ def sidebar(active="home"):
                          expanded=(active_section == "analysis")):
             _nav_btn("📊", "EDA",               "eda",     active, "pages/1_EDA.py")
             _nav_btn("🔬", "Feature Selection", "feature", active, "pages/9_Feature_Selection.py")
+            _nav_btn("✂️", "Train/Test Split",  "split",   active, "pages/12_Train_Test_Split.py")
             _nav_btn("📋", "Dataset",           "dataset", active, "pages/6_Dataset.py")
             _nav_btn("📈", "Live Statistics",   "stats",   active, "pages/11_Live_Stats.py")
 
