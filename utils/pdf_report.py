@@ -162,31 +162,63 @@ def _metric_table(metrics):
 
 def _confidence_bar(prob_no, prob_dep):
     """Simple visual confidence indicator as a table."""
-    pct_dep   = int(round(prob_dep * 100))
-    pct_no    = int(round(prob_no  * 100))
-    dep_w     = (prob_dep * W)
-    no_w      = (prob_no  * W)
+    pct_dep = int(round(prob_dep * 100))
+    pct_no  = int(round(prob_no  * 100))
 
-    row = [
-        Paragraph(
-            f'<b>No Depression</b>  {pct_no}%',
-            ParagraphStyle('CB', fontSize=10, textColor=C_WHITE,
-                           fontName='Helvetica-Bold', alignment=TA_CENTER)
-        ),
-        Paragraph(
-            f'<b>Depression Risk</b>  {pct_dep}%',
-            ParagraphStyle('CB', fontSize=10, textColor=C_WHITE,
-                           fontName='Helvetica-Bold', alignment=TA_CENTER)
-        ),
-    ]
-    tbl = Table([row], colWidths=[no_w, dep_w])
-    tbl.setStyle(TableStyle([
-        ('BACKGROUND',   (0,0), (0,0), C_SUCCESS),
-        ('BACKGROUND',   (1,0), (1,0), C_DANGER),
-        ('TOPPADDING',   (0,0), (-1,-1), 10),
-        ('BOTTOMPADDING',(0,0), (-1,-1), 10),
-        ('VALIGN',       (0,0), (-1,-1), 'MIDDLE'),
-    ]))
+    # Clamp to avoid zero/negative width — minimum 5% each side if non-zero
+    MIN_W = 0.05 * W
+    dep_w = max(MIN_W, prob_dep * W) if prob_dep > 0 else 0
+    no_w  = max(MIN_W, prob_no  * W) if prob_no  > 0 else 0
+
+    # If one side is 0, show full bar for the other
+    if prob_dep == 0:
+        no_w  = W; dep_w = 0
+    elif prob_no == 0:
+        dep_w = W; no_w  = 0
+    else:
+        # Normalise so total = W
+        total = no_w + dep_w
+        no_w  = no_w  / total * W
+        dep_w = dep_w / total * W
+
+    if dep_w == 0:
+        # Only no-depression bar
+        row = [[Paragraph(f'<b>No Depression  {pct_no}%</b>',
+                   ParagraphStyle('CB', fontSize=10, textColor=C_WHITE,
+                                   fontName='Helvetica-Bold', alignment=TA_CENTER))]]
+        tbl = Table(row, colWidths=[W])
+        tbl.setStyle(TableStyle([
+            ('BACKGROUND',   (0,0), (-1,-1), C_SUCCESS),
+            ('TOPPADDING',   (0,0), (-1,-1), 10),
+            ('BOTTOMPADDING',(0,0), (-1,-1), 10),
+        ]))
+    elif no_w == 0:
+        row = [[Paragraph(f'<b>Depression Risk  {pct_dep}%</b>',
+                   ParagraphStyle('CB', fontSize=10, textColor=C_WHITE,
+                                   fontName='Helvetica-Bold', alignment=TA_CENTER))]]
+        tbl = Table(row, colWidths=[W])
+        tbl.setStyle(TableStyle([
+            ('BACKGROUND',   (0,0), (-1,-1), C_DANGER),
+            ('TOPPADDING',   (0,0), (-1,-1), 10),
+            ('BOTTOMPADDING',(0,0), (-1,-1), 10),
+        ]))
+    else:
+        row = [[
+            Paragraph(f'<b>No Depression  {pct_no}%</b>',
+                      ParagraphStyle('CB', fontSize=10, textColor=C_WHITE,
+                                     fontName='Helvetica-Bold', alignment=TA_CENTER)),
+            Paragraph(f'<b>Depression Risk  {pct_dep}%</b>',
+                      ParagraphStyle('CB', fontSize=10, textColor=C_WHITE,
+                                     fontName='Helvetica-Bold', alignment=TA_CENTER)),
+        ]]
+        tbl = Table(row, colWidths=[no_w, dep_w])
+        tbl.setStyle(TableStyle([
+            ('BACKGROUND',   (0,0), (0,0), C_SUCCESS),
+            ('BACKGROUND',   (1,0), (1,0), C_DANGER),
+            ('TOPPADDING',   (0,0), (-1,-1), 10),
+            ('BOTTOMPADDING',(0,0), (-1,-1), 10),
+            ('VALIGN',       (0,0), (-1,-1), 'MIDDLE'),
+        ]))
     return tbl
 
 
