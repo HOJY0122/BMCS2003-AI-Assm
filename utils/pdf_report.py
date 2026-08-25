@@ -92,7 +92,7 @@ def generate_pdf(model_name, student_name, result, prob,
 
     # ── Header ────────────────────────────────────────────────
     story.append(Paragraph("MindCheck", title_s))
-    story.append(Spacer(1, 2))
+    story.append(Spacer(2, 4))
     story.append(Paragraph(
         "Student Depression Risk — Prediction Report", sub_s))
     story.append(Paragraph(
