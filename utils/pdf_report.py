@@ -242,7 +242,7 @@ def generate_pdf(
 
     # ── RESULT BANNER ─────────────────────────────────────────
     risk_color = C_DANGER if result == 1 else C_SUCCESS
-    risk_icon  = "!" if result == 1 else "OK"
+    risk_icon  = "!" if result == 1 else "✓"
     risk_text  = "DEPRESSION RISK DETECTED" if result == 1 else "NO DEPRESSION DETECTED"
     risk_sub   = ("This student shows indicators of depression risk. "
                   "Professional follow-up is recommended."
