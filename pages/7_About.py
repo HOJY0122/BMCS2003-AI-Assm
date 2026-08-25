@@ -1,8 +1,4 @@
 import streamlit as st
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-import matplotlib.patheffects as pe
-import numpy as np
 import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.sidebar import sidebar
@@ -105,225 +101,160 @@ st.write(
 st.divider()
 
 # ══════════════════════════════════════════════════════════════
-# SECTION 1 — SYSTEM ARCHITECTURE DIAGRAM
+# SECTION 1 & 2 — INTERACTIVE ARCHITECTURE + PIPELINE DIAGRAMS
+# Native Streamlit components (not a static image): every card has
+# a real hover tooltip (browser title attribute) and, where a
+# matching page exists, a real st.switch_page() button. This is
+# more reliable on Streamlit Cloud than embedding HTML/JS in an
+# iframe, which cannot safely navigate the parent app.
 # ══════════════════════════════════════════════════════════════
 st.subheader("System Architecture")
-st.caption("End-to-end pipeline from raw data to prediction output")
+st.caption("End-to-end pipeline from raw data to prediction output — hover a card for details, click Open to jump to that page")
 
-def draw_architecture():
-    fig, ax = plt.subplots(figsize=(16, 9))
-    fig.patch.set_facecolor('#0B0E1A')
-    ax.set_facecolor('#0B0E1A')
-    ax.set_xlim(0, 16); ax.set_ylim(0, 9)
-    ax.axis('off')
+st.markdown("""
+<style>
+.mc-card{border-radius:12px;padding:14px 10px;text-align:center;color:white;
+  transition:transform .15s ease, box-shadow .15s ease; min-height:64px;
+  display:flex; flex-direction:column; justify-content:center;}
+.mc-card:hover{transform:translateY(-3px); box-shadow:0 8px 20px rgba(0,0,0,.35);}
+.mc-title{font-weight:700; font-size:13px; margin-bottom:3px;}
+.mc-sub{font-size:10px; opacity:.85; line-height:1.35;}
+.mc-flow{text-align:center; color:#6B7BA8; font-size:11px; font-style:italic; margin:6px 0;}
+.mc-arrow{text-align:center; color:#4A5680; font-size:20px; line-height:1;}
+</style>
+""", unsafe_allow_html=True)
 
-    def box(x, y, w, h, color, label, sublabel="", radius=0.3):
-        fancy = mpatches.FancyBboxPatch(
-            (x - w/2, y - h/2), w, h,
-            boxstyle=f"round,pad=0.05,rounding_size={radius}",
-            facecolor=color, edgecolor='white',
-            linewidth=1.2, alpha=0.92, zorder=3
-        )
-        ax.add_patch(fancy)
-        ax.text(x, y + (0.12 if sublabel else 0), label,
-                ha='center', va='center', fontsize=9,
-                fontweight='bold', color='white', zorder=4)
-        if sublabel:
-            ax.text(x, y - 0.22, sublabel,
-                    ha='center', va='center', fontsize=7,
-                    color=(1, 1, 1, 0.6), zorder=4)
 
-    def arrow(x1, y1, x2, y2, label=""):
-        ax.annotate("", xy=(x2, y2), xytext=(x1, y1),
-                    arrowprops=dict(arrowstyle="-|>",
-                                    color='#4A5680', lw=1.5),
-                    zorder=2)
-        if label:
-            mx, my = (x1+x2)/2, (y1+y2)/2
-            ax.text(mx, my+0.12, label, ha='center', va='bottom',
-                    fontsize=7, color='#6B7BA8', zorder=5)
+def _arch_card(label, sub, color, key=None, page=None):
+    """Render one architecture card with a native hover tooltip
+    (title attribute) and, if `page` is given, a real switch_page
+    button underneath."""
+    st.markdown(
+        f"""<div class="mc-card" style="background:{color};" title="{sub}">
+              <div class="mc-title">{label}</div>
+              <div class="mc-sub">{sub}</div>
+            </div>""",
+        unsafe_allow_html=True,
+    )
+    if page:
+        if st.button("Open →", key=key, use_container_width=True):
+            st.switch_page(page)
 
-    def line_h(x1, x2, y, color='#1E2640', lw=1):
-        ax.plot([x1,x2],[y,y], color=color, lw=lw,
-                linestyle='--', zorder=1, alpha=0.5)
 
-    # ── Row 1: Data Layer ──────────────────────────────────
-    ax.text(8, 8.5, "MindCheck — System Architecture Pipeline",
-            ha='center', va='center', fontsize=14,
-            fontweight='bold', color='white', zorder=5)
+# ── Row 1: Data Layer ──────────────────────────────────────────
+r1 = st.columns(4)
+with r1[0]:
+    _arch_card("📁 Raw Dataset", "Kaggle Shariful07 (2020) · 600 records · IIUM Malaysia",
+               "#1E3A5F", key="arch_dataset", page="pages/6_Dataset.py")
+with r1[1]:
+    _arch_card("⚙️ Preprocessing", "Clean · Encode · Engineer (utils/preprocessing.py)",
+               "#1E4A3A", key="arch_prep", page="pages/6_Dataset.py")
+with r1[2]:
+    _arch_card("🔬 Feature Selection", "Pearson · t-test · Chi2 · 1–10 feature experiment",
+               "#3A1E4F", key="arch_featsel", page="pages/9_Feature_Selection.py")
+with r1[3]:
+    _arch_card("📊 EDA", "Visualize distributions · Correlation heatmap",
+               "#4F3A1E", key="arch_eda", page="pages/1_EDA.py")
 
-    # Dataset
-    box(2, 7.4, 2.2, 0.8, '#1E3A5F', '📁 Raw Dataset',
-        'Kaggle Shariful07 (2020)\n600 records · IIUM Malaysia')
-    box(6, 7.4, 2.2, 0.8, '#1E4A3A', '⚙️  Preprocessing',
-        'Clean · Encode · Engineer\nutils/preprocessing.py')
-    box(10, 7.4, 2.2, 0.8, '#3A1E4F', '🔬 Feature Selection',
-        'Pearson · t-test · Chi2\nExperiment 1–10 features')
-    box(14, 7.4, 2.2, 0.8, '#4F3A1E', '📊 EDA',
-        'Visualize distributions\nCorrelation heatmap')
+st.markdown('<div class="mc-flow">↓ 80/20 · 70/30 · 75/25 splits ↓</div>', unsafe_allow_html=True)
 
-    arrow(3.1, 7.4, 4.9, 7.4, "raw CSV")
-    arrow(7.1, 7.4, 8.9, 7.4, "cleaned df")
-    arrow(11.1, 7.4, 12.9, 7.4, "selected features")
+# ── Row 2: Model Layer ───────────────────────────────────────────
+r2 = st.columns(3)
+with r2[0]:
+    _arch_card("🔵 KNN", f"K={_LM['best_k']} · MinMax Scale · Euclidean · Target: Depression",
+               "#1B3A6B", key="arch_knn", page="pages/2_KNN.py")
+with r2[1]:
+    _arch_card("🌳 Decision Tree", "CART · Depth 5 · Gini · Target: Depression",
+               "#1B5C3A", key="arch_dt", page="pages/3_Decision_Tree.py")
+with r2[2]:
+    _arch_card("🔴 SVM", "RBF Kernel · Balanced · Ordinal Encoder · Target: Depression",
+               "#6B1B1B", key="arch_svm", page="pages/4_SVM.py")
 
-    # ── Row 2: Model Layer ────────────────────────────────
-    ax.text(8, 6.3, "Model Training Layer (Live · No Hardcode)",
-            ha='center', va='center', fontsize=10,
-            color='#6B7BA8', style='italic', zorder=5)
+st.markdown('<div class="mc-flow">↓ evaluated on held-out test split ↓</div>', unsafe_allow_html=True)
 
-    box(3, 5.5, 2.4, 0.9, '#1B3A6B', '🔵 KNN',
-        'K=5 · MinMax Scale\nEuclidean Distance\nTarget: Depression')
-    box(8, 5.5, 2.4, 0.9, '#1B5C3A', '🌳 Decision Tree',
-        'CART · Depth 5 · Gini\nFeature Importances\nTarget: Depression')
-    box(13, 5.5, 2.4, 0.9, '#6B1B1B', '🔴 SVM',
-        'RBF Kernel · Balanced\nOrdinal Encoder\nTarget: Depression')
+# ── Row 3: Evaluation ─────────────────────────────────────────
+r3 = st.columns(3)
+with r3[0]:
+    _arch_card("📊 KNN Metrics",
+               f"Acc {_LM['knn']['acc']:.2f}% · Rec {_LM['knn']['rec']:.2f}% · F1 {_LM['knn']['f1']:.2f}%",
+               "#162B4F", key="arch_knn_m", page="pages/2_KNN.py")
+with r3[1]:
+    _arch_card("📊 DT Metrics",
+               f"Acc {_LM['dt']['acc']:.2f}% · Prec {_LM['dt']['prec']:.2f}% · Rec {_LM['dt']['rec']:.2f}%",
+               "#163D2A", key="arch_dt_m", page="pages/3_Decision_Tree.py")
+with r3[2]:
+    _arch_card("📊 SVM Metrics",
+               f"Acc {_LM['svm']['acc']:.2f}% · Prec {_LM['svm']['prec']:.2f}% · F1 {_LM['svm']['f1']:.2f}%",
+               "#4F1616", key="arch_svm_m", page="pages/4_SVM.py")
 
-    arrow(2, 7.0, 3, 5.95, "80/20 split")
-    arrow(6, 7.0, 7.2, 5.95, "70/30 split")
-    arrow(10, 7.0, 12.2, 5.95, "75/25 split")
+st.markdown('<div class="mc-flow">↓ powers the Streamlit web application ↓</div>', unsafe_allow_html=True)
 
-    # ── Row 3: Evaluation ─────────────────────────────────
-    box(3, 4.1, 2.4, 0.85, '#162B4F', '📊 KNN Metrics',
-        f'Acc: {_LM["knn"]["acc"]:.2f}%\nRec: {_LM["knn"]["rec"]:.2f}% · F1: {_LM["knn"]["f1"]:.2f}%')
-    box(8, 4.1, 2.4, 0.85, '#163D2A', '📊 DT Metrics',
-        f'Acc: {_LM["dt"]["acc"]:.2f}%\nPrec: {_LM["dt"]["prec"]:.2f}% · Rec: {_LM["dt"]["rec"]:.2f}%')
-    box(13, 4.1, 2.4, 0.85, '#4F1616', '📊 SVM Metrics',
-        f'Acc: {_LM["svm"]["acc"]:.2f}%\nPrec: {_LM["svm"]["prec"]:.2f}% · F1: {_LM["svm"]["f1"]:.2f}%')
+# ── Row 4: Application Layer ──────────────────────────────────
+r4 = st.columns(6)
+with r4[0]:
+    _arch_card("🔍 Single Predict", "Enter one student's data — available on every model page", "#1E2E5F")
+with r4[1]:
+    _arch_card("📦 Batch Predict", "Upload a CSV to screen many students at once", "#1E3E4F")
+with r4[2]:
+    _arch_card("📈 Compare & Charts", "Side-by-side model comparison, live test",
+               "#2A1E5F", key="arch_compare", page="pages/5_Comparison.py")
+with r4[3]:
+    _arch_card("🔬 Feature Selection", "Correlation · t-test · Chi2 explorer",
+               "#1E4F2A", key="arch_featsel2", page="pages/9_Feature_Selection.py")
+with r4[4]:
+    _arch_card("📊 Live Stats", "Compare a student profile to the whole dataset",
+               "#4F2A1E", key="arch_livestats", page="pages/11_Live_Stats.py")
+with r4[5]:
+    _arch_card("🤖 Auto Selector", "Recommends the best model for a given profile",
+               "#4F1E3A", key="arch_autosel", page="pages/5_Comparison.py")
 
-    arrow(3, 5.05, 3, 4.53)
-    arrow(8, 5.05, 8, 4.53)
-    arrow(13, 5.05, 13, 4.53)
+st.markdown('<div class="mc-flow">↓ produces ↓</div>', unsafe_allow_html=True)
 
-    # ── Row 4: Application Layer ──────────────────────────
-    ax.text(8, 3.3, "Streamlit Web Application Layer",
-            ha='center', va='center', fontsize=10,
-            color='#6B7BA8', style='italic', zorder=5)
+# ── Row 5: Output Layer ────────────────────────────────────────
+r5 = st.columns(4)
+with r5[0]:
+    _arch_card("✅ Prediction Result", "Risk verdict + confidence percentage", "#1E3A20")
+with r5[1]:
+    _arch_card("📥 Download CSV", "Export batch prediction results", "#1E2A3A")
+with r5[2]:
+    _arch_card("🧠 Explanation", "Why the model decided this — feature contribution", "#2A1E3A")
+with r5[3]:
+    _arch_card("📊 Interactive Charts", "Plotly comparison visuals", "#3A2A1E")
 
-    boxes_app = [
-        (2,   2.6, '🔍 Single\nPredict',    '#1E2E5F'),
-        (4.5, 2.6, '📦 Batch\nPredict',     '#1E3E4F'),
-        (7,   2.6, '📈 Compare\n& Charts',  '#2A1E5F'),
-        (9.5, 2.6, '🔬 Feature\nSelection', '#1E4F2A'),
-        (12,  2.6, '📊 Live\nStats',        '#4F2A1E'),
-        (14.5,2.6, '🤖 Auto\nSelector',     '#4F1E3A'),
-    ]
-    for bx, by, blbl, bcol in boxes_app:
-        box(bx, by, 1.9, 0.85, bcol, blbl)
-        arrow(bx, 3.73, bx, 2.5) if bx < 7.5 else None
-        if bx > 7: arrow(8, 3.73, bx, 2.5)
-
-    arrow(3, 3.67, 2,   3.03)
-    arrow(3, 3.67, 4.5, 3.03)
-    arrow(8, 3.67, 7,   3.03)
-    arrow(8, 3.67, 9.5, 3.03)
-    arrow(13, 3.67, 12,  3.03)
-    arrow(13, 3.67, 14.5,3.03)
-
-    # ── Row 5: Output Layer ───────────────────────────────
-    ax.text(8, 1.85, "Output Layer",
-            ha='center', va='center', fontsize=10,
-            color='#6B7BA8', style='italic', zorder=5)
-
-    out_boxes = [
-        (3,   1.2, '✅/⚠️\nPrediction\nResult',  '#1E3A20'),
-        (6.5, 1.2, '📥 Download\nCSV Results', '#1E2A3A'),
-        (10,  1.2, '🧠 Prediction\nExplanation','#2A1E3A'),
-        (13.5,1.2, '📊 Interactive\nCharts',    '#3A2A1E'),
-    ]
-    for bx, by, blbl, bcol in out_boxes:
-        box(bx, by, 2.4, 0.9, bcol, blbl)
-
-    # Arrows from app to output
-    for ax_pos in [2, 4.5, 7, 9.5, 12, 14.5]:
-        ax.annotate("", xy=(8, 1.7), xytext=(ax_pos, 2.18),
-                    arrowprops=dict(arrowstyle="-|>",
-                                    color='#2E3854', lw=1),
-                    zorder=1)
-
-    # ── Legend ────────────────────────────────────────────
-    legend_items = [
-        (mpatches.Patch(facecolor='#1E3A5F', label='Data Layer')),
-        (mpatches.Patch(facecolor='#1B3A6B', label='Model Layer')),
-        (mpatches.Patch(facecolor='#162B4F', label='Evaluation')),
-        (mpatches.Patch(facecolor='#1E2E5F', label='Application')),
-        (mpatches.Patch(facecolor='#1E3A20', label='Output')),
-    ]
-    ax.legend(handles=legend_items, loc='lower left',
-              fontsize=8, framealpha=0.2,
-              labelcolor='white', facecolor='#1A1F35',
-              edgecolor='#2E3854')
-
-    plt.tight_layout(pad=0.5)
-    return fig
-
-fig_arch = draw_architecture()
-st.pyplot(fig_arch, use_container_width=True)
-plt.close()
+st.caption("Legend — 🔵 Data · 🟦 Model · 🔷 Evaluation · 🟪 Application · 🟩 Output")
 
 st.divider()
 
 # ══════════════════════════════════════════════════════════════
-# SECTION 2 — PREPROCESSING PIPELINE DIAGRAM
+# SECTION 2 — PREPROCESSING PIPELINE (interactive)
 # ══════════════════════════════════════════════════════════════
 st.subheader("Data Preprocessing Pipeline")
-st.caption("Step-by-step transformation from raw CSV to model-ready features")
+st.caption("Step-by-step transformation from raw CSV to model-ready features — hover a step for details")
 
-def draw_pipeline():
-    steps = [
-        ("📁 Raw CSV\n600 records\n11 features",       '#1E3A5F'),
-        ("🧹 Clean\nDrop Timestamp\nFill 8 Age NaN",   '#1B3A6B'),
-        ("🔄 Standardize\nCourse→10 cats\nYear→4 cats",'#1B4A5F'),
-        ("🔢 Encode\nYes/No→1/0\nGender→1/0",          '#1E4A3A'),
-        ("⚙️  Engineer\nMH Score 0-3\nCGPA Numeric",   '#3A3A1E'),
-        ("✂️  Split\nTrain/Test\n80/20 or 70/30",      '#3A1E4F'),
-        ("📐 Scale\nMinMax (KNN)\nStandard (SVM)",      '#4F1E3A'),
-        ("✅ Ready\nFor Training\n& Prediction",        '#1E5C2A'),
-    ]
-
-    fig2, ax2 = plt.subplots(figsize=(16, 3.2))
-    fig2.patch.set_facecolor('#0B0E1A')
-    ax2.set_facecolor('#0B0E1A')
-    ax2.set_xlim(0, 16); ax2.set_ylim(0, 3.2)
-    ax2.axis('off')
-
-    bw = 1.6; bh = 2.2; gap = 0.15
-    total_w = len(steps) * bw + (len(steps)-1) * gap
-    start_x = (16 - total_w) / 2
-
-    for i, (label, color) in enumerate(steps):
-        cx = start_x + i*(bw + gap) + bw/2
-        cy = 1.6
-        fancy = mpatches.FancyBboxPatch(
-            (cx - bw/2, cy - bh/2), bw, bh,
-            boxstyle="round,pad=0.05,rounding_size=0.15",
-            facecolor=color, edgecolor='white',
-            linewidth=1, alpha=0.9, zorder=3
+pipe_steps = [
+    ("📁 Raw CSV",      "600 records · 11 features",              "#1E3A5F"),
+    ("🧹 Clean",        "Drop Timestamp · fill 8 Age NaN",        "#1B3A6B"),
+    ("🔄 Standardize",  "Course → 10 categories · Year → 4",      "#1B4A5F"),
+    ("🔢 Encode",       "Yes/No → 1/0 · Gender → 1/0",            "#1E4A3A"),
+    ("⚙️ Engineer",     "Mental Health Score 0–3 · CGPA numeric", "#3A3A1E"),
+    ("✂️ Split",        "Train/Test · 80/20 or 70/30 or 75/25",   "#3A1E4F"),
+    ("📐 Scale",        "MinMax (KNN) · Standard (SVM)",          "#4F1E3A"),
+    ("✅ Ready",        "For training & prediction",              "#1E5C2A"),
+]
+pcols = st.columns(len(pipe_steps))
+for col, (label, sub, color) in zip(pcols, pipe_steps):
+    with col:
+        st.markdown(
+            f"""<div class="mc-card" style="background:{color};" title="{sub}">
+                  <div class="mc-title" style="font-size:11px;">{label}</div>
+                  <div class="mc-sub">{sub}</div>
+                </div>""",
+            unsafe_allow_html=True,
         )
-        ax2.add_patch(fancy)
-        ax2.text(cx, cy, label, ha='center', va='center',
-                 fontsize=8, fontweight='bold', color='white',
-                 zorder=4, linespacing=1.5)
 
-        # Step number
-        ax2.text(cx, cy + bh/2 + 0.1, f"Step {i+1}",
-                 ha='center', va='bottom', fontsize=7,
-                 color='#4A5680', zorder=4)
-
-        # Arrow to next
-        if i < len(steps) - 1:
-            nx = cx + bw/2
-            ax2.annotate("",
-                xy=(nx + gap, cy), xytext=(nx, cy),
-                arrowprops=dict(arrowstyle="-|>",
-                                color='#4A5680', lw=1.5),
-                zorder=2)
-
-    plt.tight_layout(pad=0.3)
-    return fig2
-
-fig_pipe = draw_pipeline()
-st.pyplot(fig_pipe, use_container_width=True)
-plt.close()
+st.write("")
+if st.button("🔬  See these steps applied to real data →", use_container_width=True, key="pipe_cta"):
+    st.switch_page("pages/9_Feature_Selection.py")
 
 st.divider()
 
