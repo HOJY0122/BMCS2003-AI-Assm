@@ -92,6 +92,7 @@ def generate_pdf(model_name, student_name, result, prob,
 
     # ── Header ────────────────────────────────────────────────
     story.append(Paragraph("MindCheck", title_s))
+    story.append(Spacer(1, 2))
     story.append(Paragraph(
         "Student Depression Risk — Prediction Report", sub_s))
     story.append(Paragraph(
@@ -188,10 +189,6 @@ def generate_pdf(model_name, student_name, result, prob,
         "professional medical advice. Please consult a qualified mental health "
         "professional for diagnosis and treatment.</i>", disc_s))
     story.append(Spacer(1, 6))
-    story.append(Paragraph(
-        "MindCheck · BMCS2003 Artificial Intelligence · Tutorial Group 3 "
-        "· Tutor: Dr Goh · TARUMT 202605",
-        foot_s))
 
     doc.build(story)
     buf.seek(0)
