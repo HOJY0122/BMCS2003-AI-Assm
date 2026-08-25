@@ -1,419 +1,556 @@
-import streamlit as st
-import pandas as pd
-import numpy as np
+"""
+MindCheck — Screening Report Generator
+"""
+import io
+import datetime
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-plt.style.use('seaborn-v0_8-whitegrid')
-plt.rcParams.update({'font.family':'sans-serif','font.size':10,'axes.spines.top':False,'axes.spines.right':False,'figure.facecolor':'white','axes.facecolor':'white','axes.edgecolor':'#E2E8F0','axes.labelcolor':'#1E293B','xtick.color':'#64748B','ytick.color':'#64748B','text.color':'#1E293B','grid.color':'#F1F5F9','grid.linewidth':0.8})
-import seaborn as sns
-import sys, os, warnings
-warnings.filterwarnings('ignore')
+import matplotlib.patches as mpatches
+import numpy as np
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils.sidebar import sidebar
-from utils.models import load_all_models
-from utils.pdf_report import generate_pdf
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import cm, mm
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
+from reportlab.platypus import (
+    SimpleDocTemplate, Paragraph, Spacer, Table,
+    TableStyle, HRFlowable, Image, KeepTogether,
+    PageBreak
+)
 
-st.set_page_config(page_title="KNN Predictor — MindCheck",
-                   page_icon="🔵", layout="wide",
-                   initial_sidebar_state="expanded")
-sidebar("knn")
+PAGE_W, PAGE_H = A4
+W = 17 * cm
 
-M = load_all_models()
+# ── Colours ───────────────────────────────────────────────────
+C_NAVY      = colors.HexColor('#0F172A')
+C_PRIMARY   = colors.HexColor('#1D4ED8')
+C_DANGER    = colors.HexColor('#B91C1C')
+C_SUCCESS   = colors.HexColor('#15803D')
+C_WARNING   = colors.HexColor('#B45309')
+C_GREY      = colors.HexColor('#475569')
+C_LIGHT     = colors.HexColor('#F8FAFC')
+C_BORDER    = colors.HexColor('#CBD5E1')
+C_RED_DARK  = colors.HexColor('#7F1D1D')
+C_GREEN_DARK= colors.HexColor('#14532D')
+C_BLUE_LT   = colors.HexColor('#EFF6FF')
+C_RED_LT    = colors.HexColor('#FEF2F2')
+C_GREEN_LT  = colors.HexColor('#F0FDF4')
+C_AMBER_LT  = colors.HexColor('#FFFBEB')
+C_SLATE     = colors.HexColor('#64748B')
+C_WHITE     = colors.white
 
-# ── Restore result carried from Comparison page ──────────────
-if 'knn_carry' in st.session_state and st.session_state['knn_carry'] is not None:
-    st.session_state['knn_result'] = st.session_state.pop('knn_carry')
 
-if 'knn_result' not in st.session_state:
-    st.session_state['knn_result'] = None
+def _styles():
+    return {
+        'brand'   : ParagraphStyle('BR', fontSize=28, textColor=C_PRIMARY,
+                                    fontName='Helvetica-Bold',
+                                    alignment=TA_CENTER, spaceAfter=2,
+                                    spaceBefore=8),
+        'tagline' : ParagraphStyle('TG', fontSize=10, textColor=C_GREY,
+                                    alignment=TA_CENTER, spaceAfter=2),
+        'doc_title': ParagraphStyle('DT', fontSize=13, textColor=C_NAVY,
+                                    fontName='Helvetica-Bold',
+                                    alignment=TA_CENTER, spaceAfter=2),
+        'meta'    : ParagraphStyle('MT', fontSize=9, textColor=C_SLATE,
+                                    alignment=TA_CENTER, spaceAfter=2),
+        'h1'      : ParagraphStyle('H1', fontSize=11, textColor=C_PRIMARY,
+                                    fontName='Helvetica-Bold',
+                                    spaceBefore=12, spaceAfter=5,
+                                    borderPad=0),
+        'h2'      : ParagraphStyle('H2', fontSize=10, textColor=C_NAVY,
+                                    fontName='Helvetica-Bold',
+                                    spaceBefore=8, spaceAfter=4),
+        'body'    : ParagraphStyle('BD', fontSize=10, textColor=C_NAVY,
+                                    leading=16, spaceAfter=4,
+                                    alignment=TA_JUSTIFY),
+        'body_sm' : ParagraphStyle('BS', fontSize=9, textColor=C_GREY,
+                                    leading=14, spaceAfter=3),
+        'label'   : ParagraphStyle('LB', fontSize=8, textColor=C_SLATE,
+                                    fontName='Helvetica-Bold',
+                                    spaceAfter=1, leading=10),
+        'small'   : ParagraphStyle('SM', fontSize=8, textColor=C_SLATE,
+                                    leading=12, spaceAfter=2),
+        'alert'   : ParagraphStyle('AL', fontSize=10, textColor=C_DANGER,
+                                    fontName='Helvetica-Bold',
+                                    spaceAfter=4, leftIndent=8, leading=15),
+        'note'    : ParagraphStyle('NT', fontSize=10, textColor=C_PRIMARY,
+                                    spaceAfter=4, leftIndent=8, leading=15),
+        'footer'  : ParagraphStyle('FT', fontSize=8, textColor=C_SLATE,
+                                    alignment=TA_CENTER, leading=12),
+        'disc'    : ParagraphStyle('DC', fontSize=8, textColor=C_SLATE,
+                                    leading=12, spaceAfter=3,
+                                    alignment=TA_JUSTIFY),
+        'center'  : ParagraphStyle('CN', fontSize=10, textColor=C_NAVY,
+                                    alignment=TA_CENTER),
+        'result_dep' : ParagraphStyle('RD', fontSize=15, textColor=C_WHITE,
+                                       fontName='Helvetica-Bold',
+                                       alignment=TA_CENTER),
+        'result_ok'  : ParagraphStyle('RO', fontSize=15, textColor=C_WHITE,
+                                       fontName='Helvetica-Bold',
+                                       alignment=TA_CENTER),
+    }
 
-# ── Prefill from Comparison page ──────────────────────────────
-_pre = st.session_state.pop('knn_prefill', None)
-if _pre:
-    st.info(f"📋 Data from Comparison page: **{_pre.get('name','Student')}** — form pre-filled below.")
 
-# ── Header ─────────────────────────────────────────────────────
-st.markdown("##### 🔵 KNN PREDICTOR")
-st.title("Depression Risk Predictor")
-st.caption(f"K-Nearest Neighbor · K={M['best_k']} · "
-           f"Member: Ho Jun Yon · Live trained on {M['n_records']} records")
-st.divider()
+def _section_header(title, S):
+    """Coloured section header bar."""
+    tbl = Table([[Paragraph(title, ParagraphStyle('SH', fontSize=10,
+                  textColor=C_WHITE, fontName='Helvetica-Bold'))]],
+                colWidths=[W])
+    tbl.setStyle(TableStyle([
+        ('BACKGROUND',   (0,0), (-1,-1), C_PRIMARY),
+        ('TOPPADDING',   (0,0), (-1,-1), 6),
+        ('BOTTOMPADDING',(0,0), (-1,-1), 6),
+        ('LEFTPADDING',  (0,0), (-1,-1), 10),
+    ]))
+    return tbl
 
-c1,c2,c3,c4 = st.columns(4)
-c1.metric("Accuracy",  f"{M['knn_m']['acc']:.2f}%")
-c2.metric("Precision", f"{M['knn_m']['prec']:.2f}%")
-c3.metric("Recall",    f"{M['knn_m']['rec']:.2f}%")
-c4.metric("F1 Score",  f"{M['knn_m']['f1']:.2f}%")
-st.divider()
 
-# ── Input form ─────────────────────────────────────────────────
-st.subheader("Student Information")
-col1, col2, col3 = st.columns(3)
-with col1:
-    _pn = _pre.get('name','')  if _pre else ''
-    name   = st.text_input("Name", value=_pn, placeholder="e.g. Ahmad", key="knn_name")
-    _gi = ["Female","Male"].index(_pre['gender']) if _pre and _pre.get('gender') in ["Female","Male"] else 0
-    gender = st.selectbox("Gender", ["Female","Male"], index=_gi, key="knn_gender")
-    _ai = int(_pre.get('age',20)) if _pre else 20
-    age    = st.slider("Age", 17, 30, _ai, key="knn_age")
-with col2:
-    course = st.selectbox("Course", M['courses'], key="knn_course")
-    _yi = ["Year 1","Year 2","Year 3","Year 4"].index(_pre['year']) if _pre and _pre.get('year') in ["Year 1","Year 2","Year 3","Year 4"] else 0
-    year   = st.selectbox("Year of Study", ["Year 1","Year 2","Year 3","Year 4"], index=_yi, key="knn_year")
-    cgpa   = st.selectbox("CGPA Range", list(M['cgpa_map'].keys()), key="knn_cgpa")
-with col3:
-    _axi = ["No","Yes"].index(_pre['anxiety']) if _pre and _pre.get('anxiety') in ["No","Yes"] else 0
-    anxiety = st.selectbox("Do you have Anxiety?",      ["No","Yes"], index=_axi, key="knn_anxiety")
-    _pai = ["No","Yes"].index(_pre['panic']) if _pre and _pre.get('panic') in ["No","Yes"] else 0
-    panic   = st.selectbox("Do you have Panic Attack?", ["No","Yes"], index=_pai, key="knn_panic")
-    st.write(""); st.write(""); st.write("")
-    predict_btn = st.button("🔍  Predict Depression Risk",
-                            use_container_width=True, type="primary", key="knn_predict")
+def _info_table(rows, col_w=None):
+    """Two-column key-value table."""
+    if col_w is None:
+        col_w = [5.5*cm, 11.5*cm]
+    tbl = Table(rows, colWidths=col_w)
+    tbl.setStyle(TableStyle([
+        ('FONTSIZE',      (0,0), (-1,-1), 9),
+        ('FONTNAME',      (0,0), (0,-1), 'Helvetica-Bold'),
+        ('TEXTCOLOR',     (0,0), (0,-1), C_SLATE),
+        ('TEXTCOLOR',     (1,0), (1,-1), C_NAVY),
+        ('GRID',          (0,0), (-1,-1), 0.4, C_BORDER),
+        ('ROWBACKGROUNDS',(0,0), (-1,-1), [C_WHITE, C_LIGHT]),
+        ('TOPPADDING',    (0,0), (-1,-1), 6),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ('LEFTPADDING',   (0,0), (-1,-1), 8),
+        ('VALIGN',        (0,0), (-1,-1), 'MIDDLE'),
+    ]))
+    return tbl
 
-if predict_btn:
-    _errors = []
-    if name.strip() and name.strip().isdigit():
-        _errors.append("❌ Name cannot be numbers only.")
-    if age < 17 or age > 35:
-        _errors.append(f"❌ Age {age} is outside valid range (17–35).")
-    _high_concern  = (anxiety == "Yes" and panic == "Yes")
-    _academic_risk = (year in ["Year 3","Year 4"] and cgpa == "0 - 1.99")
-    if _errors:
-        for e in _errors: st.error(e)
-        st.warning("⚠️ Please fix the errors above before predicting.")
-    else:
-        try:
-            g  = 1 if gender  == "Male" else 0
-            ax = 1 if anxiety == "Yes"  else 0
-            pa = 1 if panic   == "Yes"  else 0
-            ce = M['le_c'].transform([course])[0] if course in M['le_c'].classes_ else 0
-            ye = M['le_y'].transform([year])[0]   if year   in M['le_y'].classes_ else 0
-            cn = M['cgpa_map'].get(cgpa, 3.25)
-            inp   = pd.DataFrame([[g,age,ce,ye,cn,ax,pa]], columns=M['knn_feat'])
-            inp_s = M['sc_knn'].transform(inp)
-            pred  = int(M['knn'].predict(inp_s)[0])
-            prob  = M['knn'].predict_proba(inp_s)[0].tolist()
-            st.session_state['knn_result'] = {
-                'pred': pred, 'prob': prob,
-                'name': name.strip() or "Student",
-                'gender': gender, 'age': age, 'course': course,
-                'year': year, 'cgpa': cgpa,
-                'anxiety': anxiety, 'panic': panic,
-                'high_concern': _high_concern,
-                'academic_risk': _academic_risk,
-                'inp_s': inp_s,
-            }
-        except Exception as ex:
-            st.error(f"❌ Prediction failed: {ex}")
 
-# ── Result ─────────────────────────────────────────────────────
-if st.session_state['knn_result']:
-    R    = st.session_state['knn_result']
-    pred = R['pred']; prob = R['prob']; name_lbl = R['name']
-    st.divider()
-    st.subheader("Prediction Result")
-    if pred == 1:
-        st.error(f"### ⚠️  {name_lbl} — Depression Risk Detected\n\n"
-                 "Please consider speaking with a counsellor or mental health professional.")
-    else:
-        st.success(f"### ✅  {name_lbl} — No Depression Detected\n\n"
-                   "Keep maintaining a healthy academic and social lifestyle!")
+def _metric_table(metrics):
+    """4-column metrics summary."""
+    header = [
+        Paragraph('<b>Accuracy</b>',  ParagraphStyle('MH', fontSize=9, textColor=C_WHITE, alignment=TA_CENTER, fontName='Helvetica-Bold')),
+        Paragraph('<b>Precision</b>', ParagraphStyle('MH', fontSize=9, textColor=C_WHITE, alignment=TA_CENTER, fontName='Helvetica-Bold')),
+        Paragraph('<b>Recall</b>',    ParagraphStyle('MH', fontSize=9, textColor=C_WHITE, alignment=TA_CENTER, fontName='Helvetica-Bold')),
+        Paragraph('<b>F1 Score</b>',  ParagraphStyle('MH', fontSize=9, textColor=C_WHITE, alignment=TA_CENTER, fontName='Helvetica-Bold')),
+    ]
+    vals = [
+        Paragraph(f"{metrics['acc']:.2f}%",  ParagraphStyle('MV', fontSize=14, textColor=C_PRIMARY, alignment=TA_CENTER, fontName='Helvetica-Bold')),
+        Paragraph(f"{metrics['prec']:.2f}%", ParagraphStyle('MV', fontSize=14, textColor=C_PRIMARY, alignment=TA_CENTER, fontName='Helvetica-Bold')),
+        Paragraph(f"{metrics['rec']:.2f}%",  ParagraphStyle('MV', fontSize=14, textColor=C_PRIMARY, alignment=TA_CENTER, fontName='Helvetica-Bold')),
+        Paragraph(f"{metrics['f1']:.2f}%",   ParagraphStyle('MV', fontSize=14, textColor=C_PRIMARY, alignment=TA_CENTER, fontName='Helvetica-Bold')),
+    ]
+    desc = [
+        Paragraph('Overall correct predictions', ParagraphStyle('MD', fontSize=7, textColor=C_SLATE, alignment=TA_CENTER)),
+        Paragraph('Of Depression predictions,\nhow many were correct', ParagraphStyle('MD', fontSize=7, textColor=C_SLATE, alignment=TA_CENTER)),
+        Paragraph('Of actual cases,\nhow many were caught', ParagraphStyle('MD', fontSize=7, textColor=C_DANGER, alignment=TA_CENTER, fontName='Helvetica-Bold')),
+        Paragraph('Balance between\nPrecision & Recall', ParagraphStyle('MD', fontSize=7, textColor=C_SLATE, alignment=TA_CENTER)),
+    ]
+    tbl = Table([header, vals, desc], colWidths=[W/4]*4)
+    tbl.setStyle(TableStyle([
+        ('BACKGROUND',    (0,0), (-1,0), C_PRIMARY),
+        ('BACKGROUND',    (0,1), (-1,1), C_BLUE_LT),
+        ('BACKGROUND',    (0,2), (-1,2), C_LIGHT),
+        ('GRID',          (0,0), (-1,-1), 0.4, C_BORDER),
+        ('TOPPADDING',    (0,0), (-1,-1), 8),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+        ('VALIGN',        (0,0), (-1,-1), 'MIDDLE'),
+    ]))
+    return tbl
 
-    if R.get('high_concern'):
-        st.warning("⚠️ **High Concern:** Student has both Anxiety AND Panic Attack. Immediate counselling referral recommended.")
-    if R.get('academic_risk'):
-        st.warning("⚠️ **Academic Risk:** Senior year student with very low CGPA (0–1.99). Combined support advised.")
 
-    st.write("")
-    r1, r2, r3 = st.columns([1.2, 1.2, 1])
-    with r1:
-        st.markdown("**Prediction Confidence**")
-        fig, ax2 = plt.subplots(figsize=(4, 0.8))
-        ax2.barh([""], [prob[0]*100], color="#10B981", height=0.5)
-        ax2.barh([""], [prob[1]*100], left=[prob[0]*100], color="#EF4444", height=0.5)
-        ax2.set_xlim(0,100); ax2.axis('off')
-        for xp, val, lbl in [(prob[0]*50,prob[0],"No Risk"),(prob[0]*100+prob[1]*50,prob[1],"At Risk")]:
-            if val > 0.12:
-                ax2.text(xp,0,f"{lbl}\n{val*100:.0f}%",ha='center',va='center',fontsize=8,color='white',fontweight='bold')
-        plt.tight_layout(pad=0); st.pyplot(fig,use_container_width=True); plt.close()
-        st.write("")
-        pa_c,pb_c = st.columns(2)
-        pa_c.metric("No Depression", f"{prob[0]*100:.1f}%")
-        pb_c.metric("Depression",    f"{prob[1]*100:.1f}%")
-    with r2:
-        st.markdown("**Input Summary**")
-        st.table(pd.DataFrame({"Field":["Name","Gender","Age","Course","Year","CGPA","Anxiety","Panic Attack"],
-                               "Value":[R['name'],R['gender'],str(R['age']),R['course'],R['year'],R['cgpa'],R['anxiety'],R['panic']]
-                              }).set_index("Field"))
-    with r3:
-        st.markdown("**Model Info**")
-        with st.container(border=True):
-            st.write(f"**Algorithm:** KNN")
-            st.write(f"**Best K:** {M['best_k']}")
-            st.write(f"**Scaling:** MinMax")
-            st.write(f"**Distance:** Euclidean")
-            st.write(f"**Split:** 80 / 20")
-            st.write(f"**CV Mean:** {M['cv_scores'].mean()*100:.2f}%")
-            st.write(f"**Accuracy:** {M['knn_m']['acc']:.2f}%")
+def _confidence_bar(prob_no, prob_dep):
+    """Simple visual confidence indicator as a table."""
+    pct_dep   = int(round(prob_dep * 100))
+    pct_no    = int(round(prob_no  * 100))
+    dep_w     = (prob_dep * W)
+    no_w      = (prob_no  * W)
 
-    # Explanation
-    st.write(""); st.markdown("---")
-    st.markdown("### 🧠 Why did KNN predict this?")
-    ex1, ex2 = st.columns(2)
-    with ex1:
-        st.markdown("**Feature Contribution**")
-        _input_vals = {'Gender':1 if R['gender']=='Male' else 0,'Age':R['age'],
-                       'Course':0,'Year':0,'CGPA':M['cgpa_map'].get(R['cgpa'],3.25),
-                       'Anxiety':1 if R['anxiety']=='Yes' else 0,'Panic Attack':1 if R['panic']=='Yes' else 0}
-        _contrib = {f: v * M['knn_corr'].get(f,0) if v>0.5 else -abs(M['knn_corr'].get(f,0))*0.3
-                    for f,v in _input_vals.items()}
-        _cs = pd.Series(_contrib).sort_values()
-        fig_ex,ax_ex = plt.subplots(figsize=(5,3.5))
-        colors_ex = ['#EF4444' if v>0 else '#10B981' for v in _cs.values]
-        ax_ex.barh(_cs.index,_cs.values,color=colors_ex,edgecolor='none',height=0.6)
-        ax_ex.axvline(0,color='black',lw=1)
-        ax_ex.set_xlabel('Contribution (→ Depression  ← No Depression)')
-        ax_ex.set_title('Feature Contribution',fontweight='bold')
-        ax_ex.spines['top'].set_visible(False); ax_ex.spines['right'].set_visible(False)
-        plt.tight_layout(); st.pyplot(fig_ex,use_container_width=True); plt.close()
-    with ex2:
-        st.markdown("**K Nearest Neighbours**")
-        try:
-            g=1 if R['gender']=='Male' else 0; ax=1 if R['anxiety']=='Yes' else 0
-            pa=1 if R['panic']=='Yes' else 0
-            ce=M['le_c'].transform([R['course']])[0] if R['course'] in M['le_c'].classes_ else 0
-            ye=M['le_y'].transform([R['year']])[0]   if R['year']   in M['le_y'].classes_ else 0
-            cn=M['cgpa_map'].get(R['cgpa'],3.25)
-            inp_r=pd.DataFrame([[g,R['age'],ce,ye,cn,ax,pa]],columns=M['knn_feat'])
-            inp_s2=M['sc_knn'].transform(inp_r)
-            dists,idxs=M['knn'].kneighbors(inp_s2)
-            nbr_preds=[M['knn']._y[i] for i in idxs[0]]
-            dep_n=sum(nbr_preds); ndep_n=len(nbr_preds)-dep_n
-            with st.container(border=True):
-                st.write(f"**Among {M['best_k']} nearest neighbours:**")
-                st.write(f"🔴 Depressed: **{dep_n}** students")
-                st.write(f"🟢 Not Depressed: **{ndep_n}** students")
-                st.write("")
-                for i,(dist,lbl) in enumerate(zip(dists[0],nbr_preds),1):
-                    icon="🔴" if lbl==1 else "🟢"
-                    st.write(f"Neighbour {i}: {icon} {'Depressed' if lbl==1 else 'Not Depressed'} (dist: {dist:.4f})")
-                st.write("")
-                st.caption(f"Majority vote: {dep_n}/{M['best_k']} → **{'Depression' if dep_n>ndep_n else 'No Depression'}**")
-        except Exception as _ne: st.info(f"Neighbour analysis: {_ne}")
+    row = [
+        Paragraph(
+            f'<b>No Depression</b>  {pct_no}%',
+            ParagraphStyle('CB', fontSize=10, textColor=C_WHITE,
+                           fontName='Helvetica-Bold', alignment=TA_CENTER)
+        ),
+        Paragraph(
+            f'<b>Depression Risk</b>  {pct_dep}%',
+            ParagraphStyle('CB', fontSize=10, textColor=C_WHITE,
+                           fontName='Helvetica-Bold', alignment=TA_CENTER)
+        ),
+    ]
+    tbl = Table([row], colWidths=[no_w, dep_w])
+    tbl.setStyle(TableStyle([
+        ('BACKGROUND',   (0,0), (0,0), C_SUCCESS),
+        ('BACKGROUND',   (1,0), (1,0), C_DANGER),
+        ('TOPPADDING',   (0,0), (-1,-1), 10),
+        ('BOTTOMPADDING',(0,0), (-1,-1), 10),
+        ('VALIGN',       (0,0), (-1,-1), 'MIDDLE'),
+    ]))
+    return tbl
 
-    st.write("")
-    _alerts_knn=[]; _notes_knn=[]
-    if R.get('high_concern'): _alerts_knn.append("High Concern: Both Anxiety and Panic Attack present.")
-    if R.get('academic_risk'): _alerts_knn.append("Academic Risk: Senior year with CGPA 0-1.99.")
-    if R['anxiety']=='Yes': _notes_knn.append("Anxiety = Yes — 2nd strongest predictor (r=0.257)")
-    if R['panic']=='Yes':   _notes_knn.append("Panic Attack = Yes — strongest predictor (r=0.341)")
-    try:
-        # Build feature contribution for PDF
-        _fi_for_pdf = {
-            'Gender':       (1 if R['gender']=='Male' else 0) * M['knn_corr'].get('Gender',0),
-            'Age':          -abs(M['knn_corr'].get('Age',0))*0.3,
-            'CGPA':         -abs(M['knn_corr'].get('CGPA',0))*0.3,
-            'Anxiety':      (1 if R['anxiety']=='Yes' else -0.3) * M['knn_corr'].get('Anxiety',0),
-            'Panic Attack': (1 if R['panic']=='Yes'   else -0.3) * M['knn_corr'].get('Panic Attack',0),
-        }
-        _pdf=generate_pdf(
-            model_name   = f"KNN (K={M['best_k']})",
-            student_name = R['name'],
-            result       = R['pred'],
-            prob         = R['prob'],
-            input_data   = {
-                "Gender": R['gender'], "Age": str(R['age']),
-                "Course": R['course'], "Year": R['year'],
-                "CGPA":   R['cgpa'],   "Anxiety": R['anxiety'],
-                "Panic Attack": R['panic'],
-            },
-            metrics            = M['knn_m'],
-            business_alerts    = _alerts_knn,
-            explanation_notes  = _notes_knn,
-            feature_importance = _fi_for_pdf,
-            cm_array           = M['knn_m']['cm'],
-            model_color        = '#2563EB',
+
+# ══════════════════════════════════════════════════════════════
+# MAIN FUNCTION
+# ══════════════════════════════════════════════════════════════
+def generate_pdf(
+    model_name:         str,
+    student_name:       str,
+    result:             int,
+    prob:               list,
+    input_data:         dict,
+    metrics:            dict,
+    business_alerts:    list = [],
+    explanation_notes:  list = [],
+    feature_importance: dict = {},
+    cm_array                 = None,
+    model_color:        str  = '#1D4ED8',
+) -> io.BytesIO:
+
+    S   = _styles()
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buf, pagesize=A4,
+        topMargin=1.8*cm, bottomMargin=1.8*cm,
+        leftMargin=2*cm,  rightMargin=2*cm
+    )
+    story = []
+    now   = datetime.datetime.now()
+    ref_no = f"MC-{now.strftime('%Y%m%d')}-{hash(student_name) % 9000 + 1000}"
+
+    # ═══════════════════════════════════════════════════════════
+    # HEADER
+    # ═══════════════════════════════════════════════════════════
+    story.append(Spacer(1, 0.3*cm))
+
+    # Logo row
+    logo_tbl = Table([[
+        Paragraph("Mind<font color='#1D4ED8'>Check</font>",
+                  ParagraphStyle('LG', fontSize=26, textColor=C_NAVY,
+                                  fontName='Helvetica-Bold')),
+        Paragraph(
+            f"<b>Report No:</b> {ref_no}<br/>"
+            f"<b>Date:</b> {now.strftime('%d %B %Y')}<br/>"
+            f"<b>Time:</b> {now.strftime('%I:%M %p')}",
+            ParagraphStyle('RF', fontSize=8, textColor=C_SLATE,
+                           alignment=TA_RIGHT, leading=13)
         )
-        st.download_button("📥  Download PDF Report",data=_pdf,
-                           file_name=f"mindcheck_knn_{R['name'].replace(' ','_')}.pdf",
-                           mime="application/pdf",use_container_width=True,key="knn_pdf")
-    except Exception as _pe: st.caption(f"PDF unavailable: {_pe}")
+    ]], colWidths=[9*cm, 8*cm])
+    logo_tbl.setStyle(TableStyle([
+        ('VALIGN',   (0,0),(-1,-1),'MIDDLE'),
+        ('LEFTPADDING',(0,0),(-1,-1),0),
+        ('RIGHTPADDING',(0,0),(-1,-1),0),
+    ]))
+    story.append(logo_tbl)
+    story.append(Spacer(1, 0.2*cm))
+    story.append(Paragraph(
+        "Student Mental Health Screening Report",
+        ParagraphStyle('DT2', fontSize=12, textColor=C_SLATE,
+                        fontName='Helvetica-Bold')
+    ))
+    story.append(Paragraph(
+        f"AI-Assisted Depression Risk Assessment  ·  {model_name}  ·  "
+        f"BMCS2003 Artificial Intelligence  ·  TARUMT",
+        ParagraphStyle('MT2', fontSize=8, textColor=C_SLATE)
+    ))
+    story.append(Spacer(1, 0.4*cm))
+    story.append(HRFlowable(width='100%', thickness=2,
+                              color=C_PRIMARY, spaceAfter=0.5*cm))
 
-    st.write("")
-    if st.button("Clear Result", key="knn_clear"):
-        st.session_state['knn_result'] = None; st.rerun()
+    # ═══════════════════════════════════════════════════════════
+    # SCREENING RESULT BANNER
+    # ═══════════════════════════════════════════════════════════
+    risk_color = C_DANGER if result == 1 else C_SUCCESS
+    risk_icon  = "⚠" if result == 1 else "✓"
+    risk_text  = "DEPRESSION RISK DETECTED" if result == 1 else "NO DEPRESSION DETECTED"
+    risk_sub   = ("This student shows indicators of depression risk. "
+                  "Professional follow-up is recommended."
+                  if result == 1 else
+                  "This student shows no significant depression indicators "
+                  "at this time. Continue routine monitoring.")
 
-st.divider()
+    banner = Table([
+        [Paragraph(f"<b>{risk_icon}  {risk_text}</b>",
+                   ParagraphStyle('BN', fontSize=16, textColor=C_WHITE,
+                                   fontName='Helvetica-Bold',
+                                   alignment=TA_CENTER))],
+        [Paragraph(risk_sub,
+                   ParagraphStyle('BS2', fontSize=9, textColor=C_WHITE,
+                                   alignment=TA_CENTER, leading=13))],
+    ], colWidths=[W])
+    banner.setStyle(TableStyle([
+        ('BACKGROUND',    (0,0), (-1,-1), risk_color),
+        ('TOPPADDING',    (0,0), (-1,0), 12),
+        ('BOTTOMPADDING', (0,0), (-1,0), 4),
+        ('TOPPADDING',    (0,1), (-1,1), 0),
+        ('BOTTOMPADDING', (0,1), (-1,1), 12),
+        ('LEFTPADDING',   (0,0), (-1,-1), 12),
+        ('RIGHTPADDING',  (0,0), (-1,-1), 12),
+    ]))
+    story.append(banner)
+    story.append(Spacer(1, 0.4*cm))
 
-# ── Live Feature Importance ────────────────────────────────────
-st.subheader("Live Feature Importance")
-st.caption("Pearson correlation — computed live from dataset")
-fi = M['knn_corr'].sort_values(ascending=True)
-fi_c1,fi_c2 = st.columns([2,1])
-with fi_c1:
-    fig_fi,ax_fi=plt.subplots(figsize=(7,3.5))
-    colors_fi=['#3B82F6' if v>=fi.mean() else '#64748B' for v in fi.values]
-    bars_fi=ax_fi.barh(fi.index,fi.values,color=colors_fi,edgecolor='none',height=0.6)
-    ax_fi.axvline(fi.mean(),color='red',ls='--',lw=1.2,alpha=0.7,label=f'Mean={fi.mean():.3f}')
-    for bar,val in zip(bars_fi,fi.values):
-        ax_fi.text(val+0.005,bar.get_y()+bar.get_height()/2,f'{val:.3f}',va='center',fontsize=9,fontweight='bold')
-    ax_fi.set_xlabel('Absolute Correlation with Depression')
-    ax_fi.set_title('Feature Importance — Pearson Correlation (Live)',fontweight='bold')
-    ax_fi.legend(fontsize=9); ax_fi.spines['top'].set_visible(False); ax_fi.spines['right'].set_visible(False)
-    ax_fi.grid(axis='x',alpha=0.3); plt.tight_layout(); st.pyplot(fig_fi,use_container_width=True); plt.close()
-with fi_c2:
-    with st.container(border=True):
-        st.markdown("**Feature Ranking**")
-        for feat_n,val in fi.sort_values(ascending=False).items():
-            icon="🔵" if val>=fi.mean() else "⚪"
-            st.write(f"{icon} **{feat_n}** — {val:.3f}")
-        st.caption("🔵 Above average importance")
+    # Confidence bar
+    story.append(_confidence_bar(prob[0], prob[1]))
+    story.append(Paragraph(
+        "← No Depression Risk                                        Depression Risk →",
+        ParagraphStyle('CBL', fontSize=7, textColor=C_SLATE, alignment=TA_CENTER)
+    ))
+    story.append(Spacer(1, 0.5*cm))
 
-st.divider()
+    # ═══════════════════════════════════════════════════════════
+    # SECTION A — STUDENT PROFILE
+    # ═══════════════════════════════════════════════════════════
+    story.append(_section_header("A.  STUDENT PROFILE", S))
+    story.append(Spacer(1, 0.2*cm))
 
-# ── Learn More ─────────────────────────────────────────────────
-with st.expander("📚  Learn More — K-Value Optimization, Cross Validation & Confusion Matrix"):
-    st.markdown("### K-Value Optimization")
-    fig_k,ax_k=plt.subplots(figsize=(10,4))
-    k_range=list(range(1,21))
-    ax_k.plot(k_range,[s*100 for s in M['k_scores']],'r-o',label='Test Accuracy',markersize=4,lw=2)
-    ax_k.axvline(x=M['best_k'],color='green',ls='--',lw=2,label=f'Best K={M["best_k"]}')
-    ax_k.set_xlabel('K Value'); ax_k.set_ylabel('Accuracy (%)')
-    ax_k.set_title('KNN: Test Accuracy for Different K Values',fontweight='bold')
-    ax_k.set_xticks(k_range); ax_k.legend(); ax_k.grid(True,alpha=0.3)
-    ax_k.spines['top'].set_visible(False); ax_k.spines['right'].set_visible(False)
-    plt.tight_layout(); st.pyplot(fig_k,use_container_width=True); plt.close()
+    # Build two-column student info
+    info_rows = []
+    for k, v in input_data.items():
+        info_rows.append([k, str(v)])
+    # Add screening info
+    info_rows.insert(0, ["Student Name", student_name])
+    story.append(_info_table(info_rows))
+    story.append(Spacer(1, 0.4*cm))
 
-    st.markdown("### 5-Fold Cross Validation")
-    cv=M['cv_scores']
-    cv1,cv2,cv3=st.columns(3)
-    cv1.metric("CV Mean",f"{cv.mean()*100:.2f}%")
-    cv2.metric("CV Std",f"{cv.std()*100:.2f}%")
-    cv3.metric("CV Max",f"{cv.max()*100:.2f}%")
-    fig_cv,ax_cv=plt.subplots(figsize=(8,3))
-    colors_cv=['#3B82F6','#10B981','#EF4444','#F59E0B','#8B5CF6']
-    bars_cv=ax_cv.bar([f"Fold {i+1}" for i in range(5)],cv*100,color=colors_cv,edgecolor='none',alpha=0.9)
-    ax_cv.axhline(y=cv.mean()*100,color='red',ls='--',lw=1.5,label=f'Mean={cv.mean()*100:.2f}%')
-    ax_cv.set_ylabel('Accuracy (%)'); ax_cv.set_ylim(0,110)
-    ax_cv.set_title('5-Fold Cross Validation Scores',fontweight='bold')
-    ax_cv.legend(); ax_cv.grid(axis='y',alpha=0.3)
-    ax_cv.spines['top'].set_visible(False); ax_cv.spines['right'].set_visible(False)
-    for bar,val in zip(bars_cv,cv*100):
-        ax_cv.text(bar.get_x()+bar.get_width()/2,bar.get_height()+0.8,f'{val:.1f}%',ha='center',fontsize=9,fontweight='bold')
-    plt.tight_layout(); st.pyplot(fig_cv,use_container_width=True); plt.close()
+    # ═══════════════════════════════════════════════════════════
+    # SECTION B — SCREENING RESULT
+    # ═══════════════════════════════════════════════════════════
+    story.append(_section_header("B.  SCREENING RESULT", S))
+    story.append(Spacer(1, 0.2*cm))
 
-    st.markdown("### Confusion Matrix")
-    fig_cm,ax_cm=plt.subplots(figsize=(5,4))
-    sns.heatmap(M['knn_m']['cm'],annot=True,fmt='d',cmap='Blues',ax=ax_cm,
-                xticklabels=['No Depression','Depression'],
-                yticklabels=['No Depression','Depression'],
-                linewidths=0.5,annot_kws={'size':12,'weight':'bold'})
-    ax_cm.set_xlabel('Predicted'); ax_cm.set_ylabel('Actual')
-    ax_cm.set_title('KNN Confusion Matrix',fontweight='bold')
-    plt.tight_layout(); st.pyplot(fig_cm,use_container_width=True); plt.close()
-    tn,fp,fn,tp=M['knn_m']['cm'].ravel()
-    a,b,c,d=st.columns(4)
-    a.metric("TN",str(tn)); b.metric("FP",str(fp))
-    c.metric("FN",str(fn)); d.metric("TP",str(tp))
+    result_rows = [
+        ["Assessment Method",   f"Machine Learning — {model_name}"],
+        ["Target Variable",     "Depression (Binary: Yes / No)"],
+        ["Depression Probability",  f"{prob[1]*100:.1f}%"],
+        ["No Depression Probability", f"{prob[0]*100:.1f}%"],
+        ["Screening Outcome",   "AT RISK — Depression Detected" if result==1
+                                else "LOW RISK — No Depression Detected"],
+        ["Confidence Level",    "High" if max(prob) > 0.80
+                                else "Moderate" if max(prob) > 0.60
+                                else "Low"],
+        ["Screening Date",      now.strftime("%d %B %Y, %I:%M %p")],
+        ["Report Reference",    ref_no],
+    ]
+    row_colors = [None, None,
+                  C_RED_LT   if result==1 else C_GREEN_LT,
+                  C_GREEN_LT if result==1 else C_RED_LT,
+                  C_RED_LT   if result==1 else C_GREEN_LT,
+                  None, None, None]
+    tbl_r = Table(result_rows, colWidths=[5.5*cm, 11.5*cm])
+    style_r = [
+        ('FONTSIZE',      (0,0), (-1,-1), 9),
+        ('FONTNAME',      (0,0), (0,-1), 'Helvetica-Bold'),
+        ('TEXTCOLOR',     (0,0), (0,-1), C_SLATE),
+        ('TEXTCOLOR',     (1,0), (1,-1), C_NAVY),
+        ('GRID',          (0,0), (-1,-1), 0.4, C_BORDER),
+        ('TOPPADDING',    (0,0), (-1,-1), 6),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ('LEFTPADDING',   (0,0), (-1,-1), 8),
+        ('VALIGN',        (0,0), (-1,-1), 'MIDDLE'),
+    ]
+    for i, rc in enumerate(row_colors):
+        if rc:
+            style_r.append(('BACKGROUND', (0,i), (-1,i), rc))
+    tbl_r.setStyle(TableStyle(style_r))
+    story.append(tbl_r)
+    story.append(Spacer(1, 0.4*cm))
 
-# ── Batch Prediction ───────────────────────────────────────────
-st.divider()
-st.subheader("Batch Prediction — 🔵 KNN")
-st.caption("Upload a CSV to predict multiple students at once using KNN.")
+    # ═══════════════════════════════════════════════════════════
+    # SECTION C — RISK INDICATORS
+    # ═══════════════════════════════════════════════════════════
+    story.append(_section_header("C.  RISK INDICATORS IDENTIFIED", S))
+    story.append(Spacer(1, 0.2*cm))
 
-_knn_sample=pd.DataFrame({'Name':['Ahmad','Siti','Wei Ming'],'Gender':['Male','Female','Male'],
-    'Age':[20,21,19],'Course':['Computer Science','Engineering','Information Technology'],
-    'Year_of_Study':['Year 2','Year 3','Year 1'],'CGPA':['3.00 - 3.49','2.50 - 2.99','3.50 - 4.00'],
-    'Anxiety':['Yes','No','No'],'Panic_Attack':['No','Yes','No']})
-with st.expander("📋  View / Download CSV Template"):
-    st.dataframe(_knn_sample,use_container_width=True,hide_index=True)
-    st.download_button("⬇️  Download KNN Template",
-        data=_knn_sample.to_csv(index=False).encode(),
-        file_name="knn_batch_template.csv",mime="text/csv",
-        use_container_width=True,key="knn_tmpl_dl")
+    # Build risk table from input data + alerts
+    risk_items = []
+    risk_map = {
+        'Anxiety':      ('Anxiety Present',      'Co-morbid factor — strongly associated with depression'),
+        'Panic Attack': ('Panic Attack Present',  'Strongest predictor of depression in dataset (r=0.341)'),
+        'Panic':        ('Panic Attack Present',  'Strongest predictor of depression in dataset (r=0.341)'),
+        'Marital':      ('Marital Status: Married','Additional personal stress — significant predictor'),
+        'Treatment':    ('Sought Treatment',       'Indicates awareness of condition — monitor progress'),
+    }
+    for k, v in input_data.items():
+        if str(v).lower() == 'yes' and k in risk_map:
+            risk_items.append([f"⚠  {risk_map[k][0]}", risk_map[k][1], 'Present'])
+        elif str(v).lower() == 'no' and k in risk_map:
+            risk_items.append([f"✓  {risk_map[k][0]}", risk_map[k][1], 'Absent'])
 
-_knn_file=st.file_uploader("Upload CSV — drag & drop or click to browse",
-                            type=["csv"],key="knn_batch_file")
-if _knn_file:
-    try:
-        _kdf=pd.read_csv(_knn_file); _kdf.columns=_kdf.columns.str.strip()
-        st.success(f"✅ {len(_kdf)} students loaded")
-        _kresults=[]
-        for _ki,_krow in _kdf.iterrows():
-            try:
-                _kname=str(_krow.get('Name',f'Student {_ki+1}')).strip()
-                _kg=1 if str(_krow.get('Gender','')).lower()=='male' else 0
-                _kax=1 if str(_krow.get('Anxiety','')).lower()=='yes' else 0
-                _kpa=1 if str(_krow.get('Panic_Attack','')).lower()=='yes' else 0
-                try: _kage=int(float(_krow.get('Age',20)))
-                except: _kage=20
-                _kcourse=str(_krow.get('Course','Others'))
-                _kyear=str(_krow.get('Year_of_Study','Year 1'))
-                _kcgpa=str(_krow.get('CGPA','3.00 - 3.49')).strip()
-                _kce=M['le_c'].transform([_kcourse])[0] if _kcourse in M['le_c'].classes_ else 0
-                _kye=M['le_y'].transform([_kyear])[0]   if _kyear   in M['le_y'].classes_ else 0
-                _kcn=M['cgpa_map'].get(_kcgpa,3.25)
-                _kinp=pd.DataFrame([[_kg,_kage,_kce,_kye,_kcn,_kax,_kpa]],columns=M['knn_feat'])
-                _kinp_s=M['sc_knn'].transform(_kinp)
-                _kpred=int(M['knn'].predict(_kinp_s)[0])
-                _kprob=M['knn'].predict_proba(_kinp_s)[0][1]
-                _kresults.append({'Name':_kname,'Gender':_krow.get('Gender',''),
-                    'Age':_kage,'Course':_kcourse,'Year':_kyear,'CGPA':_kcgpa,
-                    'Anxiety':_krow.get('Anxiety',''),'Panic Attack':_krow.get('Panic_Attack',''),
-                    'Result':'⚠️ Depression' if _kpred==1 else '✅ No Depression',
-                    'Confidence':f"{_kprob*100:.1f}%",'Risk':'HIGH' if _kpred==1 else 'LOW',
-                    '_pred':_kpred,'_prob':_kprob})
-            except Exception as _ke: _kresults.append({'Name':str(_krow.get('Name','')),'Error':str(_ke)})
-        _kres=pd.DataFrame(_kresults)
-        _ktotal=len(_kres); _kdep=int(_kres['_pred'].sum()) if '_pred' in _kres else 0
-        _bm1,_bm2,_bm3=st.columns(3)
-        _bm1.metric("Total Students",str(_ktotal))
-        _bm2.metric("⚠️ At Risk",str(_kdep),delta=f"{_kdep/_ktotal*100:.0f}%",delta_color="inverse")
-        _bm3.metric("✅ No Risk",str(_ktotal-_kdep),delta=f"{(_ktotal-_kdep)/_ktotal*100:.0f}%")
-        _bc1,_bc2=st.columns(2)
-        with _bc1:
-            fig_b,ax_b=plt.subplots(figsize=(4,3))
-            ax_b.pie([_kdep,_ktotal-_kdep],labels=[f'Depression ({_kdep})',f'No Depression ({_ktotal-_kdep})'],
-                colors=['#EF4444','#10B981'],autopct='%1.1f%%',startangle=90,
-                wedgeprops={'edgecolor':'white','linewidth':2},textprops={'fontsize':10,'fontweight':'bold'})
-            ax_b.set_title('KNN Batch Results',fontweight='bold')
-            plt.tight_layout(); st.pyplot(fig_b,use_container_width=True); plt.close()
-        with _bc2:
-            if '_prob' in _kres:
-                fig_p,ax_p=plt.subplots(figsize=(4,3))
-                ax_p.hist(_kres['_prob']*100,bins=min(10,_ktotal),color='#3B82F6',edgecolor='white',alpha=0.85)
-                ax_p.axvline(50,color='red',ls='--',lw=1.5,label='Threshold 50%')
-                ax_p.set_xlabel('Depression Probability (%)'); ax_p.set_ylabel('Count')
-                ax_p.set_title('Confidence Distribution',fontweight='bold')
-                ax_p.legend(fontsize=9); ax_p.spines['top'].set_visible(False); ax_p.spines['right'].set_visible(False)
-                plt.tight_layout(); st.pyplot(fig_p,use_container_width=True); plt.close()
-        _kdisp=_kres[['Name','Gender','Age','Course','Year','CGPA','Anxiety','Panic Attack','Result','Confidence','Risk']]
-        def _kst(val):
-            if '⚠️' in str(val) or val=='HIGH': return 'background-color:#FEE2E2;color:#991B1B;font-weight:bold'
-            if '✅' in str(val) or val=='LOW':  return 'background-color:#DCFCE7;color:#166534;font-weight:bold'
-            return ''
-        try:    _kstyled=_kdisp.style.map(_kst,subset=['Result','Risk'])
-        except: _kstyled=_kdisp.style.applymap(_kst,subset=['Result','Risk'])
-        st.dataframe(_kstyled,use_container_width=True,hide_index=True)
-        st.write(""); st.markdown("**Individual Student Cards**")
-        for _,_kr in _kres.iterrows():
-            if '_pred' not in _kr: continue
-            with st.expander(f"{'⚠️' if _kr['_pred']==1 else '✅'} {_kr['Name']} — {_kr['Result']} ({_kr['Confidence']})"):
-                if _kr['_pred']==1: st.error(f"**Depression Risk** | Confidence: {_kr['Confidence']}")
-                else:               st.success(f"**No Depression** | Confidence: {_kr['Confidence']}")
-        _kdl1,_kdl2=st.columns(2)
-        with _kdl1:
-            st.download_button("⬇️  Download All Results",data=_kdisp.to_csv(index=False).encode(),
-                file_name="knn_batch_results.csv",mime="text/csv",use_container_width=True,key="knn_dl_all")
-        with _kdl2:
-            _khigh=_kres[_kres['_pred']==1][list(_kdisp.columns)] if '_pred' in _kres else pd.DataFrame()
-            if len(_khigh):
-                st.download_button(f"⬇️  At-Risk Only ({len(_khigh)})",
-                    data=_khigh.to_csv(index=False).encode(),
-                    file_name="knn_at_risk.csv",mime="text/csv",use_container_width=True,key="knn_dl_risk")
-    except Exception as _kerr:
-        st.error(f"Error: {str(_kerr)}")
-        st.caption("Please check your CSV matches the template format.")
+    if risk_items:
+        ri_hdr = [
+            Paragraph('<b>Indicator</b>',   ParagraphStyle('RH', fontSize=9, textColor=C_WHITE, fontName='Helvetica-Bold')),
+            Paragraph('<b>Significance</b>',ParagraphStyle('RH', fontSize=9, textColor=C_WHITE, fontName='Helvetica-Bold')),
+            Paragraph('<b>Status</b>',      ParagraphStyle('RH', fontSize=9, textColor=C_WHITE, fontName='Helvetica-Bold')),
+        ]
+        ri_rows = [ri_hdr]
+        for item in risk_items:
+            is_present = item[2] == 'Present'
+            ri_rows.append([
+                Paragraph(item[0], ParagraphStyle('RI', fontSize=9,
+                    textColor=C_DANGER if is_present else C_SUCCESS,
+                    fontName='Helvetica-Bold')),
+                Paragraph(item[1], ParagraphStyle('RI2', fontSize=9, textColor=C_NAVY)),
+                Paragraph(f"<b>{item[2]}</b>", ParagraphStyle('RS', fontSize=9,
+                    textColor=C_DANGER if is_present else C_SUCCESS,
+                    fontName='Helvetica-Bold', alignment=TA_CENTER)),
+            ])
+        ri_tbl = Table(ri_rows, colWidths=[5.5*cm, 9.5*cm, 2*cm])
+        ri_tbl.setStyle(TableStyle([
+            ('BACKGROUND',   (0,0), (-1,0), C_PRIMARY),
+            ('GRID',         (0,0), (-1,-1), 0.4, C_BORDER),
+            ('ROWBACKGROUNDS',(0,1),(-1,-1), [C_WHITE, C_LIGHT]),
+            ('TOPPADDING',   (0,0), (-1,-1), 7),
+            ('BOTTOMPADDING',(0,0), (-1,-1), 7),
+            ('LEFTPADDING',  (0,0), (-1,-1), 8),
+            ('VALIGN',       (0,0), (-1,-1), 'MIDDLE'),
+        ]))
+        story.append(ri_tbl)
+    else:
+        story.append(Paragraph("No major risk indicators identified.", S['body_sm']))
 
-st.divider()
-st.caption("MindCheck · BMCS2003 AI · 202605 · Group 3 · Dr Goh · TARUMT")
+    if business_alerts:
+        story.append(Spacer(1, 0.3*cm))
+        for alert in business_alerts:
+            story.append(Paragraph(f"⚠  {alert}", S['alert']))
+
+    story.append(Spacer(1, 0.4*cm))
+
+    # ═══════════════════════════════════════════════════════════
+    # SECTION D — MODEL PERFORMANCE
+    # ═══════════════════════════════════════════════════════════
+    story.append(_section_header("D.  AI MODEL PERFORMANCE", S))
+    story.append(Spacer(1, 0.2*cm))
+    story.append(_metric_table(metrics))
+    story.append(Spacer(1, 0.2*cm))
+    story.append(Paragraph(
+        "<b>Note:</b> Recall is the most critical metric in mental health screening — "
+        "it measures how many actual depression cases the model correctly identifies. "
+        "A high recall minimises the risk of missing students who need support.",
+        S['body_sm']
+    ))
+    story.append(Spacer(1, 0.4*cm))
+
+    # ═══════════════════════════════════════════════════════════
+    # SECTION E — CLINICAL RECOMMENDATION
+    # ═══════════════════════════════════════════════════════════
+    story.append(_section_header("E.  CLINICAL RECOMMENDATION", S))
+    story.append(Spacer(1, 0.2*cm))
+
+    if result == 1:
+        rec_level = "URGENT" if max(prob) > 0.80 else "MODERATE"
+        rec_color = C_RED_LT if rec_level == "URGENT" else C_AMBER_LT
+        rec_border = C_DANGER if rec_level == "URGENT" else colors.HexColor('#B45309')
+
+        recs = [
+            ("Immediate Action",
+             "Arrange a confidential consultation with a licensed counsellor "
+             "or mental health professional within 5–7 working days."),
+            ("Academic Support",
+             "Notify the academic advisor (with student consent) to explore "
+             "possible academic accommodations or extensions."),
+            ("Follow-Up Screening",
+             "Re-administer this screening tool after 4–6 weeks of intervention "
+             "to track progress and adjust support accordingly."),
+            ("Campus Resources",
+             "Provide information on campus mental health services, student "
+             "support groups, and 24-hour crisis helplines."),
+        ]
+    else:
+        rec_color  = C_GREEN_LT
+        rec_border = C_SUCCESS
+        rec_level  = "ROUTINE"
+        recs = [
+            ("Routine Monitoring",
+             "Continue standard student wellbeing check-ins. No immediate "
+             "clinical intervention is required at this time."),
+            ("Preventive Support",
+             "Encourage participation in campus wellness programmes, stress "
+             "management workshops, and peer support groups."),
+            ("Re-Screening",
+             "Re-administer screening at the next academic term or "
+             "if new risk factors emerge (anxiety, academic difficulty, life events)."),
+            ("Open Door Policy",
+             "Remind the student that counselling services are available "
+             "on a voluntary, confidential basis at any time."),
+        ]
+
+    rec_rows = []
+    for i, (action, detail) in enumerate(recs, 1):
+        rec_rows.append([
+            Paragraph(f"<b>{i}.  {action}</b>",
+                      ParagraphStyle('RA', fontSize=9, textColor=C_NAVY,
+                                     fontName='Helvetica-Bold')),
+            Paragraph(detail, ParagraphStyle('RD2', fontSize=9,
+                                              textColor=C_NAVY, leading=14)),
+        ])
+
+    rec_tbl = Table(rec_rows, colWidths=[4.5*cm, 12.5*cm])
+    rec_tbl.setStyle(TableStyle([
+        ('BACKGROUND',   (0,0), (-1,-1), rec_color),
+        ('GRID',         (0,0), (-1,-1), 0.4, C_BORDER),
+        ('TOPPADDING',   (0,0), (-1,-1), 8),
+        ('BOTTOMPADDING',(0,0), (-1,-1), 8),
+        ('LEFTPADDING',  (0,0), (-1,-1), 10),
+        ('VALIGN',       (0,0), (-1,-1), 'TOP'),
+        ('LINEAFTER',    (0,0), (0,-1), 1.5, rec_border),
+    ]))
+    story.append(rec_tbl)
+    story.append(Spacer(1, 0.4*cm))
+
+    # ═══════════════════════════════════════════════════════════
+    # SECTION F — ADDITIONAL NOTES (if any)
+    # ═══════════════════════════════════════════════════════════
+    if explanation_notes:
+        story.append(_section_header("F.  SCREENING NOTES", S))
+        story.append(Spacer(1, 0.2*cm))
+        for note in explanation_notes:
+            story.append(Paragraph(f"•   {note}", S['body_sm']))
+        story.append(Spacer(1, 0.4*cm))
+
+    # ═══════════════════════════════════════════════════════════
+    # SIGN-OFF BOX
+    # ═══════════════════════════════════════════════════════════
+    sign_rows = [[
+        Paragraph("Screened by (AI System)\n\nMindCheck v1.0\nBMCS2003 AI · TARUMT",
+                  ParagraphStyle('SG', fontSize=9, textColor=C_NAVY, leading=14)),
+        Paragraph("Reviewed by\n\n\n_________________________\nCounsellor / Advisor",
+                  ParagraphStyle('SG', fontSize=9, textColor=C_NAVY, leading=14)),
+        Paragraph("Acknowledged by\n\n\n_________________________\nStudent Signature",
+                  ParagraphStyle('SG', fontSize=9, textColor=C_NAVY, leading=14)),
+    ]]
+    sign_tbl = Table(sign_rows, colWidths=[W/3]*3)
+    sign_tbl.setStyle(TableStyle([
+        ('GRID',          (0,0), (-1,-1), 0.4, C_BORDER),
+        ('TOPPADDING',    (0,0), (-1,-1), 10),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 25),
+        ('LEFTPADDING',   (0,0), (-1,-1), 10),
+        ('BACKGROUND',    (0,0), (-1,-1), C_LIGHT),
+        ('VALIGN',        (0,0), (-1,-1), 'TOP'),
+    ]))
+    story.append(sign_tbl)
+    story.append(Spacer(1, 0.4*cm))
+
+    # ═══════════════════════════════════════════════════════════
+    # FOOTER
+    # ═══════════════════════════════════════════════════════════
+    story.append(HRFlowable(width='100%', thickness=0.5,
+                              color=C_BORDER, spaceAfter=0.2*cm))
+    story.append(Paragraph(
+        f"Report Ref: {ref_no}  ·  Generated: {now.strftime('%d %b %Y %H:%M')}  ·  "
+        f"MindCheck AI Screening Tool  ·  BMCS2003 Artificial Intelligence  ·  "
+        f"Tutorial Group 3  ·  Tutor: Dr Goh  ·  TARUMT 202605",
+        S['footer']
+    ))
+    story.append(Spacer(1, 0.15*cm))
+    story.append(Paragraph(
+        "CONFIDENTIALITY NOTICE: This report contains sensitive mental health information. "
+        "It is intended solely for the authorised recipient. This is an AI-assisted "
+        "SCREENING TOOL ONLY and does not constitute a clinical diagnosis. "
+        "All findings must be reviewed by a qualified mental health professional.",
+        S['disc']
+    ))
+
+    doc.build(story)
+    buf.seek(0)
+    return buf
