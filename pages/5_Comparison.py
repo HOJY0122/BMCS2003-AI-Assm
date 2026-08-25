@@ -750,7 +750,7 @@ for cm_tab, title, cm_data, color, split, member in [
 # MODEL AUTO-SELECTOR
 # ══════════════════════════════════════════════════════════════
 st.divider()
-st.subheader("🤖 Predictor Auto Selector")
+st.subheader("Predictor Auto Selector")
 st.write(
     "Not sure which model to use? Fill in the student profile below and the system "
     "will **automatically recommend the best model** based on the student's characteristics "

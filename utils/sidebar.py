@@ -175,7 +175,29 @@ _SECTION_MAP = {
 }
 
 
+def came_from(page_key):
+    """True if the immediately-previous page (before this rerun cycle
+    began) was `page_key`, e.g. came_from('compare'). Used to show a
+    'Back to Compare Models' button only when actually reached from
+    that page, not on a direct/sidebar visit."""
+    return st.session_state.get('_mc_prev_page') == page_key
+
+
 def sidebar(active="home"):
+    # ── Track page transitions ──────────────────────────────────
+    # Only update "previous page" when the active page actually CHANGES
+    # between reruns — not on every rerun of the same page (Streamlit
+    # reruns the whole script on every widget interaction, e.g. clicking
+    # Predict, so naively updating this every time would lose the
+    # "came from Compare" signal after a single click). This lets a
+    # predictor page reliably show a "Back to Compare Models" button
+    # only when it was actually reached from the Compare page, and keep
+    # showing it across further interactions on that same page.
+    _prev_active = st.session_state.get('_mc_current_page')
+    if _prev_active != active:
+        st.session_state['_mc_prev_page'] = _prev_active
+    st.session_state['_mc_current_page'] = active
+
     st.markdown(SIDEBAR_CSS, unsafe_allow_html=True)
 
     with st.sidebar:

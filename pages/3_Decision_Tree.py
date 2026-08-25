@@ -9,7 +9,7 @@ import sys, os, warnings
 warnings.filterwarnings('ignore')
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils.sidebar import sidebar
+from utils.sidebar import sidebar, came_from
 from utils.models import load_all_models, MAX_BATCH_ROWS, MAX_BATCH_MB
 from utils.pdf_report import generate_pdf
 
@@ -89,6 +89,10 @@ st.set_page_config(page_title="Decision Tree Predictor — MindCheck",
                    page_icon="🌳", layout="wide",
                    initial_sidebar_state="expanded")
 sidebar("dt")
+
+if came_from('compare'):
+    if st.button("← Back to Compare Models", key="dt_back_to_compare"):
+        st.switch_page("pages/5_Comparison.py")
 
 M = load_all_models()
 

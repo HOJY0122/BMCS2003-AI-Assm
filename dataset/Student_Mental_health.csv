@@ -1,601 +1,1001 @@
 Timestamp,Choose your gender,Age,What is your course?,Your current year of Study,What is your CGPA?,Marital status,Do you have Depression?,Do you have Anxiety?,Do you have Panic attack?,Did you seek any specialist for a treatment?
-05/11/2022 09:29,Female,18.0,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
-02/04/2025 17:59,Male,21.0,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
-08/14/2024 07:53,Male,19.0,BIT,Year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
-10/04/2023 04:50,Female,22.0,Laws,year 3,3.00 - 3.49,Yes,Yes,No,No,No
-09/25/2023 15:14,Male,23.0,Mathemathics,year 4,3.00 - 3.49,No,No,No,No,No
-06/08/2025 09:52,Male,19.0,Engineering,Year 2,3.50 - 4.00,No,No,No,Yes,No
-05/06/2022 13:35,Female,23.0,Pendidikan islam,year 2,3.50 - 4.00 ,Yes,Yes,No,Yes,No
-10/15/2024 20:30,Female,18.0,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
-10/22/2022 08:19,Female,19.0,Human Resources,Year 2,2.50 - 2.99,No,No,No,No,No
-05/18/2022 14:14,Male,18.0,Irkhs,year 1,3.50 - 4.00,No,No,Yes,Yes,No
-02/09/2024 04:27,Female,20.0,Psychology,year 1,3.50 - 4.00,No,No,No,No,No
-11/26/2025 09:13,Female,24.0,Engineering,Year 3,3.50 - 4.00,Yes,Yes,No,No,No
-12/10/2024 22:25,Female,18.0,BCS,year 1,3.00 - 3.49,No,Yes,No,No,No
-01/17/2025 00:36,Male,19.0,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
-11/14/2024 05:37,Female,18.0,KENMS,Year 2,3.50 - 4.00,No,No,Yes,No,No
-02/22/2025 10:33,Male,24.0,BCS,Year 3,3.50 - 4.00,No,No,No,No,No
-01/20/2024 19:46,Female,24.0,Accounting ,year 3,3.00 - 3.49,No,No,No,No,No
-07/07/2022 04:10,Female,24.0,ENM,year 4,3.00 - 3.49,Yes,Yes,Yes,Yes,No
-05/11/2025 20:55,Female,20.0,BIT,Year 2,3.50 - 4.00,No,No,Yes,No,No
-10/21/2023 00:19,Female,18.0,Marine science,year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
-01/02/2024 00:20,Female,19.0,Engineering,year 1,3.00 - 3.49,No,No,No,Yes,No
-06/26/2023 17:39,Female,18.0,KOE,Year 2,3.00 - 3.49,No,No,No,No,No
-09/24/2022 16:55,Female,24.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-09/16/2025 00:05,Female,24.0,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
-02/15/2025 20:52,Female,23.0,BCS,Year 3,3.50 - 4.00,No,Yes,Yes,Yes,No
-07/29/2024 16:29,Female,18.0,Banking Studies,year 1,3.50 - 4.00,No,No,No,No,No
-08/11/2023 22:15,Female,19.0,Engineering,year 1,3.50 - 4.00,No,No,No,No,No
-04/17/2025 01:18,Male,18.0,Engineering,Year 2,3.00 - 3.49,Yes,Yes,Yes,No,No
-03/07/2024 20:55,Female,24.0,BIT,Year 3,3.50 - 4.00,Yes,Yes,Yes,Yes,Yes
-10/10/2023 19:52,Female,24.0,BCS,year 4,3.50 - 4.00,No,No,No,No,No
-10/21/2023 02:54,Female,23.0,Business Administration,Year 2,3.00 - 3.49,No,No,No,No,No
-11/28/2022 23:53,Male,18.0,BCS,year 2,3.00 - 3.49,No,No,No,No,No
-05/15/2022 14:39,Male,19.0,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
-03/21/2024 05:57,Male,18.0,BCS,Year 2,3.50 - 4.00,Yes,Yes,Yes,No,Yes
-07/21/2025 04:58,Female,19.0,BIT,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
-04/04/2022 05:41,Female,18.0,Engineering,year 1,2.00 - 2.49,No,No,No,No,No
-06/07/2025 23:07,Female,18.0,Law,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
-04/24/2025 04:03,Female,19.0,BIT,year 1,2.50 - 2.99,No,Yes,Yes,Yes,No
-02/09/2023 08:18,Female,18.0,KIRKHS,year 1,3.50 - 4.00,No,No,No,No,No
-07/11/2024 20:40,Female,24.0,Engineering,Year 2,2.50 - 2.99,Yes,Yes,No,Yes,Yes
-08/30/2022 09:35,Female,24.0,BIT,Year 3,3.00 - 3.49,No,No,Yes,No,No
-01/12/2025 13:35,Female,22.0,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
-10/20/2024 11:08,Female,20.0,Usuluddin ,year 2,3.00 - 3.49,No,Yes,No,No,No
-06/02/2023 23:05,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
-04/10/2022 05:32,Male,23.0,TAASL,year 2,3.50 - 4.00,No,No,No,Yes,No
-11/19/2025 04:33,Male,18.0,BCS,year 1,3.50 - 4.00,No,No,Yes,Yes,No
-10/14/2023 03:35,Female,19.0,Engineering,year 1,3.50 - 4.00,No,No,Yes,No,No
-07/28/2025 20:23,Female,18.0,Engine,year 4,3.50 - 4.00,No,No,No,No,No
-09/17/2024 10:33,Male,24.0,BCS,year 2,3.00 - 3.49,No,Yes,No,No,No
-02/11/2025 05:14,Female,24.0,BCS,year 3,3.50 - 4.00,No,No,No,Yes,No
-01/15/2025 05:06,Female,23.0,ALA,year 1,2.50 - 2.99,Yes,Yes,No,Yes,Yes
-10/12/2022 08:48,Female,18.0,BCS,year 2,3.50 - 4.00,No,No,Yes,No,No
-06/16/2023 16:00,Female,19.0,Biomedical science,year 3,3.00 - 3.49,No,No,No,No,No
-11/13/2023 21:06,Female,20.0,koe,year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
-12/29/2023 06:33,Female,19.0,BCS,year 1,3.50 - 4.00,No,Yes,No,Yes,Yes
-03/05/2022 23:56,Male,21.0,BCS,year 1,3.00 - 3.49,No,No,No,No,No
-03/09/2024 12:54,Male,23.0,Kirkhs,Year 3,3.50 - 4.00,No,No,No,No,No
-08/14/2022 10:00,Female,20.0,BENL,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
-12/22/2024 01:43,Female,18.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-09/24/2024 22:25,Female,23.0,Benl,year 1,3.00 - 3.49,No,No,No,No,No
-09/09/2025 19:30,Female,18.0,IT,Year 3,3.00 - 3.49,No,No,No,Yes,No
-12/24/2024 02:20,Female,19.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-06/20/2023 15:57,Female,18.0,CTS,Year 1,3.50 - 4.00,No,No,No,Yes,No
-11/14/2025 12:45,Female,24.0,engin,year 1,3.50 - 4.00,No,No,No,Yes,No
-08/24/2023 06:03,Female,24.0,Engine,year 1,3.50 - 4.00,No,No,No,No,No
-04/22/2023 00:44,Female,23.0,Econs,year 1,3.50 - 4.00,No,Yes,Yes,No,No
-08/15/2025 23:42,Female,18.0,KOE,Year 3,3.00 - 3.49,No,No,Yes,No,No
-06/26/2023 05:47,Male,19.0,MHSC,Year 3,3.00 - 3.49,Yes,Yes,No,Yes,No
-04/22/2022 12:53,Female,18.0,Malcom,year 1,3.50 - 4.00,No,Yes,No,No,No
-11/18/2023 00:30,Female,24.0,Kop,year 4,3.00 - 3.49,No,No,Yes,No,No
-03/08/2025 11:43,Female,24.0,Biomedical science,year 1,3.00 - 3.49,No,No,No,No,No
-10/04/2022 19:37,Female,18.0,Laws,Year 3,3.50 - 4.00,No,No,No,Yes,No
-11/08/2023 08:32,Female,19.0,BIT,Year 3,3.00 - 3.49,Yes,Yes,No,No,No
-07/09/2022 19:34,Male,18.0,Biomedical science,year 1,0 - 1.99,No,No,No,No,No
-09/29/2024 22:40,Male,24.0,BIT,Year 3,3.50 - 4.00,No,No,Yes,No,No
-11/27/2023 00:07,Female,24.0,KOE,year 1,3.50 - 4.00,No,No,Yes,Yes,No
-04/28/2023 10:00,Female,23.0,Engineering,year 1,3.00 - 3.49,No,Yes,No,No,No
-11/28/2022 12:20,Female,18.0,Human Sciences ,Year 2,3.00 - 3.49,No,No,No,Yes,No
-04/04/2024 17:37,Female,19.0,Biotechnology,Year 3,0 - 1.99,No,No,No,No,No
-09/05/2024 14:21,Female,18.0,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
-10/05/2025 18:53,Female,24.0,Communication ,Year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
-10/01/2023 16:17,Female,24.0,Diploma Nursing,year 2,3.50 - 4.00,No,No,No,No,No
-08/23/2022 18:22,Female,19.0,Engineering,year 1,3.00 - 3.49,No,Yes,Yes,No,No
-05/01/2025 13:01,Female,19.0,Pendidikan Islam ,Year 2,3.00 - 3.49,No,No,No,No,No
-07/09/2024 02:03,Male,23.0,Radiography,year 1,3.00 - 3.49,No,No,No,No,No
-10/20/2024 02:05,Female,18.0,psychology,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
-05/23/2022 01:09,Female,19.0,Fiqh fatwa ,Year 3,3.00 - 3.49,No,No,No,No,No
-04/02/2023 08:49,Female,18.0,psychology,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
-01/26/2025 19:40,Male,24.0,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
-04/30/2025 22:21,Male,24.0,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
-09/28/2023 20:26,Female,23.0,DIPLOMA TESL,Year 3,3.50 - 4.00,No,No,No,Yes,No
-03/21/2025 18:15,Male,18.0,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
-05/14/2025 17:05,Female,19.0,KOE,year 2,3.00 - 3.49,Yes,Yes,No,No,No
-07/21/2023 02:32,Female,18.0,BENL,year 1,3.00 - 3.49,No,Yes,No,No,No
-08/05/2025 02:32,Female,24.0,Fiqh,Year 3,0 - 1.99,No,No,No,Yes,No
-02/26/2023 05:56,Female,18.0,Islamic Education,year 1,3.50 - 4.00,No,No,No,No,No
-12/16/2022 23:51,Female,21.0,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
-09/24/2024 03:01,Male,18.0,Engineering,Year 2,3.00 - 3.49,No,Yes,Yes,No,No
-07/19/2024 07:24,Female,19.0,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
-07/24/2022 04:16,Female,23.0,Pendidikan Islam,year 4,3.50 - 4.00,No,No,No,No,No
-05/01/2025 15:04,Male,20.0,Biomedical science,Year 2,3.00 - 3.49,No,No,No,No,No
-10/20/2022 01:34,Female,18.0,BCS,year 2,3.50 - 4.00,No,No,Yes,No,No
-03/21/2025 22:58,Female,19.0,KOE,year 2,3.00 - 3.49,Yes,Yes,No,No,No
-01/11/2022 18:09,Female,18.0,KENMS,Year 2,3.50 - 4.00,No,No,Yes,No,No
-03/10/2025 04:29,Female,18.0,Laws,Year 3,3.50 - 4.00,No,No,No,Yes,No
-02/23/2025 16:42,Female,18.0,IT,Year 3,3.00 - 3.49,No,No,No,Yes,No
-02/14/2025 02:41,Female,19.0,Engineering,year 1,3.00 - 3.49,No,No,No,Yes,No
-08/29/2024 08:19,Female,19.0,Engineering,year 1,3.00 - 3.49,No,Yes,Yes,No,No
-11/20/2023 23:01,Female,19.0,Fiqh fatwa ,Year 3,3.00 - 3.49,No,No,No,No,No
-10/27/2024 05:55,Male,24.0,BIT,Year 3,3.50 - 4.00,No,No,Yes,No,No
-02/09/2023 20:59,Male,24.0,BIT,Year 3,3.50 - 4.00,No,No,Yes,No,No
-02/14/2025 15:28,Female,18.0,psychology,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
-03/22/2024 19:12,Female,23.0,Pendidikan Islam,year 4,3.50 - 4.00,No,No,No,No,No
-11/02/2023 11:25,Female,24.0,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
-01/09/2024 16:34,Male,19.0,BIT,Year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
-04/10/2024 22:20,Female,18.0,KOE,Year 2,3.00 - 3.49,No,No,No,No,No
-02/24/2022 10:33,Female,19.0,Biomedical science,year 3,3.00 - 3.49,No,No,No,No,No
-07/24/2022 05:50,Male,21.0,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
-12/25/2022 15:33,Female,18.0,psychology,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
-06/17/2022 07:52,Female,24.0,BCS,year 4,3.50 - 4.00,No,No,No,No,No
-10/05/2023 06:36,Female,19.0,BIT,year 1,2.50 - 2.99,No,Yes,Yes,Yes,No
-09/03/2024 12:52,Male,21.0,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
-08/14/2024 02:53,Female,24.0,engin,year 1,3.50 - 4.00,No,No,No,Yes,No
-11/20/2023 06:31,Female,23.0,Benl,year 1,3.00 - 3.49,No,No,No,No,No
-06/03/2025 06:31,Female,19.0,Engineering,year 1,3.00 - 3.49,No,No,No,Yes,No
-04/05/2024 19:26,Male,19.0,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
-04/26/2022 16:58,Female,24.0,KOE,year 1,3.50 - 4.00,No,No,Yes,Yes,No
-01/22/2025 15:55,Female,20.0,BENL,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
-04/19/2024 11:47,Female,18.0,KOE,Year 2,3.00 - 3.49,No,No,No,No,No
-07/16/2024 07:45,Male,24.0,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
-04/06/2024 00:15,Male,24.0,BCS,year 2,3.00 - 3.49,No,Yes,No,No,No
-03/19/2024 18:42,Female,23.0,DIPLOMA TESL,Year 3,3.50 - 4.00,No,No,No,Yes,No
-05/13/2022 07:37,Female,18.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-03/28/2024 00:02,Female,22.0,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
-03/07/2025 08:48,Male,18.0,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
-03/21/2023 01:42,Female,23.0,Benl,year 1,3.00 - 3.49,No,No,No,No,No
-05/30/2024 17:55,Female,18.0,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
-02/15/2022 00:35,Female,18.0,KENMS,Year 2,3.50 - 4.00,No,No,Yes,No,No
-05/23/2023 16:42,Female,19.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-10/01/2023 01:03,Female,19.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-12/06/2025 18:44,Female,19.0,Engineering,year 1,3.50 - 4.00,No,No,Yes,No,No
-11/10/2022 12:11,Female,19.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-02/09/2023 00:53,Female,23.0,ALA,year 1,2.50 - 2.99,Yes,Yes,No,Yes,Yes
-08/20/2023 20:38,Female,19.0,BCS,year 1,3.50 - 4.00,No,Yes,No,Yes,Yes
-12/21/2025 06:49,Female,24.0,engin,year 1,3.50 - 4.00,No,No,No,Yes,No
-05/31/2025 19:43,Male,19.0,BIT,Year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
-02/20/2022 16:28,Male,20.0,Biomedical science,Year 2,3.00 - 3.49,No,No,No,No,No
-12/08/2022 18:51,Female,23.0,ALA,year 1,2.50 - 2.99,Yes,Yes,No,Yes,Yes
-04/15/2025 11:11,Female,23.0,Pendidikan islam,year 2,3.50 - 4.00 ,Yes,Yes,No,Yes,No
-03/27/2022 04:19,Female,19.0,Engineering,year 1,3.00 - 3.49,No,No,No,Yes,No
-06/04/2025 03:14,Female,19.0,BIT,Year 3,3.00 - 3.49,Yes,Yes,No,No,No
-02/16/2023 02:26,Female,18.0,KIRKHS,year 1,3.50 - 4.00,No,No,No,No,No
-09/02/2025 16:33,Female,24.0,ENM,year 4,3.00 - 3.49,Yes,Yes,Yes,Yes,No
-03/05/2023 22:34,Female,22.0,Laws,year 3,3.00 - 3.49,Yes,Yes,No,No,No
-09/27/2023 12:53,Male,24.0,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
-08/25/2024 01:26,Female,23.0,Benl,year 1,3.00 - 3.49,No,No,No,No,No
-07/04/2022 11:54,Male,19.0,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
-03/24/2024 19:46,Female,19.0,Human Resources,Year 2,2.50 - 2.99,No,No,No,No,No
-01/08/2024 19:51,Male,24.0,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
-02/19/2025 06:36,Female,19.0,Biomedical science,year 3,3.00 - 3.49,No,No,No,No,No
-12/26/2025 07:29,Male,21.0,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
-08/28/2024 13:29,Female,19.0,Pendidikan Islam ,Year 2,3.00 - 3.49,No,No,No,No,No
-08/21/2023 19:42,Male,18.0,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
-08/17/2023 17:32,Female,23.0,Benl,year 1,3.00 - 3.49,No,No,No,No,No
-09/03/2023 15:18,Female,24.0,Biomedical science,year 1,3.00 - 3.49,No,No,No,No,No
-04/04/2025 06:48,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
-04/15/2023 07:06,Female,18.0,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
-09/01/2022 22:44,Female,19.0,Engineering,year 1,3.50 - 4.00,No,No,Yes,No,No
-05/04/2023 09:35,Female,19.0,BIT,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
-02/03/2022 04:22,Female,18.0,Human Sciences ,Year 2,3.00 - 3.49,No,No,No,Yes,No
-06/05/2022 01:47,Female,24.0,Communication ,Year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
-05/12/2022 13:26,Female,18.0,Engineering,year 1,2.00 - 2.49,No,No,No,No,No
-02/01/2025 05:42,Female,24.0,BCS,year 3,3.50 - 4.00,No,No,No,Yes,No
-11/21/2024 08:48,Female,22.0,Laws,year 3,3.00 - 3.49,Yes,Yes,No,No,No
-10/14/2024 23:34,Male,21.0,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
-11/06/2023 19:15,Male,19.0,Engineering,Year 2,3.50 - 4.00,No,No,No,Yes,No
-11/13/2024 14:56,Female,20.0,koe,year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
-08/24/2022 14:50,Female,22.0,Laws,year 3,3.00 - 3.49,Yes,Yes,No,No,No
-08/08/2025 19:23,Female,20.0,koe,year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
-01/03/2024 00:38,Female,19.0,KOE,year 2,3.00 - 3.49,Yes,Yes,No,No,No
-10/02/2025 11:50,Female,18.0,CTS,Year 1,3.50 - 4.00,No,No,No,Yes,No
-08/11/2022 12:40,Female,24.0,ENM,year 4,3.00 - 3.49,Yes,Yes,Yes,Yes,No
-12/28/2023 14:22,Male,24.0,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
+05-11-22 9:29,Female,18,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
+02-04-25 17:59,Male,21,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
+08/14/2024 07:53,Male,19,BIT,Year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+10-04-23 4:50,Female,22,Laws,year 3,3.00 - 3.49,Yes,Yes,No,No,No
+09/25/2023 15:14,Male,23,Mathemathics,year 4,3.00 - 3.49,No,No,No,No,No
+06-08-25 9:52,Male,19,Engineering,Year 2,3.50 - 4.00,No,No,No,Yes,No
+05-06-22 13:35,Female,23,Pendidikan islam,year 2,3.50 - 4.00 ,Yes,Yes,No,Yes,No
+10/15/2024 20:30,Female,18,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+10/22/2022 08:19,Female,19,Human Resources,Year 2,2.50 - 2.99,No,No,No,No,No
+05/18/2022 14:14,Male,18,Irkhs,year 1,3.50 - 4.00,No,No,Yes,Yes,No
+02-09-24 4:27,Female,20,Psychology,year 1,3.50 - 4.00,No,No,No,No,No
+11/26/2025 09:13,Female,24,Engineering,Year 3,3.50 - 4.00,Yes,Yes,No,No,No
+12-10-24 22:25,Female,18,BCS,year 1,3.00 - 3.49,No,Yes,No,No,No
+01/17/2025 00:36,Male,19,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+11/14/2024 05:37,Female,18,KENMS,Year 2,3.50 - 4.00,No,No,Yes,No,No
+02/22/2025 10:33,Male,24,BCS,Year 3,3.50 - 4.00,No,No,No,No,No
+01/20/2024 19:46,Female,24,Accounting ,year 3,3.00 - 3.49,No,No,No,No,No
+07-07-22 4:10,Female,24,ENM,year 4,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+05-11-25 20:55,Female,20,BIT,Year 2,3.50 - 4.00,No,No,Yes,No,No
+10/21/2023 00:19,Female,18,Marine science,year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
+01-02-24 0:20,Female,19,Engineering,year 1,3.00 - 3.49,No,No,No,Yes,No
+06/26/2023 17:39,Female,18,KOE,Year 2,3.00 - 3.49,No,No,No,No,No
+09/24/2022 16:55,Female,24,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+09/16/2025 00:05,Female,24,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+02/15/2025 20:52,Female,23,BCS,Year 3,3.50 - 4.00,No,Yes,Yes,Yes,No
+07/29/2024 16:29,Female,18,Banking Studies,year 1,3.50 - 4.00,No,No,No,No,No
+08-11-23 22:15,Female,19,Engineering,year 1,3.50 - 4.00,No,No,No,No,No
+04/17/2025 01:18,Male,18,Engineering,Year 2,3.00 - 3.49,Yes,Yes,Yes,No,No
+03-07-24 20:55,Female,24,BIT,Year 3,3.50 - 4.00,Yes,Yes,Yes,Yes,Yes
+10-10-23 19:52,Female,24,BCS,year 4,3.50 - 4.00,No,No,No,No,No
+10/21/2023 02:54,Female,23,Business Administration,Year 2,3.00 - 3.49,No,No,No,No,No
+11/28/2022 23:53,Male,18,BCS,year 2,3.00 - 3.49,No,No,No,No,No
+05/15/2022 14:39,Male,19,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
+03/21/2024 05:57,Male,18,BCS,Year 2,3.50 - 4.00,Yes,Yes,Yes,No,Yes
+07/21/2025 04:58,Female,19,BIT,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+04-04-22 5:41,Female,18,Engineering,year 1,2.00 - 2.49,No,No,No,No,No
+06-07-25 23:07,Female,18,Law,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
+04/24/2025 04:03,Female,19,BIT,year 1,2.50 - 2.99,No,Yes,Yes,Yes,No
+02-09-23 8:18,Female,18,KIRKHS,year 1,3.50 - 4.00,No,No,No,No,No
+07-11-24 20:40,Female,24,Engineering,Year 2,2.50 - 2.99,Yes,Yes,No,Yes,Yes
+08/30/2022 09:35,Female,24,BIT,Year 3,3.00 - 3.49,No,No,Yes,No,No
+01-12-25 13:35,Female,22,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
+10/20/2024 11:08,Female,20,Usuluddin ,year 2,3.00 - 3.49,No,Yes,No,No,No
+06-02-23 23:05,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
+04-10-22 5:32,Male,23,TAASL,year 2,3.50 - 4.00,No,No,No,Yes,No
+11/19/2025 04:33,Male,18,BCS,year 1,3.50 - 4.00,No,No,Yes,Yes,No
+10/14/2023 03:35,Female,19,Engineering,year 1,3.50 - 4.00,No,No,Yes,No,No
+07/28/2025 20:23,Female,18,Engine,year 4,3.50 - 4.00,No,No,No,No,No
+09/17/2024 10:33,Male,24,BCS,year 2,3.00 - 3.49,No,Yes,No,No,No
+02-11-25 5:14,Female,24,BCS,year 3,3.50 - 4.00,No,No,No,Yes,No
+01/15/2025 05:06,Female,23,ALA,year 1,2.50 - 2.99,Yes,Yes,No,Yes,Yes
+10-12-22 8:48,Female,18,BCS,year 2,3.50 - 4.00,No,No,Yes,No,No
+06/16/2023 16:00,Female,19,Biomedical science,year 3,3.00 - 3.49,No,No,No,No,No
+11/13/2023 21:06,Female,20,koe,year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+12/29/2023 06:33,Female,19,BCS,year 1,3.50 - 4.00,No,Yes,No,Yes,Yes
+03-05-22 23:56,Male,21,BCS,year 1,3.00 - 3.49,No,No,No,No,No
+03-09-24 12:54,Male,23,Kirkhs,Year 3,3.50 - 4.00,No,No,No,No,No
+08/14/2022 10:00,Female,20,BENL,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
+12/22/2024 01:43,Female,18,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+09/24/2024 22:25,Female,23,Benl,year 1,3.00 - 3.49,No,No,No,No,No
+09-09-25 19:30,Female,18,IT,Year 3,3.00 - 3.49,No,No,No,Yes,No
+12/24/2024 02:20,Female,19,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+06/20/2023 15:57,Female,18,CTS,Year 1,3.50 - 4.00,No,No,No,Yes,No
+11/14/2025 12:45,Female,24,engin,year 1,3.50 - 4.00,No,No,No,Yes,No
+08/24/2023 06:03,Female,24,Engine,year 1,3.50 - 4.00,No,No,No,No,No
+04/22/2023 00:44,Female,23,Econs,year 1,3.50 - 4.00,No,Yes,Yes,No,No
+08/15/2025 23:42,Female,18,KOE,Year 3,3.00 - 3.49,No,No,Yes,No,No
+06/26/2023 05:47,Male,19,MHSC,Year 3,3.00 - 3.49,Yes,Yes,No,Yes,No
+04/22/2022 12:53,Female,18,Malcom,year 1,3.50 - 4.00,No,Yes,No,No,No
+11/18/2023 00:30,Female,24,Kop,year 4,3.00 - 3.49,No,No,Yes,No,No
+03-08-25 11:43,Female,24,Biomedical science,year 1,3.00 - 3.49,No,No,No,No,No
+10-04-22 19:37,Female,18,Laws,Year 3,3.50 - 4.00,No,No,No,Yes,No
+11-08-23 8:32,Female,19,BIT,Year 3,3.00 - 3.49,Yes,Yes,No,No,No
+07-09-22 19:34,Male,18,Biomedical science,year 1,0 - 1.99,No,No,No,No,No
+09/29/2024 22:40,Male,24,BIT,Year 3,3.50 - 4.00,No,No,Yes,No,No
+11/27/2023 00:07,Female,24,KOE,year 1,3.50 - 4.00,No,No,Yes,Yes,No
+04/28/2023 10:00,Female,23,Engineering,year 1,3.00 - 3.49,No,Yes,No,No,No
+11/28/2022 12:20,Female,18,Human Sciences ,Year 2,3.00 - 3.49,No,No,No,Yes,No
+04-04-24 17:37,Female,19,Biotechnology,Year 3,0 - 1.99,No,No,No,No,No
+09-05-24 14:21,Female,18,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
+10-05-25 18:53,Female,24,Communication ,Year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
+10-01-23 16:17,Female,24,Diploma Nursing,year 2,3.50 - 4.00,No,No,No,No,No
+08/23/2022 18:22,Female,19,Engineering,year 1,3.00 - 3.49,No,Yes,Yes,No,No
+05-01-25 13:01,Female,19,Pendidikan Islam ,Year 2,3.00 - 3.49,No,No,No,No,No
+07-09-24 2:03,Male,23,Radiography,year 1,3.00 - 3.49,No,No,No,No,No
+10/20/2024 02:05,Female,18,psychology,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
+05/23/2022 01:09,Female,19,Fiqh fatwa ,Year 3,3.00 - 3.49,No,No,No,No,No
+04-02-23 8:49,Female,18,psychology,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
+01/26/2025 19:40,Male,24,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
+04/30/2025 22:21,Male,24,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
+09/28/2023 20:26,Female,23,DIPLOMA TESL,Year 3,3.50 - 4.00,No,No,No,Yes,No
+03/21/2025 18:15,Male,18,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
+05/14/2025 17:05,Female,19,KOE,year 2,3.00 - 3.49,Yes,Yes,No,No,No
+07/21/2023 02:32,Female,18,BENL,year 1,3.00 - 3.49,No,Yes,No,No,No
+08-05-25 2:32,Female,24,Fiqh,Year 3,0 - 1.99,No,No,No,Yes,No
+02/26/2023 05:56,Female,18,Islamic Education,year 1,3.50 - 4.00,No,No,No,No,No
+12/16/2022 23:51,Female,21,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+09/24/2024 03:01,Male,18,Engineering,Year 2,3.00 - 3.49,No,Yes,Yes,No,No
+07/19/2024 07:24,Female,19,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
+07/24/2022 04:16,Female,23,Pendidikan Islam,year 4,3.50 - 4.00,No,No,No,No,No
+05-01-25 15:04,Male,20,Biomedical science,Year 2,3.00 - 3.49,No,No,No,No,No
+10/20/2022 01:34,Female,18,BCS,year 2,3.50 - 4.00,No,No,Yes,No,No
+03/21/2025 22:58,Female,19,KOE,year 2,3.00 - 3.49,Yes,Yes,No,No,No
+01-11-22 18:09,Female,18,KENMS,Year 2,3.50 - 4.00,No,No,Yes,No,No
+03-10-25 4:29,Female,18,Laws,Year 3,3.50 - 4.00,No,No,No,Yes,No
+02/23/2025 16:42,Female,18,IT,Year 3,3.00 - 3.49,No,No,No,Yes,No
+02/14/2025 02:41,Female,19,Engineering,year 1,3.00 - 3.49,No,No,No,Yes,No
+08/29/2024 08:19,Female,19,Engineering,year 1,3.00 - 3.49,No,Yes,Yes,No,No
+11/20/2023 23:01,Female,19,Fiqh fatwa ,Year 3,3.00 - 3.49,No,No,No,No,No
+10/27/2024 05:55,Male,24,BIT,Year 3,3.50 - 4.00,No,No,Yes,No,No
+02-09-23 20:59,Male,24,BIT,Year 3,3.50 - 4.00,No,No,Yes,No,No
+02/14/2025 15:28,Female,18,psychology,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
+03/22/2024 19:12,Female,23,Pendidikan Islam,year 4,3.50 - 4.00,No,No,No,No,No
+11-02-23 11:25,Female,24,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+01-09-24 16:34,Male,19,BIT,Year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+04-10-24 22:20,Female,18,KOE,Year 2,3.00 - 3.49,No,No,No,No,No
+02/24/2022 10:33,Female,19,Biomedical science,year 3,3.00 - 3.49,No,No,No,No,No
+07/24/2022 05:50,Male,21,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
+12/25/2022 15:33,Female,18,psychology,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
+06/17/2022 07:52,Female,24,BCS,year 4,3.50 - 4.00,No,No,No,No,No
+10-05-23 6:36,Female,19,BIT,year 1,2.50 - 2.99,No,Yes,Yes,Yes,No
+09-03-24 12:52,Male,21,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
+08/14/2024 02:53,Female,24,engin,year 1,3.50 - 4.00,No,No,No,Yes,No
+11/20/2023 06:31,Female,23,Benl,year 1,3.00 - 3.49,No,No,No,No,No
+06-03-25 6:31,Female,19,Engineering,year 1,3.00 - 3.49,No,No,No,Yes,No
+04-05-24 19:26,Male,19,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
+04/26/2022 16:58,Female,24,KOE,year 1,3.50 - 4.00,No,No,Yes,Yes,No
+01/22/2025 15:55,Female,20,BENL,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
+04/19/2024 11:47,Female,18,KOE,Year 2,3.00 - 3.49,No,No,No,No,No
+07/16/2024 07:45,Male,24,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
+04-06-24 0:15,Male,24,BCS,year 2,3.00 - 3.49,No,Yes,No,No,No
+03/19/2024 18:42,Female,23,DIPLOMA TESL,Year 3,3.50 - 4.00,No,No,No,Yes,No
+05/13/2022 07:37,Female,18,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+03/28/2024 00:02,Female,22,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
+03-07-25 8:48,Male,18,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
+03/21/2023 01:42,Female,23,Benl,year 1,3.00 - 3.49,No,No,No,No,No
+05/30/2024 17:55,Female,18,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
+02/15/2022 00:35,Female,18,KENMS,Year 2,3.50 - 4.00,No,No,Yes,No,No
+05/23/2023 16:42,Female,19,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+10-01-23 1:03,Female,19,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+12-06-25 18:44,Female,19,Engineering,year 1,3.50 - 4.00,No,No,Yes,No,No
+11-10-22 12:11,Female,19,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+02-09-23 0:53,Female,23,ALA,year 1,2.50 - 2.99,Yes,Yes,No,Yes,Yes
+08/20/2023 20:38,Female,19,BCS,year 1,3.50 - 4.00,No,Yes,No,Yes,Yes
+12/21/2025 06:49,Female,24,engin,year 1,3.50 - 4.00,No,No,No,Yes,No
+05/31/2025 19:43,Male,19,BIT,Year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+02/20/2022 16:28,Male,20,Biomedical science,Year 2,3.00 - 3.49,No,No,No,No,No
+12-08-22 18:51,Female,23,ALA,year 1,2.50 - 2.99,Yes,Yes,No,Yes,Yes
+04/15/2025 11:11,Female,23,Pendidikan islam,year 2,3.50 - 4.00 ,Yes,Yes,No,Yes,No
+03/27/2022 04:19,Female,19,Engineering,year 1,3.00 - 3.49,No,No,No,Yes,No
+06-04-25 3:14,Female,19,BIT,Year 3,3.00 - 3.49,Yes,Yes,No,No,No
+02/16/2023 02:26,Female,18,KIRKHS,year 1,3.50 - 4.00,No,No,No,No,No
+09-02-25 16:33,Female,24,ENM,year 4,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+03-05-23 22:34,Female,22,Laws,year 3,3.00 - 3.49,Yes,Yes,No,No,No
+09/27/2023 12:53,Male,24,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
+08/25/2024 01:26,Female,23,Benl,year 1,3.00 - 3.49,No,No,No,No,No
+07-04-22 11:54,Male,19,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+03/24/2024 19:46,Female,19,Human Resources,Year 2,2.50 - 2.99,No,No,No,No,No
+01-08-24 19:51,Male,24,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
+02/19/2025 06:36,Female,19,Biomedical science,year 3,3.00 - 3.49,No,No,No,No,No
+12/26/2025 07:29,Male,21,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
+08/28/2024 13:29,Female,19,Pendidikan Islam ,Year 2,3.00 - 3.49,No,No,No,No,No
+08/21/2023 19:42,Male,18,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
+08/17/2023 17:32,Female,23,Benl,year 1,3.00 - 3.49,No,No,No,No,No
+09-03-23 15:18,Female,24,Biomedical science,year 1,3.00 - 3.49,No,No,No,No,No
+04-04-25 6:48,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
+04/15/2023 07:06,Female,18,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+09-01-22 22:44,Female,19,Engineering,year 1,3.50 - 4.00,No,No,Yes,No,No
+05-04-23 9:35,Female,19,BIT,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+02-03-22 4:22,Female,18,Human Sciences ,Year 2,3.00 - 3.49,No,No,No,Yes,No
+06-05-22 1:47,Female,24,Communication ,Year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
+05-12-22 13:26,Female,18,Engineering,year 1,2.00 - 2.49,No,No,No,No,No
+02-01-25 5:42,Female,24,BCS,year 3,3.50 - 4.00,No,No,No,Yes,No
+11/21/2024 08:48,Female,22,Laws,year 3,3.00 - 3.49,Yes,Yes,No,No,No
+10/14/2024 23:34,Male,21,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
+11-06-23 19:15,Male,19,Engineering,Year 2,3.50 - 4.00,No,No,No,Yes,No
+11/13/2024 14:56,Female,20,koe,year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+08/24/2022 14:50,Female,22,Laws,year 3,3.00 - 3.49,Yes,Yes,No,No,No
+08-08-25 19:23,Female,20,koe,year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+01-03-24 0:38,Female,19,KOE,year 2,3.00 - 3.49,Yes,Yes,No,No,No
+10-02-25 11:50,Female,18,CTS,Year 1,3.50 - 4.00,No,No,No,Yes,No
+08-11-22 12:40,Female,24,ENM,year 4,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+12/28/2023 14:22,Male,24,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
 10/14/2024 07:46,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
-12/26/2023 02:37,Male,18.0,BCS,Year 2,3.50 - 4.00,Yes,Yes,Yes,No,Yes
-10/14/2023 20:01,Male,18.0,Biomedical science,year 1,0 - 1.99,No,No,No,No,No
-08/31/2022 20:07,Female,19.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-07/11/2023 16:07,Female,23.0,Pendidikan Islam,year 4,3.50 - 4.00,No,No,No,No,No
-12/15/2022 20:06,Male,19.0,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
-03/17/2023 12:13,Female,24.0,Fiqh,Year 3,0 - 1.99,No,No,No,Yes,No
-09/25/2024 21:16,Female,18.0,Engine,year 4,3.50 - 4.00,No,No,No,No,No
-07/09/2024 20:13,Female,18.0,KENMS,Year 2,3.50 - 4.00,No,No,Yes,No,No
-06/06/2024 02:44,Female,18.0,Laws,Year 3,3.50 - 4.00,No,No,No,Yes,No
-06/13/2023 14:35,Female,18.0,Human Sciences ,Year 2,3.00 - 3.49,No,No,No,Yes,No
-11/03/2025 02:39,Female,19.0,Fiqh fatwa ,Year 3,3.00 - 3.49,No,No,No,No,No
-05/09/2022 01:21,Female,19.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-05/16/2023 12:36,Female,24.0,Engineering,Year 2,2.50 - 2.99,Yes,Yes,No,Yes,Yes
-06/22/2022 09:45,Male,23.0,Radiography,year 1,3.00 - 3.49,No,No,No,No,No
-05/11/2023 04:43,Female,18.0,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
-11/06/2025 07:58,Female,24.0,Diploma Nursing,year 2,3.50 - 4.00,No,No,No,No,No
-06/20/2023 02:39,Female,19.0,Biomedical science,year 3,3.00 - 3.49,No,No,No,No,No
-08/20/2025 10:28,Female,24.0,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
-12/25/2023 06:58,Female,18.0,Banking Studies,year 1,3.50 - 4.00,No,No,No,No,No
-10/19/2024 06:31,Male,24.0,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
-10/31/2023 06:53,Female,23.0,Benl,year 1,3.00 - 3.49,No,No,No,No,No
-01/24/2023 10:27,Female,24.0,BIT,Year 3,3.00 - 3.49,No,No,Yes,No,No
-01/21/2025 12:56,Female,24.0,BIT,Year 3,3.50 - 4.00,Yes,Yes,Yes,Yes,Yes
-11/16/2025 23:12,Female,18.0,KENMS,Year 2,3.50 - 4.00,No,No,Yes,No,No
-01/21/2023 00:14,Male,23.0,TAASL,year 2,3.50 - 4.00,No,No,No,Yes,No
-02/11/2025 18:07,Female,24.0,Engine,year 1,3.50 - 4.00,No,No,No,No,No
-01/17/2023 12:36,Male,24.0,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
-11/13/2024 09:02,Female,24.0,Biomedical science,year 1,3.00 - 3.49,No,No,No,No,No
-02/26/2025 17:43,Female,19.0,Human Resources,Year 2,2.50 - 2.99,No,No,No,No,No
-10/19/2023 12:24,Female,18.0,psychology,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
-12/12/2024 15:20,Female,18.0,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
-02/02/2023 17:52,Female,18.0,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
-04/26/2022 18:56,Female,18.0,psychology,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
-05/21/2022 19:51,Female,18.0,CTS,Year 1,3.50 - 4.00,No,No,No,Yes,No
-10/16/2023 02:26,Female,20.0,Psychology,year 1,3.50 - 4.00,No,No,No,No,No
-08/11/2025 16:51,Female,24.0,Communication ,Year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
-07/06/2022 09:21,Female,18.0,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
-10/28/2023 21:20,Female,19.0,BIT,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
-10/25/2024 14:10,Female,19.0,BIT,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
-10/23/2022 15:40,Male,19.0,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
-11/20/2024 06:45,Male,23.0,Mathemathics,year 4,3.00 - 3.49,No,No,No,No,No
-03/24/2023 00:03,Female,24.0,BIT,Year 3,3.00 - 3.49,No,No,Yes,No,No
-03/27/2025 10:52,Male,18.0,Engineering,Year 2,3.00 - 3.49,Yes,Yes,Yes,No,No
-04/26/2024 05:45,Female,23.0,Pendidikan islam,year 2,3.50 - 4.00 ,Yes,Yes,No,Yes,No
-03/10/2024 00:45,Female,19.0,BIT,Year 3,3.00 - 3.49,Yes,Yes,No,No,No
-09/16/2022 06:21,Female,18.0,Laws,Year 3,3.50 - 4.00,No,No,No,Yes,No
-11/08/2023 17:51,Female,24.0,Engineering,Year 3,3.50 - 4.00,Yes,Yes,No,No,No
-06/05/2025 12:19,Male,18.0,BCS,Year 2,3.50 - 4.00,Yes,Yes,Yes,No,Yes
-01/29/2022 12:35,Male,19.0,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
-01/13/2025 04:43,Female,18.0,Engine,year 4,3.50 - 4.00,No,No,No,No,No
-12/21/2023 22:13,Female,24.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-11/17/2024 03:14,Female,19.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-08/27/2024 01:52,Female,18.0,psychology,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
-09/24/2023 06:54,Female,18.0,Law,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
-03/27/2023 23:06,Female,19.0,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
-07/05/2024 11:57,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
-07/24/2022 20:49,Female,18.0,psychology,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
-05/03/2024 08:48,Female,23.0,DIPLOMA TESL,Year 3,3.50 - 4.00,No,No,No,Yes,No
-05/19/2022 08:22,Female,19.0,BIT,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
-08/07/2024 10:13,Female,24.0,Engine,year 1,3.50 - 4.00,No,No,No,No,No
-07/07/2024 14:19,Female,19.0,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
-05/04/2022 08:57,Male,20.0,Biomedical science,Year 2,3.00 - 3.49,No,No,No,No,No
-01/11/2025 16:33,Female,19.0,Engineering,year 1,3.50 - 4.00,No,No,Yes,No,No
-08/31/2023 11:52,Female,18.0,Human Sciences ,Year 2,3.00 - 3.49,No,No,No,Yes,No
-02/23/2025 15:23,Male,19.0,BIT,Year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
-03/02/2022 19:09,Female,18.0,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
-09/20/2022 04:27,Male,23.0,Mathemathics,year 4,3.00 - 3.49,No,No,No,No,No
-12/23/2023 17:17,Male,24.0,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
-10/02/2022 23:55,Male,19.0,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
-04/27/2023 22:15,Female,19.0,Engineering,year 1,3.50 - 4.00,No,No,No,No,No
-08/23/2024 03:14,Female,19.0,Human Resources,Year 2,2.50 - 2.99,No,No,No,No,No
-07/31/2022 03:35,Female,19.0,Biotechnology,Year 3,0 - 1.99,No,No,No,No,No
-09/17/2024 02:58,Female,18.0,KENMS,Year 2,3.50 - 4.00,No,No,Yes,No,No
-06/01/2022 01:43,Male,24.0,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
-09/13/2022 22:41,Female,22.0,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
-05/08/2024 13:10,Female,23.0,Engineering,year 1,3.00 - 3.49,No,Yes,No,No,No
-03/05/2025 06:41,Female,23.0,ALA,year 1,2.50 - 2.99,Yes,Yes,No,Yes,Yes
-09/07/2022 05:40,Female,18.0,CTS,Year 1,3.50 - 4.00,No,No,No,Yes,No
-03/15/2023 06:56,Female,18.0,Islamic Education,year 1,3.50 - 4.00,No,No,No,No,No
-09/13/2025 14:24,Female,18.0,BCS,year 2,3.50 - 4.00,No,No,Yes,No,No
-12/16/2025 22:16,Female,18.0,Islamic Education,year 1,3.50 - 4.00,No,No,No,No,No
-04/28/2024 22:19,Female,22.0,Laws,year 3,3.00 - 3.49,Yes,Yes,No,No,No
-10/16/2023 02:56,Female,18.0,BENL,year 1,3.00 - 3.49,No,Yes,No,No,No
-05/22/2023 18:38,Male,20.0,Biomedical science,Year 2,3.00 - 3.49,No,No,No,No,No
-06/13/2024 19:00,Female,24.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-05/13/2024 07:51,Female,18.0,KENMS,Year 2,3.50 - 4.00,No,No,Yes,No,No
-03/07/2023 15:13,Female,20.0,Usuluddin ,year 2,3.00 - 3.49,No,Yes,No,No,No
-02/03/2022 07:35,Female,24.0,BIT,Year 3,3.50 - 4.00,Yes,Yes,Yes,Yes,Yes
-08/10/2022 08:08,Female,18.0,Engineering,year 1,2.00 - 2.49,No,No,No,No,No
-11/01/2025 10:55,Female,18.0,BCS,year 1,3.00 - 3.49,No,Yes,No,No,No
-09/03/2023 22:11,Male,18.0,BCS,year 2,3.00 - 3.49,No,No,No,No,No
-12/06/2023 15:29,Female,24.0,Biomedical science,year 1,3.00 - 3.49,No,No,No,No,No
-11/14/2023 10:39,Female,18.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-02/17/2025 13:49,Female,18.0,psychology,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
-04/05/2022 21:38,Male,18.0,Engineering,Year 2,3.00 - 3.49,Yes,Yes,Yes,No,No
-05/01/2022 20:50,Female,23.0,Econs,year 1,3.50 - 4.00,No,Yes,Yes,No,No
-02/08/2023 00:18,Female,22.0,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
-12/13/2023 00:11,Male,23.0,TAASL,year 2,3.50 - 4.00,No,No,No,Yes,No
-09/07/2024 12:17,Female,19.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-12/18/2023 22:09,Male,23.0,Kirkhs,Year 3,3.50 - 4.00,No,No,No,No,No
-10/07/2023 13:07,Male,19.0,Engineering,Year 2,3.50 - 4.00,No,No,No,Yes,No
-10/02/2025 03:56,Male,18.0,Engineering,Year 2,3.00 - 3.49,Yes,Yes,Yes,No,No
-08/24/2022 05:58,Male,18.0,Engineering,Year 2,3.00 - 3.49,Yes,Yes,Yes,No,No
+12/26/2023 02:37,Male,18,BCS,Year 2,3.50 - 4.00,Yes,Yes,Yes,No,Yes
+10/14/2023 20:01,Male,18,Biomedical science,year 1,0 - 1.99,No,No,No,No,No
+08/31/2022 20:07,Female,19,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+07-11-23 16:07,Female,23,Pendidikan Islam,year 4,3.50 - 4.00,No,No,No,No,No
+12/15/2022 20:06,Male,19,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+03/17/2023 12:13,Female,24,Fiqh,Year 3,0 - 1.99,No,No,No,Yes,No
+09/25/2024 21:16,Female,18,Engine,year 4,3.50 - 4.00,No,No,No,No,No
+07-09-24 20:13,Female,18,KENMS,Year 2,3.50 - 4.00,No,No,Yes,No,No
+06-06-24 2:44,Female,18,Laws,Year 3,3.50 - 4.00,No,No,No,Yes,No
+06/13/2023 14:35,Female,18,Human Sciences ,Year 2,3.00 - 3.49,No,No,No,Yes,No
+11-03-25 2:39,Female,19,Fiqh fatwa ,Year 3,3.00 - 3.49,No,No,No,No,No
+05-09-22 1:21,Female,19,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+05/16/2023 12:36,Female,24,Engineering,Year 2,2.50 - 2.99,Yes,Yes,No,Yes,Yes
+06/22/2022 09:45,Male,23,Radiography,year 1,3.00 - 3.49,No,No,No,No,No
+05-11-23 4:43,Female,18,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
+11-06-25 7:58,Female,24,Diploma Nursing,year 2,3.50 - 4.00,No,No,No,No,No
+06/20/2023 02:39,Female,19,Biomedical science,year 3,3.00 - 3.49,No,No,No,No,No
+08/20/2025 10:28,Female,24,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+12/25/2023 06:58,Female,18,Banking Studies,year 1,3.50 - 4.00,No,No,No,No,No
+10/19/2024 06:31,Male,24,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
+10/31/2023 06:53,Female,23,Benl,year 1,3.00 - 3.49,No,No,No,No,No
+01/24/2023 10:27,Female,24,BIT,Year 3,3.00 - 3.49,No,No,Yes,No,No
+01/21/2025 12:56,Female,24,BIT,Year 3,3.50 - 4.00,Yes,Yes,Yes,Yes,Yes
+11/16/2025 23:12,Female,18,KENMS,Year 2,3.50 - 4.00,No,No,Yes,No,No
+01/21/2023 00:14,Male,23,TAASL,year 2,3.50 - 4.00,No,No,No,Yes,No
+02-11-25 18:07,Female,24,Engine,year 1,3.50 - 4.00,No,No,No,No,No
+01/17/2023 12:36,Male,24,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
+11/13/2024 09:02,Female,24,Biomedical science,year 1,3.00 - 3.49,No,No,No,No,No
+02/26/2025 17:43,Female,19,Human Resources,Year 2,2.50 - 2.99,No,No,No,No,No
+10/19/2023 12:24,Female,18,psychology,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
+12-12-24 15:20,Female,18,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
+02-02-23 17:52,Female,18,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+04/26/2022 18:56,Female,18,psychology,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
+05/21/2022 19:51,Female,18,CTS,Year 1,3.50 - 4.00,No,No,No,Yes,No
+10/16/2023 02:26,Female,20,Psychology,year 1,3.50 - 4.00,No,No,No,No,No
+08-11-25 16:51,Female,24,Communication ,Year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
+07-06-22 9:21,Female,18,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+10/28/2023 21:20,Female,19,BIT,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+10/25/2024 14:10,Female,19,BIT,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+10/23/2022 15:40,Male,19,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
+11/20/2024 06:45,Male,23,Mathemathics,year 4,3.00 - 3.49,No,No,No,No,No
+03/24/2023 00:03,Female,24,BIT,Year 3,3.00 - 3.49,No,No,Yes,No,No
+03/27/2025 10:52,Male,18,Engineering,Year 2,3.00 - 3.49,Yes,Yes,Yes,No,No
+04/26/2024 05:45,Female,23,Pendidikan islam,year 2,3.50 - 4.00 ,Yes,Yes,No,Yes,No
+03-10-24 0:45,Female,19,BIT,Year 3,3.00 - 3.49,Yes,Yes,No,No,No
+09/16/2022 06:21,Female,18,Laws,Year 3,3.50 - 4.00,No,No,No,Yes,No
+11-08-23 17:51,Female,24,Engineering,Year 3,3.50 - 4.00,Yes,Yes,No,No,No
+06-05-25 12:19,Male,18,BCS,Year 2,3.50 - 4.00,Yes,Yes,Yes,No,Yes
+01/29/2022 12:35,Male,19,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
+01/13/2025 04:43,Female,18,Engine,year 4,3.50 - 4.00,No,No,No,No,No
+12/21/2023 22:13,Female,24,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+11/17/2024 03:14,Female,19,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+08/27/2024 01:52,Female,18,psychology,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
+09/24/2023 06:54,Female,18,Law,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
+03/27/2023 23:06,Female,19,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
+07-05-24 11:57,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
+07/24/2022 20:49,Female,18,psychology,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
+05-03-24 8:48,Female,23,DIPLOMA TESL,Year 3,3.50 - 4.00,No,No,No,Yes,No
+05/19/2022 08:22,Female,19,BIT,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+08-07-24 10:13,Female,24,Engine,year 1,3.50 - 4.00,No,No,No,No,No
+07-07-24 14:19,Female,19,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
+05-04-22 8:57,Male,20,Biomedical science,Year 2,3.00 - 3.49,No,No,No,No,No
+01-11-25 16:33,Female,19,Engineering,year 1,3.50 - 4.00,No,No,Yes,No,No
+08/31/2023 11:52,Female,18,Human Sciences ,Year 2,3.00 - 3.49,No,No,No,Yes,No
+02/23/2025 15:23,Male,19,BIT,Year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+03-02-22 19:09,Female,18,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
+09/20/2022 04:27,Male,23,Mathemathics,year 4,3.00 - 3.49,No,No,No,No,No
+12/23/2023 17:17,Male,24,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
+10-02-22 23:55,Male,19,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+04/27/2023 22:15,Female,19,Engineering,year 1,3.50 - 4.00,No,No,No,No,No
+08/23/2024 03:14,Female,19,Human Resources,Year 2,2.50 - 2.99,No,No,No,No,No
+07/31/2022 03:35,Female,19,Biotechnology,Year 3,0 - 1.99,No,No,No,No,No
+09/17/2024 02:58,Female,18,KENMS,Year 2,3.50 - 4.00,No,No,Yes,No,No
+06-01-22 1:43,Male,24,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
+09/13/2022 22:41,Female,22,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
+05-08-24 13:10,Female,23,Engineering,year 1,3.00 - 3.49,No,Yes,No,No,No
+03-05-25 6:41,Female,23,ALA,year 1,2.50 - 2.99,Yes,Yes,No,Yes,Yes
+09-07-22 5:40,Female,18,CTS,Year 1,3.50 - 4.00,No,No,No,Yes,No
+03/15/2023 06:56,Female,18,Islamic Education,year 1,3.50 - 4.00,No,No,No,No,No
+09/13/2025 14:24,Female,18,BCS,year 2,3.50 - 4.00,No,No,Yes,No,No
+12/16/2025 22:16,Female,18,Islamic Education,year 1,3.50 - 4.00,No,No,No,No,No
+04/28/2024 22:19,Female,22,Laws,year 3,3.00 - 3.49,Yes,Yes,No,No,No
+10/16/2023 02:56,Female,18,BENL,year 1,3.00 - 3.49,No,Yes,No,No,No
+05/22/2023 18:38,Male,20,Biomedical science,Year 2,3.00 - 3.49,No,No,No,No,No
+06/13/2024 19:00,Female,24,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+05/13/2024 07:51,Female,18,KENMS,Year 2,3.50 - 4.00,No,No,Yes,No,No
+03-07-23 15:13,Female,20,Usuluddin ,year 2,3.00 - 3.49,No,Yes,No,No,No
+02-03-22 7:35,Female,24,BIT,Year 3,3.50 - 4.00,Yes,Yes,Yes,Yes,Yes
+08-10-22 8:08,Female,18,Engineering,year 1,2.00 - 2.49,No,No,No,No,No
+11-01-25 10:55,Female,18,BCS,year 1,3.00 - 3.49,No,Yes,No,No,No
+09-03-23 22:11,Male,18,BCS,year 2,3.00 - 3.49,No,No,No,No,No
+12-06-23 15:29,Female,24,Biomedical science,year 1,3.00 - 3.49,No,No,No,No,No
+11/14/2023 10:39,Female,18,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+02/17/2025 13:49,Female,18,psychology,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
+04-05-22 21:38,Male,18,Engineering,Year 2,3.00 - 3.49,Yes,Yes,Yes,No,No
+05-01-22 20:50,Female,23,Econs,year 1,3.50 - 4.00,No,Yes,Yes,No,No
+02-08-23 0:18,Female,22,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
+12/13/2023 00:11,Male,23,TAASL,year 2,3.50 - 4.00,No,No,No,Yes,No
+09-07-24 12:17,Female,19,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+12/18/2023 22:09,Male,23,Kirkhs,Year 3,3.50 - 4.00,No,No,No,No,No
+10-07-23 13:07,Male,19,Engineering,Year 2,3.50 - 4.00,No,No,No,Yes,No
+10-02-25 3:56,Male,18,Engineering,Year 2,3.00 - 3.49,Yes,Yes,Yes,No,No
+08/24/2022 05:58,Male,18,Engineering,Year 2,3.00 - 3.49,Yes,Yes,Yes,No,No
 04/15/2024 07:04,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
-03/03/2024 05:16,Female,19.0,Pendidikan Islam ,Year 2,3.00 - 3.49,No,No,No,No,No
-11/23/2023 18:25,Female,24.0,BCS,year 4,3.50 - 4.00,No,No,No,No,No
-03/25/2025 21:35,Female,19.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-01/26/2023 01:14,Male,24.0,BIT,Year 3,3.50 - 4.00,No,No,Yes,No,No
-10/25/2025 11:05,Male,18.0,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
-04/30/2023 10:08,Male,24.0,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
-03/07/2024 06:02,Female,19.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-01/31/2024 16:51,Female,21.0,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
-05/26/2025 12:36,Female,18.0,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
-10/04/2023 05:59,Female,19.0,Engineering,year 1,3.50 - 4.00,No,No,No,No,No
-02/20/2023 17:46,Female,19.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-02/01/2022 13:48,Female,23.0,Engineering,year 1,3.00 - 3.49,No,Yes,No,No,No
-06/16/2023 08:00,Male,19.0,BIT,Year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
-04/22/2025 05:06,Female,24.0,Kop,year 4,3.00 - 3.49,No,No,Yes,No,No
-01/15/2022 11:42,Female,18.0,Laws,Year 3,3.50 - 4.00,No,No,No,Yes,No
-08/02/2025 06:58,Female,19.0,Engineering,year 1,3.50 - 4.00,No,No,No,No,No
-03/04/2024 01:41,Female,19.0,Human Resources,Year 2,2.50 - 2.99,No,No,No,No,No
-07/24/2022 21:41,Female,19.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-03/18/2023 11:36,Female,18.0,Law,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
-03/20/2024 10:43,Female,21.0,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
-04/07/2023 05:25,Female,23.0,ALA,year 1,2.50 - 2.99,Yes,Yes,No,Yes,Yes
-06/08/2022 15:05,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
-08/31/2024 00:14,Female,24.0,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
-09/09/2024 03:25,Female,19.0,Biotechnology,Year 3,0 - 1.99,No,No,No,No,No
-06/23/2022 16:12,Female,18.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-02/15/2023 21:10,Male,18.0,BCS,year 2,3.00 - 3.49,No,No,No,No,No
-12/23/2022 07:10,Female,18.0,Islamic Education,year 1,3.50 - 4.00,No,No,No,No,No
-08/21/2024 09:59,Female,18.0,psychology,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
-12/02/2024 23:05,Female,18.0,BCS,year 2,3.50 - 4.00,No,No,Yes,No,No
-11/28/2024 03:20,Female,19.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-10/03/2025 12:43,Female,20.0,BENL,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
-01/27/2025 23:51,Female,18.0,BCS,year 2,3.50 - 4.00,No,No,Yes,No,No
-04/14/2023 12:18,Female,24.0,Engineering,Year 3,3.50 - 4.00,Yes,Yes,No,No,No
-06/07/2022 09:49,Female,18.0,KIRKHS,year 1,3.50 - 4.00,No,No,No,No,No
-06/16/2024 23:50,Male,21.0,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
-08/31/2025 07:02,Male,19.0,BIT,Year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
-11/25/2025 16:50,Male,20.0,Biomedical science,Year 2,3.00 - 3.49,No,No,No,No,No
-12/03/2022 08:13,Male,21.0,BCS,year 1,3.00 - 3.49,No,No,No,No,No
-12/12/2022 11:04,Female,24.0,Communication ,Year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
-02/24/2022 15:50,Female,18.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-07/26/2022 09:12,Male,21.0,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
-03/21/2024 15:20,Male,21.0,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
-03/09/2024 21:06,Male,18.0,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
-06/26/2023 22:01,Female,20.0,koe,year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
-03/29/2023 20:16,Female,19.0,Fiqh fatwa ,Year 3,3.00 - 3.49,No,No,No,No,No
-04/27/2025 07:44,Male,20.0,Biomedical science,Year 2,3.00 - 3.49,No,No,No,No,No
-11/04/2023 02:37,Female,18.0,Islamic Education,year 1,3.50 - 4.00,No,No,No,No,No
-03/26/2025 20:31,Female,21.0,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
-11/08/2025 06:03,Female,18.0,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
-04/09/2023 08:09,Female,20.0,BIT,Year 2,3.50 - 4.00,No,No,Yes,No,No
-10/24/2022 04:48,Male,21.0,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
-10/24/2025 04:27,Female,19.0,Biomedical science,year 3,3.00 - 3.49,No,No,No,No,No
+03-03-24 5:16,Female,19,Pendidikan Islam ,Year 2,3.00 - 3.49,No,No,No,No,No
+11/23/2023 18:25,Female,24,BCS,year 4,3.50 - 4.00,No,No,No,No,No
+03/25/2025 21:35,Female,19,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+01/26/2023 01:14,Male,24,BIT,Year 3,3.50 - 4.00,No,No,Yes,No,No
+10/25/2025 11:05,Male,18,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
+04/30/2023 10:08,Male,24,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
+03-07-24 6:02,Female,19,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+01/31/2024 16:51,Female,21,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+05/26/2025 12:36,Female,18,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
+10-04-23 5:59,Female,19,Engineering,year 1,3.50 - 4.00,No,No,No,No,No
+02/20/2023 17:46,Female,19,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+02-01-22 13:48,Female,23,Engineering,year 1,3.00 - 3.49,No,Yes,No,No,No
+06/16/2023 08:00,Male,19,BIT,Year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+04/22/2025 05:06,Female,24,Kop,year 4,3.00 - 3.49,No,No,Yes,No,No
+01/15/2022 11:42,Female,18,Laws,Year 3,3.50 - 4.00,No,No,No,Yes,No
+08-02-25 6:58,Female,19,Engineering,year 1,3.50 - 4.00,No,No,No,No,No
+03-04-24 1:41,Female,19,Human Resources,Year 2,2.50 - 2.99,No,No,No,No,No
+07/24/2022 21:41,Female,19,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+03/18/2023 11:36,Female,18,Law,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
+03/20/2024 10:43,Female,21,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+04-07-23 5:25,Female,23,ALA,year 1,2.50 - 2.99,Yes,Yes,No,Yes,Yes
+06-08-22 15:05,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
+08/31/2024 00:14,Female,24,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+09-09-24 3:25,Female,19,Biotechnology,Year 3,0 - 1.99,No,No,No,No,No
+06/23/2022 16:12,Female,18,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+02/15/2023 21:10,Male,18,BCS,year 2,3.00 - 3.49,No,No,No,No,No
+12/23/2022 07:10,Female,18,Islamic Education,year 1,3.50 - 4.00,No,No,No,No,No
+08/21/2024 09:59,Female,18,psychology,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
+12-02-24 23:05,Female,18,BCS,year 2,3.50 - 4.00,No,No,Yes,No,No
+11/28/2024 03:20,Female,19,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+10-03-25 12:43,Female,20,BENL,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
+01/27/2025 23:51,Female,18,BCS,year 2,3.50 - 4.00,No,No,Yes,No,No
+04/14/2023 12:18,Female,24,Engineering,Year 3,3.50 - 4.00,Yes,Yes,No,No,No
+06-07-22 9:49,Female,18,KIRKHS,year 1,3.50 - 4.00,No,No,No,No,No
+06/16/2024 23:50,Male,21,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
+08/31/2025 07:02,Male,19,BIT,Year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+11/25/2025 16:50,Male,20,Biomedical science,Year 2,3.00 - 3.49,No,No,No,No,No
+12-03-22 8:13,Male,21,BCS,year 1,3.00 - 3.49,No,No,No,No,No
+12-12-22 11:04,Female,24,Communication ,Year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
+02/24/2022 15:50,Female,18,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+07/26/2022 09:12,Male,21,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
+03/21/2024 15:20,Male,21,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
+03-09-24 21:06,Male,18,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
+06/26/2023 22:01,Female,20,koe,year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+03/29/2023 20:16,Female,19,Fiqh fatwa ,Year 3,3.00 - 3.49,No,No,No,No,No
+04/27/2025 07:44,Male,20,Biomedical science,Year 2,3.00 - 3.49,No,No,No,No,No
+11-04-23 2:37,Female,18,Islamic Education,year 1,3.50 - 4.00,No,No,No,No,No
+03/26/2025 20:31,Female,21,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+11-08-25 6:03,Female,18,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
+04-09-23 8:09,Female,20,BIT,Year 2,3.50 - 4.00,No,No,Yes,No,No
+10/24/2022 04:48,Male,21,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
+10/24/2025 04:27,Female,19,Biomedical science,year 3,3.00 - 3.49,No,No,No,No,No
 07/16/2024 11:43,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
-03/02/2023 00:44,Male,24.0,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
-06/27/2024 12:53,Male,18.0,BCS,year 2,3.00 - 3.49,No,No,No,No,No
-01/23/2024 11:57,Female,24.0,Kop,year 4,3.00 - 3.49,No,No,Yes,No,No
-08/15/2025 23:34,Male,18.0,BCS,year 2,3.00 - 3.49,No,No,No,No,No
-01/09/2023 23:09,Male,19.0,MHSC,Year 3,3.00 - 3.49,Yes,Yes,No,Yes,No
-12/19/2025 09:50,Female,19.0,BCS,year 1,3.50 - 4.00,No,Yes,No,Yes,Yes
-09/29/2025 13:25,Male,24.0,BIT,Year 3,3.50 - 4.00,No,No,Yes,No,No
-09/22/2022 00:08,Male,21.0,BCS,year 1,3.00 - 3.49,No,No,No,No,No
-08/29/2022 11:48,Female,24.0,Accounting ,year 3,3.00 - 3.49,No,No,No,No,No
-02/18/2024 22:36,Female,19.0,BIT,year 1,2.50 - 2.99,No,Yes,Yes,Yes,No
-03/07/2022 14:44,Female,24.0,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
-03/13/2023 13:03,Female,18.0,Malcom,year 1,3.50 - 4.00,No,Yes,No,No,No
-09/28/2023 16:14,Male,18.0,Engineering,Year 2,3.00 - 3.49,No,Yes,Yes,No,No
-11/17/2025 06:06,Female,24.0,Kop,year 4,3.00 - 3.49,No,No,Yes,No,No
-12/20/2025 20:39,Female,18.0,psychology,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
-08/10/2022 09:35,Female,20.0,Psychology,year 1,3.50 - 4.00,No,No,No,No,No
-07/26/2025 17:46,Male,24.0,BCS,Year 3,3.50 - 4.00,No,No,No,No,No
-05/13/2022 20:19,Female,21.0,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
-12/29/2024 17:11,Female,19.0,BIT,Year 3,3.00 - 3.49,Yes,Yes,No,No,No
-05/20/2025 11:36,Female,18.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-07/25/2025 10:44,Female,24.0,Kop,year 4,3.00 - 3.49,No,No,Yes,No,No
-11/23/2022 09:55,Female,18.0,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
-07/29/2025 07:48,Female,19.0,KOE,year 2,3.00 - 3.49,Yes,Yes,No,No,No
-06/19/2022 10:45,Male,19.0,BIT,Year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
-01/29/2024 01:14,Female,18.0,Marine science,year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
-11/18/2023 00:08,Female,18.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-04/07/2023 13:44,Female,18.0,Engineering,year 1,2.00 - 2.49,No,No,No,No,No
-02/02/2022 07:24,Female,20.0,BIT,Year 2,3.50 - 4.00,No,No,Yes,No,No
-02/01/2025 21:50,Male,24.0,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
-05/06/2023 06:54,Female,18.0,KOE,Year 3,3.00 - 3.49,No,No,Yes,No,No
-08/24/2024 16:29,Female,20.0,BIT,Year 2,3.50 - 4.00,No,No,Yes,No,No
-08/23/2023 07:57,Female,18.0,Marine science,year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
-06/30/2023 21:56,Female,18.0,Islamic Education,year 1,3.50 - 4.00,No,No,No,No,No
-07/18/2025 21:04,Female,24.0,Biomedical science,year 1,3.00 - 3.49,No,No,No,No,No
-05/19/2022 00:22,Female,18.0,BCS,year 2,3.50 - 4.00,No,No,Yes,No,No
-12/12/2024 04:45,Male,19.0,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
-12/27/2024 01:25,Female,24.0,Engineering,Year 2,2.50 - 2.99,Yes,Yes,No,Yes,Yes
-07/10/2023 04:01,Female,18.0,KIRKHS,year 1,3.50 - 4.00,No,No,No,No,No
-01/19/2023 10:54,Female,24.0,Diploma Nursing,year 2,3.50 - 4.00,No,No,No,No,No
-01/08/2022 18:05,Female,18.0,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
-09/30/2025 16:24,Female,20.0,Psychology,year 1,3.50 - 4.00,No,No,No,No,No
-10/16/2025 15:15,Male,18.0,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
-12/19/2022 01:23,Male,23.0,Kirkhs,Year 3,3.50 - 4.00,No,No,No,No,No
-02/16/2022 14:55,Male,24.0,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
-06/29/2022 08:23,Female,24.0,BCS,year 3,3.50 - 4.00,No,No,No,Yes,No
-04/09/2022 19:49,Female,24.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-04/29/2025 06:08,Female,23.0,Business Administration,Year 2,3.00 - 3.49,No,No,No,No,No
-07/27/2025 01:58,Female,18.0,BENL,year 1,3.00 - 3.49,No,Yes,No,No,No
-08/12/2022 22:45,Female,22.0,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
-12/26/2024 23:40,Female,19.0,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
-09/19/2022 21:51,Female,23.0,Pendidikan islam,year 2,3.50 - 4.00 ,Yes,Yes,No,Yes,No
-06/21/2023 11:48,Male,24.0,BCS,Year 3,3.50 - 4.00,No,No,No,No,No
-05/25/2024 16:45,Male,24.0,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
-11/17/2024 19:30,Female,23.0,Benl,year 1,3.00 - 3.49,No,No,No,No,No
-07/01/2025 17:38,Male,21.0,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
-03/07/2022 10:20,Female,18.0,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
-10/14/2022 23:47,Female,18.0,Engine,year 4,3.50 - 4.00,No,No,No,No,No
-02/14/2023 19:45,Female,24.0,Engineering,Year 3,3.50 - 4.00,Yes,Yes,No,No,No
-03/30/2023 09:11,Female,18.0,Malcom,year 1,3.50 - 4.00,No,Yes,No,No,No
-12/29/2025 02:50,Female,18.0,Law,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
-02/09/2025 18:55,Male,18.0,BCS,year 2,3.00 - 3.49,No,No,No,No,No
-04/14/2023 03:06,Female,19.0,Human Resources,Year 2,2.50 - 2.99,No,No,No,No,No
-11/20/2025 20:07,Female,19.0,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
-12/31/2023 11:42,Female,20.0,BIT,Year 2,3.50 - 4.00,No,No,Yes,No,No
-01/02/2024 13:59,Female,18.0,Engine,year 4,3.50 - 4.00,No,No,No,No,No
-09/26/2023 15:12,Female,18.0,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
-07/30/2022 05:37,Male,19.0,BIT,Year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
-09/27/2025 02:50,Female,18.0,Marine science,year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
-01/21/2022 08:39,Female,24.0,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
-09/12/2022 14:54,Female,20.0,koe,year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
-12/02/2022 12:39,Male,19.0,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
-02/13/2023 01:17,Female,24.0,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
-07/12/2022 14:12,Male,24.0,BIT,Year 3,3.50 - 4.00,No,No,Yes,No,No
-01/27/2022 05:47,Female,18.0,Laws,Year 3,3.50 - 4.00,No,No,No,Yes,No
-09/17/2024 01:25,Female,18.0,Engineering,year 1,2.00 - 2.49,No,No,No,No,No
-11/17/2025 03:52,Female,19.0,BIT,year 1,2.50 - 2.99,No,Yes,Yes,Yes,No
-06/27/2022 23:56,Female,19.0,Pendidikan Islam ,Year 2,3.00 - 3.49,No,No,No,No,No
-03/10/2023 05:42,Female,19.0,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
-01/10/2024 17:57,Male,24.0,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
-09/17/2025 01:56,Female,19.0,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
-10/11/2024 07:37,Female,23.0,BCS,Year 3,3.50 - 4.00,No,Yes,Yes,Yes,No
-01/24/2025 09:37,Female,19.0,KOE,year 2,3.00 - 3.49,Yes,Yes,No,No,No
-04/29/2024 00:16,Female,24.0,ENM,year 4,3.00 - 3.49,Yes,Yes,Yes,Yes,No
-09/02/2023 06:56,Female,24.0,Diploma Nursing,year 2,3.50 - 4.00,No,No,No,No,No
-10/19/2022 20:56,Female,23.0,Econs,year 1,3.50 - 4.00,No,Yes,Yes,No,No
-06/16/2025 18:19,Female,20.0,koe,year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
-03/20/2025 19:49,Female,19.0,BIT,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
-02/06/2022 16:09,Female,18.0,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
-11/11/2024 05:02,Female,18.0,IT,Year 3,3.00 - 3.49,No,No,No,Yes,No
-05/04/2022 06:59,Female,24.0,BIT,Year 3,3.00 - 3.49,No,No,Yes,No,No
-12/15/2024 15:44,Female,23.0,Pendidikan Islam,year 4,3.50 - 4.00,No,No,No,No,No
-04/21/2025 17:14,Male,19.0,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
-07/11/2022 11:24,Male,19.0,MHSC,Year 3,3.00 - 3.49,Yes,Yes,No,Yes,No
-09/26/2023 20:01,Male,19.0,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
-06/30/2022 19:18,Male,19.0,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
-04/08/2024 19:11,Female,19.0,Engineering,year 1,3.00 - 3.49,No,No,No,Yes,No
-09/17/2025 04:03,Female,18.0,Engine,year 4,3.50 - 4.00,No,No,No,No,No
-04/29/2022 03:36,Female,18.0,Marine science,year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
-08/04/2023 20:40,Female,18.0,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
-11/22/2025 17:29,Female,23.0,Pendidikan islam,year 2,3.50 - 4.00 ,Yes,Yes,No,Yes,No
-03/16/2023 16:27,Female,18.0,KOE,Year 3,3.00 - 3.49,No,No,Yes,No,No
-07/13/2022 04:02,Female,24.0,Accounting ,year 3,3.00 - 3.49,No,No,No,No,No
-12/15/2023 19:42,Male,19.0,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
-01/13/2024 17:34,Female,18.0,Engine,year 4,3.50 - 4.00,No,No,No,No,No
-08/26/2024 10:40,Female,24.0,KOE,year 1,3.50 - 4.00,No,No,Yes,Yes,No
-04/04/2023 08:53,Female,18.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-10/28/2025 03:58,Female,18.0,psychology,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
-02/01/2024 05:08,Female,18.0,KOE,Year 2,3.00 - 3.49,No,No,No,No,No
-02/23/2023 11:57,Female,24.0,BCS,year 4,3.50 - 4.00,No,No,No,No,No
-11/03/2025 23:24,Female,19.0,BIT,year 1,2.50 - 2.99,No,Yes,Yes,Yes,No
-09/13/2025 03:28,Female,23.0,ALA,year 1,2.50 - 2.99,Yes,Yes,No,Yes,Yes
-12/31/2023 06:42,Female,20.0,koe,year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
-02/06/2022 07:40,Female,18.0,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
-05/22/2024 02:58,Female,19.0,Engineering,year 1,3.50 - 4.00,No,No,No,No,No
-03/22/2024 03:27,Female,19.0,Engineering,year 1,3.50 - 4.00,No,No,No,No,No
-08/05/2022 12:46,Male,18.0,Engineering,Year 2,3.00 - 3.49,No,Yes,Yes,No,No
-07/15/2024 05:42,Female,19.0,Engineering,year 1,3.00 - 3.49,No,No,No,Yes,No
-05/13/2025 09:35,Female,24.0,BCS,year 4,3.50 - 4.00,No,No,No,No,No
-06/04/2022 17:11,Female,21.0,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
-11/22/2024 18:35,Male,18.0,Engineering,Year 2,3.00 - 3.49,Yes,Yes,Yes,No,No
-07/25/2022 00:52,Female,24.0,engin,year 1,3.50 - 4.00,No,No,No,Yes,No
-12/30/2024 00:50,Female,21.0,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
-09/05/2023 07:49,Female,18.0,Malcom,year 1,3.50 - 4.00,No,Yes,No,No,No
-01/10/2022 12:18,Female,18.0,IT,Year 3,3.00 - 3.49,No,No,No,Yes,No
-11/12/2025 15:57,Female,18.0,Engine,year 4,3.50 - 4.00,No,No,No,No,No
-08/31/2022 11:35,Female,20.0,BIT,Year 2,3.50 - 4.00,No,No,Yes,No,No
-05/20/2024 19:38,Female,22.0,Laws,year 3,3.00 - 3.49,Yes,Yes,No,No,No
-09/23/2022 03:00,Female,19.0,BIT,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
-09/25/2025 03:31,Female,24.0,engin,year 1,3.50 - 4.00,No,No,No,Yes,No
-12/14/2024 16:38,Male,24.0,BCS,year 2,3.00 - 3.49,No,Yes,No,No,No
-03/21/2025 04:06,Female,24.0,Accounting ,year 3,3.00 - 3.49,No,No,No,No,No
+03-02-23 0:44,Male,24,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
+06/27/2024 12:53,Male,18,BCS,year 2,3.00 - 3.49,No,No,No,No,No
+01/23/2024 11:57,Female,24,Kop,year 4,3.00 - 3.49,No,No,Yes,No,No
+08/15/2025 23:34,Male,18,BCS,year 2,3.00 - 3.49,No,No,No,No,No
+01-09-23 23:09,Male,19,MHSC,Year 3,3.00 - 3.49,Yes,Yes,No,Yes,No
+12/19/2025 09:50,Female,19,BCS,year 1,3.50 - 4.00,No,Yes,No,Yes,Yes
+09/29/2025 13:25,Male,24,BIT,Year 3,3.50 - 4.00,No,No,Yes,No,No
+09/22/2022 00:08,Male,21,BCS,year 1,3.00 - 3.49,No,No,No,No,No
+08/29/2022 11:48,Female,24,Accounting ,year 3,3.00 - 3.49,No,No,No,No,No
+02/18/2024 22:36,Female,19,BIT,year 1,2.50 - 2.99,No,Yes,Yes,Yes,No
+03-07-22 14:44,Female,24,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+03/13/2023 13:03,Female,18,Malcom,year 1,3.50 - 4.00,No,Yes,No,No,No
+09/28/2023 16:14,Male,18,Engineering,Year 2,3.00 - 3.49,No,Yes,Yes,No,No
+11/17/2025 06:06,Female,24,Kop,year 4,3.00 - 3.49,No,No,Yes,No,No
+12/20/2025 20:39,Female,18,psychology,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
+08-10-22 9:35,Female,20,Psychology,year 1,3.50 - 4.00,No,No,No,No,No
+07/26/2025 17:46,Male,24,BCS,Year 3,3.50 - 4.00,No,No,No,No,No
+05/13/2022 20:19,Female,21,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+12/29/2024 17:11,Female,19,BIT,Year 3,3.00 - 3.49,Yes,Yes,No,No,No
+05/20/2025 11:36,Female,18,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+07/25/2025 10:44,Female,24,Kop,year 4,3.00 - 3.49,No,No,Yes,No,No
+11/23/2022 09:55,Female,18,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
+07/29/2025 07:48,Female,19,KOE,year 2,3.00 - 3.49,Yes,Yes,No,No,No
+06/19/2022 10:45,Male,19,BIT,Year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+01/29/2024 01:14,Female,18,Marine science,year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
+11/18/2023 00:08,Female,18,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+04-07-23 13:44,Female,18,Engineering,year 1,2.00 - 2.49,No,No,No,No,No
+02-02-22 7:24,Female,20,BIT,Year 2,3.50 - 4.00,No,No,Yes,No,No
+02-01-25 21:50,Male,24,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
+05-06-23 6:54,Female,18,KOE,Year 3,3.00 - 3.49,No,No,Yes,No,No
+08/24/2024 16:29,Female,20,BIT,Year 2,3.50 - 4.00,No,No,Yes,No,No
+08/23/2023 07:57,Female,18,Marine science,year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
+06/30/2023 21:56,Female,18,Islamic Education,year 1,3.50 - 4.00,No,No,No,No,No
+07/18/2025 21:04,Female,24,Biomedical science,year 1,3.00 - 3.49,No,No,No,No,No
+05/19/2022 00:22,Female,18,BCS,year 2,3.50 - 4.00,No,No,Yes,No,No
+12-12-24 4:45,Male,19,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
+12/27/2024 01:25,Female,24,Engineering,Year 2,2.50 - 2.99,Yes,Yes,No,Yes,Yes
+07-10-23 4:01,Female,18,KIRKHS,year 1,3.50 - 4.00,No,No,No,No,No
+01/19/2023 10:54,Female,24,Diploma Nursing,year 2,3.50 - 4.00,No,No,No,No,No
+01-08-22 18:05,Female,18,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
+09/30/2025 16:24,Female,20,Psychology,year 1,3.50 - 4.00,No,No,No,No,No
+10/16/2025 15:15,Male,18,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
+12/19/2022 01:23,Male,23,Kirkhs,Year 3,3.50 - 4.00,No,No,No,No,No
+02/16/2022 14:55,Male,24,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
+06/29/2022 08:23,Female,24,BCS,year 3,3.50 - 4.00,No,No,No,Yes,No
+04-09-22 19:49,Female,24,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+04/29/2025 06:08,Female,23,Business Administration,Year 2,3.00 - 3.49,No,No,No,No,No
+07/27/2025 01:58,Female,18,BENL,year 1,3.00 - 3.49,No,Yes,No,No,No
+08-12-22 22:45,Female,22,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
+12/26/2024 23:40,Female,19,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
+09/19/2022 21:51,Female,23,Pendidikan islam,year 2,3.50 - 4.00 ,Yes,Yes,No,Yes,No
+06/21/2023 11:48,Male,24,BCS,Year 3,3.50 - 4.00,No,No,No,No,No
+05/25/2024 16:45,Male,24,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
+11/17/2024 19:30,Female,23,Benl,year 1,3.00 - 3.49,No,No,No,No,No
+07-01-25 17:38,Male,21,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
+03-07-22 10:20,Female,18,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
+10/14/2022 23:47,Female,18,Engine,year 4,3.50 - 4.00,No,No,No,No,No
+02/14/2023 19:45,Female,24,Engineering,Year 3,3.50 - 4.00,Yes,Yes,No,No,No
+03/30/2023 09:11,Female,18,Malcom,year 1,3.50 - 4.00,No,Yes,No,No,No
+12/29/2025 02:50,Female,18,Law,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
+02-09-25 18:55,Male,18,BCS,year 2,3.00 - 3.49,No,No,No,No,No
+04/14/2023 03:06,Female,19,Human Resources,Year 2,2.50 - 2.99,No,No,No,No,No
+11/20/2025 20:07,Female,19,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
+12/31/2023 11:42,Female,20,BIT,Year 2,3.50 - 4.00,No,No,Yes,No,No
+01-02-24 13:59,Female,18,Engine,year 4,3.50 - 4.00,No,No,No,No,No
+09/26/2023 15:12,Female,18,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
+07/30/2022 05:37,Male,19,BIT,Year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+09/27/2025 02:50,Female,18,Marine science,year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
+01/21/2022 08:39,Female,24,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+09-12-22 14:54,Female,20,koe,year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+12-02-22 12:39,Male,19,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
+02/13/2023 01:17,Female,24,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+07-12-22 14:12,Male,24,BIT,Year 3,3.50 - 4.00,No,No,Yes,No,No
+01/27/2022 05:47,Female,18,Laws,Year 3,3.50 - 4.00,No,No,No,Yes,No
+09/17/2024 01:25,Female,18,Engineering,year 1,2.00 - 2.49,No,No,No,No,No
+11/17/2025 03:52,Female,19,BIT,year 1,2.50 - 2.99,No,Yes,Yes,Yes,No
+06/27/2022 23:56,Female,19,Pendidikan Islam ,Year 2,3.00 - 3.49,No,No,No,No,No
+03-10-23 5:42,Female,19,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
+01-10-24 17:57,Male,24,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
+09/17/2025 01:56,Female,19,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
+10-11-24 7:37,Female,23,BCS,Year 3,3.50 - 4.00,No,Yes,Yes,Yes,No
+01/24/2025 09:37,Female,19,KOE,year 2,3.00 - 3.49,Yes,Yes,No,No,No
+04/29/2024 00:16,Female,24,ENM,year 4,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+09-02-23 6:56,Female,24,Diploma Nursing,year 2,3.50 - 4.00,No,No,No,No,No
+10/19/2022 20:56,Female,23,Econs,year 1,3.50 - 4.00,No,Yes,Yes,No,No
+06/16/2025 18:19,Female,20,koe,year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+03/20/2025 19:49,Female,19,BIT,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+02-06-22 16:09,Female,18,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
+11-11-24 5:02,Female,18,IT,Year 3,3.00 - 3.49,No,No,No,Yes,No
+05-04-22 6:59,Female,24,BIT,Year 3,3.00 - 3.49,No,No,Yes,No,No
+12/15/2024 15:44,Female,23,Pendidikan Islam,year 4,3.50 - 4.00,No,No,No,No,No
+04/21/2025 17:14,Male,19,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
+07-11-22 11:24,Male,19,MHSC,Year 3,3.00 - 3.49,Yes,Yes,No,Yes,No
+09/26/2023 20:01,Male,19,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
+06/30/2022 19:18,Male,19,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+04-08-24 19:11,Female,19,Engineering,year 1,3.00 - 3.49,No,No,No,Yes,No
+09/17/2025 04:03,Female,18,Engine,year 4,3.50 - 4.00,No,No,No,No,No
+04/29/2022 03:36,Female,18,Marine science,year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
+08-04-23 20:40,Female,18,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+11/22/2025 17:29,Female,23,Pendidikan islam,year 2,3.50 - 4.00 ,Yes,Yes,No,Yes,No
+03/16/2023 16:27,Female,18,KOE,Year 3,3.00 - 3.49,No,No,Yes,No,No
+07/13/2022 04:02,Female,24,Accounting ,year 3,3.00 - 3.49,No,No,No,No,No
+12/15/2023 19:42,Male,19,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
+01/13/2024 17:34,Female,18,Engine,year 4,3.50 - 4.00,No,No,No,No,No
+08/26/2024 10:40,Female,24,KOE,year 1,3.50 - 4.00,No,No,Yes,Yes,No
+04-04-23 8:53,Female,18,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+10/28/2025 03:58,Female,18,psychology,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
+02-01-24 5:08,Female,18,KOE,Year 2,3.00 - 3.49,No,No,No,No,No
+02/23/2023 11:57,Female,24,BCS,year 4,3.50 - 4.00,No,No,No,No,No
+11-03-25 23:24,Female,19,BIT,year 1,2.50 - 2.99,No,Yes,Yes,Yes,No
+09/13/2025 03:28,Female,23,ALA,year 1,2.50 - 2.99,Yes,Yes,No,Yes,Yes
+12/31/2023 06:42,Female,20,koe,year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+02-06-22 7:40,Female,18,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+05/22/2024 02:58,Female,19,Engineering,year 1,3.50 - 4.00,No,No,No,No,No
+03/22/2024 03:27,Female,19,Engineering,year 1,3.50 - 4.00,No,No,No,No,No
+08-05-22 12:46,Male,18,Engineering,Year 2,3.00 - 3.49,No,Yes,Yes,No,No
+07/15/2024 05:42,Female,19,Engineering,year 1,3.00 - 3.49,No,No,No,Yes,No
+05/13/2025 09:35,Female,24,BCS,year 4,3.50 - 4.00,No,No,No,No,No
+06-04-22 17:11,Female,21,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+11/22/2024 18:35,Male,18,Engineering,Year 2,3.00 - 3.49,Yes,Yes,Yes,No,No
+07/25/2022 00:52,Female,24,engin,year 1,3.50 - 4.00,No,No,No,Yes,No
+12/30/2024 00:50,Female,21,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+09-05-23 7:49,Female,18,Malcom,year 1,3.50 - 4.00,No,Yes,No,No,No
+01-10-22 12:18,Female,18,IT,Year 3,3.00 - 3.49,No,No,No,Yes,No
+11-12-25 15:57,Female,18,Engine,year 4,3.50 - 4.00,No,No,No,No,No
+08/31/2022 11:35,Female,20,BIT,Year 2,3.50 - 4.00,No,No,Yes,No,No
+05/20/2024 19:38,Female,22,Laws,year 3,3.00 - 3.49,Yes,Yes,No,No,No
+09/23/2022 03:00,Female,19,BIT,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+09/25/2025 03:31,Female,24,engin,year 1,3.50 - 4.00,No,No,No,Yes,No
+12/14/2024 16:38,Male,24,BCS,year 2,3.00 - 3.49,No,Yes,No,No,No
+03/21/2025 04:06,Female,24,Accounting ,year 3,3.00 - 3.49,No,No,No,No,No
 09/24/2023 06:26,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
-11/14/2023 20:16,Male,18.0,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
-07/15/2024 17:08,Female,24.0,BCS,year 4,3.50 - 4.00,No,No,No,No,No
-02/20/2025 12:56,Female,19.0,KOE,year 2,3.00 - 3.49,Yes,Yes,No,No,No
-05/22/2025 10:29,Male,18.0,BCS,year 1,3.50 - 4.00,No,No,Yes,Yes,No
-01/27/2022 01:25,Male,19.0,Engineering,Year 2,3.50 - 4.00,No,No,No,Yes,No
-08/27/2024 11:06,Female,19.0,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
-06/09/2022 11:01,Female,18.0,Law,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
-02/25/2023 16:02,Female,24.0,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
-04/26/2025 19:05,Female,19.0,KOE,year 2,3.00 - 3.49,Yes,Yes,No,No,No
-01/01/2023 23:59,Male,18.0,BCS,year 1,3.50 - 4.00,No,No,Yes,Yes,No
-03/10/2025 03:35,Female,19.0,Biomedical science,year 3,3.00 - 3.49,No,No,No,No,No
-11/08/2023 10:54,Female,24.0,Fiqh,Year 3,0 - 1.99,No,No,No,Yes,No
-12/06/2022 21:18,Female,19.0,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
-05/04/2023 07:56,Female,23.0,Benl,year 1,3.00 - 3.49,No,No,No,No,No
-02/15/2024 10:54,Female,21.0,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
-01/22/2025 21:07,Female,18.0,CTS,Year 1,3.50 - 4.00,No,No,No,Yes,No
-06/04/2024 09:20,Male,23.0,Radiography,year 1,3.00 - 3.49,No,No,No,No,No
-09/25/2025 10:33,Male,18.0,BCS,year 2,3.00 - 3.49,No,No,No,No,No
-06/21/2025 18:23,Female,19.0,Fiqh fatwa ,Year 3,3.00 - 3.49,No,No,No,No,No
-01/05/2025 15:35,Male,19.0,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
-05/31/2024 03:20,Female,18.0,KOE,Year 3,3.00 - 3.49,No,No,Yes,No,No
-02/28/2023 11:30,Female,24.0,ENM,year 4,3.00 - 3.49,Yes,Yes,Yes,Yes,No
-08/26/2023 18:24,Female,23.0,BCS,Year 3,3.50 - 4.00,No,Yes,Yes,Yes,No
-06/23/2022 16:54,Female,24.0,Fiqh,Year 3,0 - 1.99,No,No,No,Yes,No
-07/01/2023 16:23,Female,20.0,koe,year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
-09/15/2025 13:49,Female,20.0,BENL,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
-09/15/2023 05:07,Female,18.0,KOE,Year 3,3.00 - 3.49,No,No,Yes,No,No
-06/16/2022 03:47,Male,18.0,BCS,year 1,3.50 - 4.00,No,No,Yes,Yes,No
-08/10/2024 11:18,Female,24.0,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
-11/07/2025 09:07,Male,18.0,BCS,year 2,3.00 - 3.49,No,No,No,No,No
-06/21/2025 09:41,Female,19.0,Engineering,year 1,3.50 - 4.00,No,No,Yes,No,No
-02/05/2023 10:13,Female,18.0,psychology,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
-10/26/2023 03:26,Female,24.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-02/15/2024 19:33,Female,23.0,Econs,year 1,3.50 - 4.00,No,Yes,Yes,No,No
-12/29/2022 02:14,Female,19.0,Engineering,year 1,3.50 - 4.00,No,No,No,No,No
-01/28/2023 13:24,Male,21.0,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
-12/12/2022 18:19,Male,24.0,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
-12/24/2025 01:59,Female,24.0,Accounting ,year 3,3.00 - 3.49,No,No,No,No,No
-12/25/2024 22:14,Male,19.0,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
-05/13/2025 11:47,Female,19.0,Human Resources,Year 2,2.50 - 2.99,No,No,No,No,No
-04/08/2025 00:10,Female,20.0,Usuluddin ,year 2,3.00 - 3.49,No,Yes,No,No,No
-11/02/2025 07:24,Female,18.0,Engine,year 4,3.50 - 4.00,No,No,No,No,No
-06/03/2022 19:28,Female,18.0,KIRKHS,year 1,3.50 - 4.00,No,No,No,No,No
-07/12/2025 01:33,Female,19.0,KOE,year 2,3.00 - 3.49,Yes,Yes,No,No,No
-04/08/2022 05:49,Female,22.0,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
-11/26/2023 14:09,Female,18.0,Banking Studies,year 1,3.50 - 4.00,No,No,No,No,No
-05/18/2024 11:13,Female,19.0,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
-06/07/2023 20:02,Female,24.0,BCS,year 3,3.50 - 4.00,No,No,No,Yes,No
-08/02/2022 13:25,Female,23.0,BCS,Year 3,3.50 - 4.00,No,Yes,Yes,Yes,No
-10/08/2022 22:51,Female,24.0,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
-04/19/2025 20:01,Female,18.0,BCS,year 1,3.00 - 3.49,No,Yes,No,No,No
-04/11/2023 15:44,Female,23.0,Benl,year 1,3.00 - 3.49,No,No,No,No,No
-03/30/2023 09:34,Female,23.0,Pendidikan islam,year 2,3.50 - 4.00 ,Yes,Yes,No,Yes,No
-09/11/2025 00:45,Male,23.0,Kirkhs,Year 3,3.50 - 4.00,No,No,No,No,No
-07/30/2022 04:43,Female,18.0,Engineering,year 1,2.00 - 2.49,No,No,No,No,No
-08/30/2025 04:55,Male,23.0,TAASL,year 2,3.50 - 4.00,No,No,No,Yes,No
-09/07/2025 12:54,Female,18.0,Marine science,year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
-05/24/2024 11:53,Female,24.0,Engine,year 1,3.50 - 4.00,No,No,No,No,No
-08/30/2022 20:12,Female,18.0,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
-08/16/2022 17:06,Male,24.0,BCS,Year 3,3.50 - 4.00,No,No,No,No,No
-02/20/2023 23:25,Male,19.0,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
-04/23/2024 14:30,Female,24.0,KOE,year 1,3.50 - 4.00,No,No,Yes,Yes,No
-08/13/2022 10:18,Female,19.0,Fiqh fatwa ,Year 3,3.00 - 3.49,No,No,No,No,No
-10/28/2023 17:11,Female,18.0,KENMS,Year 2,3.50 - 4.00,No,No,Yes,No,No
-06/18/2022 17:32,Male,18.0,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
-02/29/2024 08:31,Male,18.0,Engineering,Year 2,3.00 - 3.49,No,Yes,Yes,No,No
-01/31/2022 21:32,Female,23.0,Econs,year 1,3.50 - 4.00,No,Yes,Yes,No,No
-11/01/2024 21:38,Male,18.0,BCS,year 2,3.00 - 3.49,No,No,No,No,No
-03/22/2022 22:23,Female,19.0,Fiqh fatwa ,Year 3,3.00 - 3.49,No,No,No,No,No
-10/12/2022 15:13,Female,18.0,CTS,Year 1,3.50 - 4.00,No,No,No,Yes,No
-09/13/2022 03:37,Female,18.0,psychology,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
-04/29/2025 01:58,Female,23.0,ALA,year 1,2.50 - 2.99,Yes,Yes,No,Yes,Yes
-03/19/2022 23:47,Female,23.0,BCS,Year 3,3.50 - 4.00,No,Yes,Yes,Yes,No
-09/20/2023 03:33,Female,20.0,BENL,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
-05/13/2024 15:52,Female,18.0,CTS,Year 1,3.50 - 4.00,No,No,No,Yes,No
-01/24/2024 20:52,Female,19.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-09/21/2024 12:34,Female,18.0,KOE,Year 2,3.00 - 3.49,No,No,No,No,No
-03/19/2025 07:56,Female,20.0,BENL,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
-07/30/2023 02:15,Female,20.0,BENL,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
-04/25/2025 00:37,Female,18.0,psychology,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
-04/10/2023 14:02,Male,24.0,BCS,year 2,3.00 - 3.49,No,Yes,No,No,No
-12/09/2025 05:47,Female,18.0,BCS,year 2,3.50 - 4.00,No,No,Yes,No,No
-01/08/2024 02:42,Female,22.0,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
-12/11/2024 07:34,Female,24.0,Kop,year 4,3.00 - 3.49,No,No,Yes,No,No
-07/02/2025 09:10,Female,18.0,KENMS,Year 2,3.50 - 4.00,No,No,Yes,No,No
-03/04/2025 01:31,Female,20.0,koe,year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
-05/28/2025 12:04,Female,23.0,Benl,year 1,3.00 - 3.49,No,No,No,No,No
-02/23/2024 20:18,Male,20.0,Biomedical science,Year 2,3.00 - 3.49,No,No,No,No,No
-03/05/2022 12:24,Female,21.0,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
-12/22/2023 09:28,Female,18.0,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
-09/23/2022 04:03,Female,19.0,Biomedical science,year 3,3.00 - 3.49,No,No,No,No,No
-07/22/2025 23:59,Female,23.0,Benl,year 1,3.00 - 3.49,No,No,No,No,No
-12/12/2022 21:13,Male,23.0,Mathemathics,year 4,3.00 - 3.49,No,No,No,No,No
-11/30/2022 05:02,Male,19.0,MHSC,Year 3,3.00 - 3.49,Yes,Yes,No,Yes,No
-12/31/2022 08:31,Male,19.0,Engineering,Year 2,3.50 - 4.00,No,No,No,Yes,No
-07/27/2024 18:56,Female,18.0,Islamic Education,year 1,3.50 - 4.00,No,No,No,No,No
-04/14/2024 13:42,Female,18.0,BENL,year 1,3.00 - 3.49,No,Yes,No,No,No
-10/18/2025 06:09,Female,19.0,Engineering,year 1,3.50 - 4.00,No,No,Yes,No,No
-09/01/2023 03:49,Female,19.0,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
-02/17/2023 09:48,Female,19.0,BCS,year 1,3.50 - 4.00,No,Yes,No,Yes,Yes
-03/13/2022 23:02,Female,24.0,Engineering,Year 2,2.50 - 2.99,Yes,Yes,No,Yes,Yes
-01/11/2022 08:06,Female,18.0,BCS,year 2,3.50 - 4.00,No,No,Yes,No,No
-06/30/2023 20:24,Male,24.0,BCS,Year 3,3.50 - 4.00,No,No,No,No,No
-09/14/2025 14:51,Female,18.0,BCS,year 1,3.00 - 3.49,No,Yes,No,No,No
-02/05/2024 04:52,Female,24.0,BCS,year 4,3.50 - 4.00,No,No,No,No,No
-07/29/2025 11:21,Female,20.0,BIT,Year 2,3.50 - 4.00,No,No,Yes,No,No
-05/29/2022 13:01,Female,24.0,Accounting ,year 3,3.00 - 3.49,No,No,No,No,No
-05/17/2022 08:12,Female,18.0,CTS,Year 1,3.50 - 4.00,No,No,No,Yes,No
-05/02/2025 16:23,Female,20.0,BIT,Year 2,3.50 - 4.00,No,No,Yes,No,No
-06/05/2022 22:48,Male,18.0,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
-03/17/2022 21:59,Female,20.0,BENL,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
-08/14/2023 09:06,Female,19.0,BCS,year 1,3.50 - 4.00,No,Yes,No,Yes,Yes
-09/13/2025 04:39,Male,24.0,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
-10/04/2024 04:32,Male,20.0,Biomedical science,Year 2,3.00 - 3.49,No,No,No,No,No
-05/25/2022 19:18,Male,24.0,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
-05/08/2025 01:09,Female,19.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-05/17/2025 11:06,Female,24.0,BCS,year 1,3.50 - 4.00,No,No,No,No,No
-03/15/2025 19:37,Female,19.0,Human Resources,Year 2,2.50 - 2.99,No,No,No,No,No
-08/11/2025 18:37,Female,24.0,Engineering,Year 3,3.50 - 4.00,Yes,Yes,No,No,No
-12/17/2022 11:04,Female,18.0,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
-12/02/2025 03:39,Female,20.0,BENL,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
-04/14/2023 12:53,Female,18.0,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
-03/17/2025 18:14,Male,18.0,BCS,Year 2,3.50 - 4.00,Yes,Yes,Yes,No,Yes
-04/26/2024 10:50,Female,18.0,Islamic Education,year 1,3.50 - 4.00,No,No,No,No,No
-02/12/2025 19:36,Female,18.0,Engine,year 4,3.50 - 4.00,No,No,No,No,No
-07/06/2024 05:51,Male,24.0,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
-07/27/2024 16:02,Female,18.0,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
+11/14/2023 20:16,Male,18,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
+07/15/2024 17:08,Female,24,BCS,year 4,3.50 - 4.00,No,No,No,No,No
+02/20/2025 12:56,Female,19,KOE,year 2,3.00 - 3.49,Yes,Yes,No,No,No
+05/22/2025 10:29,Male,18,BCS,year 1,3.50 - 4.00,No,No,Yes,Yes,No
+01/27/2022 01:25,Male,19,Engineering,Year 2,3.50 - 4.00,No,No,No,Yes,No
+08/27/2024 11:06,Female,19,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
+06-09-22 11:01,Female,18,Law,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
+02/25/2023 16:02,Female,24,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+04/26/2025 19:05,Female,19,KOE,year 2,3.00 - 3.49,Yes,Yes,No,No,No
+01-01-23 23:59,Male,18,BCS,year 1,3.50 - 4.00,No,No,Yes,Yes,No
+03-10-25 3:35,Female,19,Biomedical science,year 3,3.00 - 3.49,No,No,No,No,No
+11-08-23 10:54,Female,24,Fiqh,Year 3,0 - 1.99,No,No,No,Yes,No
+12-06-22 21:18,Female,19,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
+05-04-23 7:56,Female,23,Benl,year 1,3.00 - 3.49,No,No,No,No,No
+02/15/2024 10:54,Female,21,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+01/22/2025 21:07,Female,18,CTS,Year 1,3.50 - 4.00,No,No,No,Yes,No
+06-04-24 9:20,Male,23,Radiography,year 1,3.00 - 3.49,No,No,No,No,No
+09/25/2025 10:33,Male,18,BCS,year 2,3.00 - 3.49,No,No,No,No,No
+06/21/2025 18:23,Female,19,Fiqh fatwa ,Year 3,3.00 - 3.49,No,No,No,No,No
+01-05-25 15:35,Male,19,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
+05/31/2024 03:20,Female,18,KOE,Year 3,3.00 - 3.49,No,No,Yes,No,No
+02/28/2023 11:30,Female,24,ENM,year 4,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+08/26/2023 18:24,Female,23,BCS,Year 3,3.50 - 4.00,No,Yes,Yes,Yes,No
+06/23/2022 16:54,Female,24,Fiqh,Year 3,0 - 1.99,No,No,No,Yes,No
+07-01-23 16:23,Female,20,koe,year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+09/15/2025 13:49,Female,20,BENL,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
+09/15/2023 05:07,Female,18,KOE,Year 3,3.00 - 3.49,No,No,Yes,No,No
+06/16/2022 03:47,Male,18,BCS,year 1,3.50 - 4.00,No,No,Yes,Yes,No
+08-10-24 11:18,Female,24,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+11-07-25 9:07,Male,18,BCS,year 2,3.00 - 3.49,No,No,No,No,No
+06/21/2025 09:41,Female,19,Engineering,year 1,3.50 - 4.00,No,No,Yes,No,No
+02-05-23 10:13,Female,18,psychology,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
+10/26/2023 03:26,Female,24,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+02/15/2024 19:33,Female,23,Econs,year 1,3.50 - 4.00,No,Yes,Yes,No,No
+12/29/2022 02:14,Female,19,Engineering,year 1,3.50 - 4.00,No,No,No,No,No
+01/28/2023 13:24,Male,21,Islamic education,year 2,3.00 - 3.49,No,No,Yes,No,No
+12-12-22 18:19,Male,24,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
+12/24/2025 01:59,Female,24,Accounting ,year 3,3.00 - 3.49,No,No,No,No,No
+12/25/2024 22:14,Male,19,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
+05/13/2025 11:47,Female,19,Human Resources,Year 2,2.50 - 2.99,No,No,No,No,No
+04-08-25 0:10,Female,20,Usuluddin ,year 2,3.00 - 3.49,No,Yes,No,No,No
+11-02-25 7:24,Female,18,Engine,year 4,3.50 - 4.00,No,No,No,No,No
+06-03-22 19:28,Female,18,KIRKHS,year 1,3.50 - 4.00,No,No,No,No,No
+07-12-25 1:33,Female,19,KOE,year 2,3.00 - 3.49,Yes,Yes,No,No,No
+04-08-22 5:49,Female,22,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
+11/26/2023 14:09,Female,18,Banking Studies,year 1,3.50 - 4.00,No,No,No,No,No
+05/18/2024 11:13,Female,19,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
+06-07-23 20:02,Female,24,BCS,year 3,3.50 - 4.00,No,No,No,Yes,No
+08-02-22 13:25,Female,23,BCS,Year 3,3.50 - 4.00,No,Yes,Yes,Yes,No
+10-08-22 22:51,Female,24,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+04/19/2025 20:01,Female,18,BCS,year 1,3.00 - 3.49,No,Yes,No,No,No
+04-11-23 15:44,Female,23,Benl,year 1,3.00 - 3.49,No,No,No,No,No
+03/30/2023 09:34,Female,23,Pendidikan islam,year 2,3.50 - 4.00 ,Yes,Yes,No,Yes,No
+09-11-25 0:45,Male,23,Kirkhs,Year 3,3.50 - 4.00,No,No,No,No,No
+07/30/2022 04:43,Female,18,Engineering,year 1,2.00 - 2.49,No,No,No,No,No
+08/30/2025 04:55,Male,23,TAASL,year 2,3.50 - 4.00,No,No,No,Yes,No
+09-07-25 12:54,Female,18,Marine science,year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,No
+05/24/2024 11:53,Female,24,Engine,year 1,3.50 - 4.00,No,No,No,No,No
+08/30/2022 20:12,Female,18,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+08/16/2022 17:06,Male,24,BCS,Year 3,3.50 - 4.00,No,No,No,No,No
+02/20/2023 23:25,Male,19,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+04/23/2024 14:30,Female,24,KOE,year 1,3.50 - 4.00,No,No,Yes,Yes,No
+08/13/2022 10:18,Female,19,Fiqh fatwa ,Year 3,3.00 - 3.49,No,No,No,No,No
+10/28/2023 17:11,Female,18,KENMS,Year 2,3.50 - 4.00,No,No,Yes,No,No
+06/18/2022 17:32,Male,18,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
+02/29/2024 08:31,Male,18,Engineering,Year 2,3.00 - 3.49,No,Yes,Yes,No,No
+01/31/2022 21:32,Female,23,Econs,year 1,3.50 - 4.00,No,Yes,Yes,No,No
+11-01-24 21:38,Male,18,BCS,year 2,3.00 - 3.49,No,No,No,No,No
+03/22/2022 22:23,Female,19,Fiqh fatwa ,Year 3,3.00 - 3.49,No,No,No,No,No
+10-12-22 15:13,Female,18,CTS,Year 1,3.50 - 4.00,No,No,No,Yes,No
+09/13/2022 03:37,Female,18,psychology,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
+04/29/2025 01:58,Female,23,ALA,year 1,2.50 - 2.99,Yes,Yes,No,Yes,Yes
+03/19/2022 23:47,Female,23,BCS,Year 3,3.50 - 4.00,No,Yes,Yes,Yes,No
+09/20/2023 03:33,Female,20,BENL,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
+05/13/2024 15:52,Female,18,CTS,Year 1,3.50 - 4.00,No,No,No,Yes,No
+01/24/2024 20:52,Female,19,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+09/21/2024 12:34,Female,18,KOE,Year 2,3.00 - 3.49,No,No,No,No,No
+03/19/2025 07:56,Female,20,BENL,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
+07/30/2023 02:15,Female,20,BENL,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
+04/25/2025 00:37,Female,18,psychology,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
+04-10-23 14:02,Male,24,BCS,year 2,3.00 - 3.49,No,Yes,No,No,No
+12-09-25 5:47,Female,18,BCS,year 2,3.50 - 4.00,No,No,Yes,No,No
+01-08-24 2:42,Female,22,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
+12-11-24 7:34,Female,24,Kop,year 4,3.00 - 3.49,No,No,Yes,No,No
+07-02-25 9:10,Female,18,KENMS,Year 2,3.50 - 4.00,No,No,Yes,No,No
+03-04-25 1:31,Female,20,koe,year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+05/28/2025 12:04,Female,23,Benl,year 1,3.00 - 3.49,No,No,No,No,No
+02/23/2024 20:18,Male,20,Biomedical science,Year 2,3.00 - 3.49,No,No,No,No,No
+03-05-22 12:24,Female,21,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+12/22/2023 09:28,Female,18,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+09/23/2022 04:03,Female,19,Biomedical science,year 3,3.00 - 3.49,No,No,No,No,No
+07/22/2025 23:59,Female,23,Benl,year 1,3.00 - 3.49,No,No,No,No,No
+12-12-22 21:13,Male,23,Mathemathics,year 4,3.00 - 3.49,No,No,No,No,No
+11/30/2022 05:02,Male,19,MHSC,Year 3,3.00 - 3.49,Yes,Yes,No,Yes,No
+12/31/2022 08:31,Male,19,Engineering,Year 2,3.50 - 4.00,No,No,No,Yes,No
+07/27/2024 18:56,Female,18,Islamic Education,year 1,3.50 - 4.00,No,No,No,No,No
+04/14/2024 13:42,Female,18,BENL,year 1,3.00 - 3.49,No,Yes,No,No,No
+10/18/2025 06:09,Female,19,Engineering,year 1,3.50 - 4.00,No,No,Yes,No,No
+09-01-23 3:49,Female,19,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
+02/17/2023 09:48,Female,19,BCS,year 1,3.50 - 4.00,No,Yes,No,Yes,Yes
+03/13/2022 23:02,Female,24,Engineering,Year 2,2.50 - 2.99,Yes,Yes,No,Yes,Yes
+01-11-22 8:06,Female,18,BCS,year 2,3.50 - 4.00,No,No,Yes,No,No
+06/30/2023 20:24,Male,24,BCS,Year 3,3.50 - 4.00,No,No,No,No,No
+09/14/2025 14:51,Female,18,BCS,year 1,3.00 - 3.49,No,Yes,No,No,No
+02-05-24 4:52,Female,24,BCS,year 4,3.50 - 4.00,No,No,No,No,No
+07/29/2025 11:21,Female,20,BIT,Year 2,3.50 - 4.00,No,No,Yes,No,No
+05/29/2022 13:01,Female,24,Accounting ,year 3,3.00 - 3.49,No,No,No,No,No
+05/17/2022 08:12,Female,18,CTS,Year 1,3.50 - 4.00,No,No,No,Yes,No
+05-02-25 16:23,Female,20,BIT,Year 2,3.50 - 4.00,No,No,Yes,No,No
+06-05-22 22:48,Male,18,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
+03/17/2022 21:59,Female,20,BENL,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
+08/14/2023 09:06,Female,19,BCS,year 1,3.50 - 4.00,No,Yes,No,Yes,Yes
+09/13/2025 04:39,Male,24,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
+10-04-24 4:32,Male,20,Biomedical science,Year 2,3.00 - 3.49,No,No,No,No,No
+05/25/2022 19:18,Male,24,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
+05-08-25 1:09,Female,19,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+05/17/2025 11:06,Female,24,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+03/15/2025 19:37,Female,19,Human Resources,Year 2,2.50 - 2.99,No,No,No,No,No
+08-11-25 18:37,Female,24,Engineering,Year 3,3.50 - 4.00,Yes,Yes,No,No,No
+12/17/2022 11:04,Female,18,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
+12-02-25 3:39,Female,20,BENL,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
+04/14/2023 12:53,Female,18,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
+03/17/2025 18:14,Male,18,BCS,Year 2,3.50 - 4.00,Yes,Yes,Yes,No,Yes
+04/26/2024 10:50,Female,18,Islamic Education,year 1,3.50 - 4.00,No,No,No,No,No
+02-12-25 19:36,Female,18,Engine,year 4,3.50 - 4.00,No,No,No,No,No
+07-06-24 5:51,Male,24,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
+07/27/2024 16:02,Female,18,Engineering,year 1,3.00 - 3.49,No,Yes,No,Yes,No
+01-01-25 8:00,Female,24,Engineering,Year 2,3.50 - 4.00,No,No,Yes,No,No
+01-01-25 8:17,Male,19,BCS,Year 2,3.50 - 4.00,No,No,No,No,No
+01-01-25 8:34,Female,18,Fiqh,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+01-01-25 8:51,Female,18,psychology,year 1,3.50 - 4.00,No,No,No,No,No
+01-01-25 9:08,Female,23,BIT,Year 2,3.50 - 4.00,No,Yes,No,Yes,No
+01-01-25 9:25,Female,18,Pendidikan Islam ,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
+01-01-25 9:42,Female,24,Biomedical science,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
+01-01-25 9:59,Female,23,Accounting ,Year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
+01-01-25 10:16,Female,19,Engineering,Year 2,3.00 - 3.49,No,No,No,No,No
+01-01-25 10:33,Female,24,engin,year 4,3.50 - 4.00,Yes,Yes,Yes,Yes,No
+01-01-25 10:50,Female,24,Biomedical science,year 1,3.50 - 4.00,No,No,No,No,No
+01-01-25 11:07,Female,24,Koe,year 1,3.50 - 4.00,No,No,No,No,No
+01-01-25 11:24,Female,19,BCS,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+01-01-25 11:41,Female,18,BCS,year 4,0 - 1.99,Yes,Yes,Yes,Yes,No
+01-01-25 11:58,Female,24,Pendidikan Islam,year 2,3.50 - 4.00,No,No,No,No,No
+01-01-25 12:15,Female,19,Engineering,year 2,3.50 - 4.00,Yes,Yes,Yes,No,No
+01-01-25 12:32,Female,24,BCS,year 3,3.00 - 3.49,Yes,Yes,No,Yes,No
+01-01-25 12:49,Female,20,Biomedical science,year 1,3.50 - 4.00,Yes,Yes,Yes,No,No
+01-01-25 13:06,Female,24,Islamic Education,year 1,3.00 - 3.49,No,No,No,No,No
+01-01-25 13:23,Female,23,BCS,Year 3,3.50 - 4.00,Yes,Yes,No,No,Yes
+01-01-25 13:40,Male,18,BCS,Year 2,3.50 - 4.00,No,No,No,Yes,No
+01-01-25 13:57,Male,22,Islamic education,year 3,3.50 - 4.00,No,No,Yes,Yes,No
+01-01-25 14:14,Female,19,engin,year 1,3.00 - 3.49,Yes,Yes,Yes,No,No
+01-01-25 14:31,Male,18,Engineering,year 3,3.50 - 4.00,No,No,No,Yes,No
+01-01-25 14:48,Female,18,Nursing ,Year 3,3.50 - 4.00,No,No,No,Yes,No
+01-01-25 15:05,Male,24,Biotechnology,year 2,3.00 - 3.49,No,No,Yes,Yes,No
+01-01-25 15:22,Male,18,BIT,year 1,3.50 - 4.00,No,No,Yes,No,No
+01-01-25 15:39,Male,18,Benl,year 1,2.00 - 2.49,No,No,No,No,No
+01-01-25 15:56,Male,18,Engineering,year 1,3.50 - 4.00,No,No,No,Yes,No
+01-01-25 16:13,Female,24,BCS,year 2,3.00 - 3.49,No,Yes,No,Yes,No
+01-01-25 16:30,Female,19,BCS,Year 2,3.00 - 3.49,No,Yes,No,Yes,No
+01-01-25 16:47,Female,21,BCS,Year 3,2.50 - 2.99,No,Yes,Yes,Yes,Yes
+01-01-25 17:04,Female,24,CTS,year 1,3.50 - 4.00,No,No,No,No,No
+01-01-25 17:21,Female,19,koe,year 1,3.50 - 4.00,No,No,Yes,No,No
+01-01-25 17:38,Female,18,Pendidikan Islam,year 2,3.00 - 3.49,No,No,No,No,No
+01-01-25 17:55,Male,24,Fiqh,year 3,3.50 - 4.00,No,No,No,No,No
+01-01-25 18:12,Female,19,Usuluddin ,year 4,3.50 - 4.00,Yes,Yes,No,No,No
+01-01-25 18:29,Male,21,Pendidikan Islam ,Year 1,3.50 - 4.00,Yes,Yes,Yes,Yes,No
+01-01-25 18:46,Male,22,Engineering,Year 2,3.50 - 4.00,No,No,Yes,No,No
+01-01-25 19:03,Female,18,Benl,Year 2,3.50 - 4.00,No,No,Yes,No,No
+01-01-25 19:20,Male,24,Engine,year 1,3.50 - 4.00,No,No,No,No,No
+01-01-25 19:37,Female,18,Nursing ,year 2,3.50 - 4.00,Yes,Yes,No,No,No
+01-01-25 19:54,Female,18,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
+01-01-25 20:11,Male,18,Laws,year 1,3.00 - 3.49,No,No,No,Yes,No
+01-01-25 20:28,Male,19,BCS,Year 1,2.00 - 2.49,No,Yes,No,No,No
+01-01-25 20:45,Female,18,ENM,year 1,3.50 - 4.00,No,Yes,No,No,No
+01-01-25 21:02,Female,24,Engineering,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+01-01-25 21:19,Female,21,Engineering,Year 3,3.50 - 4.00,No,No,Yes,No,No
+01-01-25 21:36,Male,18,BCS,year 2,3.00 - 3.49,Yes,Yes,No,Yes,No
+01-01-25 21:53,Male,18,Engineering,year 2,3.50 - 4.00,No,No,No,No,No
+01-01-25 22:10,Female,19,Econs,Year 3,3.00 - 3.49,No,No,No,No,No
+01-01-25 22:27,Female,23,Engineering,year 4,3.00 - 3.49,No,Yes,Yes,No,No
+01-01-25 22:44,Male,20,psychology,year 1,3.50 - 4.00,No,No,Yes,No,No
+01-01-25 23:01,Male,23,Laws,Year 3,3.00 - 3.49,No,No,No,No,No
+01-01-25 23:18,Female,19,BCS,year 1,3.00 - 3.49,Yes,Yes,Yes,No,No
+01-01-25 23:35,Female,24,KOE,year 1,3.50 - 4.00,Yes,Yes,Yes,Yes,No
+01-01-25 23:52,Female,21,Biomedical science,year 3,3.50 - 4.00,No,Yes,Yes,Yes,No
+01-02-25 0:09,Female,18,BCS,Year 3,3.50 - 4.00,No,Yes,No,No,No
+01-02-25 0:26,Male,19,BCS,year 1,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+01-02-25 0:43,Female,18,BIT,Year 3,3.00 - 3.49,No,No,Yes,No,No
+01-02-25 1:00,Female,18,BIT,Year 2,0 - 1.99,No,Yes,Yes,No,No
+01-02-25 1:17,Female,23,IT,year 1,2.50 - 2.99,No,No,No,No,No
+01-02-25 1:34,Female,19,MHSC,year 1,3.50 - 4.00,No,No,No,No,No
+01-02-25 1:51,Male,18,Accounting ,year 1,3.50 - 4.00,No,No,No,No,No
+01-02-25 2:08,Female,18,BCS,year 2,3.00 - 3.49,Yes,Yes,No,Yes,Yes
+01-02-25 2:25,Female,18,BIT,year 4,3.50 - 4.00,No,No,No,No,No
+01-02-25 2:42,Female,19,Engineering,Year 3,3.50 - 4.00,No,No,No,No,No
+01-02-25 2:59,Male,24,Fiqh fatwa ,Year 1,3.50 - 4.00,No,No,No,No,No
+01-02-25 3:16,Female,24,Engineering,year 2,3.50 - 4.00,No,No,No,No,No
+01-02-25 3:33,Female,20,BCS,year 1,3.00 - 3.49,No,No,Yes,No,No
+01-02-25 3:50,Female,19,BIT,Year 1,3.00 - 3.49,No,Yes,Yes,No,No
+01-02-25 4:07,Female,24,Engineering,year 2,3.00 - 3.49,No,No,Yes,Yes,No
+01-02-25 4:24,Male,19,BCS,year 4,3.50 - 4.00,No,No,Yes,No,No
+01-02-25 4:41,Female,18,Irkhs,year 1,2.00 - 2.49,No,No,Yes,No,No
+01-02-25 4:58,Female,19,Nursing ,Year 3,3.50 - 4.00,No,No,No,No,No
+01-02-25 5:15,Female,24,Human Resources,year 1,3.50 - 4.00,No,No,No,Yes,No
+01-02-25 5:32,Female,19,Mathemathics,year 1,3.00 - 3.49,No,No,No,Yes,No
+01-02-25 5:49,Male,18,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+01-02-25 6:06,Female,24,KOE,year 2,2.00 - 2.49,No,No,No,No,No
+01-02-25 6:23,Male,18,BIT,year 3,0 - 1.99,No,No,No,No,No
+01-02-25 6:40,Female,24,BCS,Year 3,3.00 - 3.49,No,No,No,Yes,No
+01-02-25 6:57,Female,20,psychology,Year 1,3.50 - 4.00,Yes,Yes,No,Yes,No
+01-02-25 7:14,Female,18,Engineering,year 4,3.50 - 4.00,No,Yes,No,No,No
+01-02-25 7:31,Female,24,ALA,year 4,3.00 - 3.49,No,No,No,Yes,No
+01-02-25 7:48,Female,18,Engine,year 4,3.00 - 3.49,No,No,No,No,No
+01-02-25 8:05,Female,24,BCS,year 2,3.00 - 3.49,No,No,No,No,No
+01-02-25 8:22,Female,19,BCS,year 1,2.00 - 2.49,No,No,No,No,No
+01-02-25 8:39,Male,24,BCS,year 2,3.50 - 4.00,No,No,No,No,No
+01-02-25 8:56,Male,19,Human Sciences ,year 1,3.50 - 4.00,No,Yes,Yes,No,No
+01-02-25 9:13,Female,21,Pendidikan Islam ,year 2,3.00 - 3.49,No,No,Yes,No,No
+01-02-25 9:30,Female,18,BCS,year 3,3.50 - 4.00,No,Yes,No,No,No
+01-02-25 9:47,Female,24,BIT,year 4,3.00 - 3.49,No,Yes,No,Yes,No
+01-02-25 10:04,Male,23,BIT,year 1,3.00 - 3.49,No,No,No,No,No
+01-02-25 10:21,Female,19,BCS,year 2,3.50 - 4.00,No,No,No,No,No
+01-02-25 10:38,Female,24,BCS,year 2,3.50 - 4.00,No,No,No,No,No
+01-02-25 10:55,Female,19,BCS,Year 3,3.50 - 4.00,No,No,Yes,Yes,No
+01-02-25 11:12,Female,22,BIT,Year 1,3.00 - 3.49,Yes,Yes,Yes,No,No
+01-02-25 11:29,Female,24,KENMS,Year 3,3.00 - 3.49,Yes,Yes,No,Yes,No
+01-02-25 11:46,Female,18,BCS,year 4,3.50 - 4.00,No,Yes,Yes,No,No
+01-02-25 12:03,Female,20,ALA,Year 2,3.50 - 4.00,No,No,No,Yes,No
+01-02-25 12:20,Female,19,BCS,year 3,3.50 - 4.00,No,No,Yes,No,No
+01-02-25 12:37,Female,18,BCS,Year 2,3.50 - 4.00,No,No,No,No,No
+01-02-25 12:54,Female,20,Engineering,year 1,3.50 - 4.00,No,No,No,Yes,No
+01-02-25 13:11,Female,24,KENMS,year 4,3.00 - 3.49,No,No,No,No,No
+01-02-25 13:28,Female,24,psychology,year 1,3.50 - 4.00,No,Yes,No,No,No
+01-02-25 13:45,Female,24,BIT,Year 2,3.00 - 3.49,No,No,No,Yes,No
+01-02-25 14:02,Male,18,BCS,Year 2,2.00 - 2.49,No,No,No,No,No
+01-02-25 14:19,Male,19,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+01-02-25 14:36,Female,24,BCS,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
+01-02-25 14:53,Female,19,BCS,year 3,3.50 - 4.00,No,No,No,No,No
+01-02-25 15:10,Male,18,BIT,Year 2,3.50 - 4.00,No,No,No,No,No
+01-02-25 15:27,Female,19,BCS,Year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+01-02-25 15:44,Female,18,BIT,year 1,3.50 - 4.00,No,No,No,No,No
+01-02-25 16:01,Female,23,koe,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
+01-02-25 16:18,Female,19,BCS,Year 1,3.00 - 3.49,No,No,No,No,No
+01-02-25 16:35,Male,18,BCS,Year 3,3.00 - 3.49,No,No,No,Yes,No
+01-02-25 16:52,Female,18,BCS,year 4,3.50 - 4.00,No,No,No,No,No
+01-02-25 17:09,Male,18,BCS,year 1,3.00 - 3.49,No,No,No,Yes,No
+01-02-25 17:26,Female,23,psychology,year 4,3.50 - 4.00,No,Yes,Yes,Yes,No
+01-02-25 17:43,Female,18,Engineering,Year 3,3.50 - 4.00,No,No,Yes,No,No
+01-02-25 18:00,Female,24,BCS,year 3,3.00 - 3.49,No,No,Yes,No,No
+01-02-25 18:17,Female,19,Engineering,year 1,3.50 - 4.00,No,No,No,Yes,No
+01-02-25 18:34,Female,18,BIT,Year 2,3.00 - 3.49,No,No,Yes,No,No
+01-02-25 18:51,Female,23,KENMS,Year 2,3.00 - 3.49,Yes,Yes,No,Yes,No
+01-02-25 19:08,Female,19,BENL,Year 2,3.00 - 3.49,No,No,No,Yes,No
+01-02-25 19:25,Male,18,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
+01-02-25 19:42,Female,18,Pendidikan Islam ,year 3,3.50 - 4.00,No,Yes,No,No,No
+01-02-25 19:59,Female,20,Usuluddin ,Year 3,3.50 - 4.00,No,No,Yes,No,No
+01-02-25 20:16,Female,18,Engineering,year 1,3.00 - 3.49,No,No,No,Yes,No
+01-02-25 20:33,Female,21,BCS,year 3,3.50 - 4.00,No,No,No,Yes,No
+01-02-25 20:50,Female,19,BIT,year 2,3.00 - 3.49,No,No,No,Yes,No
+01-02-25 21:07,Female,18,psychology,year 1,3.00 - 3.49,Yes,Yes,No,No,No
+01-02-25 21:24,Female,19,Islamic education,year 4,3.50 - 4.00,No,No,No,No,No
+01-02-25 21:41,Female,21,IT,year 1,2.50 - 2.99,No,No,No,Yes,No
+01-02-25 21:58,Male,19,BCS,year 1,3.00 - 3.49,No,No,No,Yes,No
+01-02-25 22:15,Female,19,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
+01-02-25 22:32,Male,18,Biomedical science,Year 3,3.50 - 4.00,No,Yes,Yes,Yes,Yes
+01-02-25 22:49,Female,23,Biotechnology,year 1,3.00 - 3.49,No,No,No,No,No
+01-02-25 23:06,Male,18,Engineering,Year 3,3.50 - 4.00,No,Yes,Yes,Yes,Yes
+01-02-25 23:23,Male,19,psychology,year 2,3.00 - 3.49,No,No,No,No,No
+01-02-25 23:40,Female,19,Biomedical science,year 2,3.00 - 3.49,No,No,No,No,No
+01-02-25 23:57,Female,24,BCS,Year 1,3.50 - 4.00,No,No,Yes,No,No
+01-03-25 0:14,Female,24,KENMS,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+01-03-25 0:31,Male,19,Biomedical science,Year 2,0 - 1.99,Yes,Yes,Yes,Yes,No
+01-03-25 0:48,Male,18,Accounting ,Year 2,3.50 - 4.00,No,No,Yes,No,No
+01-03-25 1:05,Female,20,Engineering,year 1,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+01-03-25 1:22,Female,19,BIT,year 4,3.00 - 3.49,No,No,No,Yes,No
+01-03-25 1:39,Female,21,BCS,year 1,3.00 - 3.49,No,No,No,No,No
+01-03-25 1:56,Female,23,BIT,year 1,3.50 - 4.00,Yes,Yes,No,Yes,Yes
+01-03-25 2:13,Female,23,Biomedical science,Year 2,3.00 - 3.49,No,No,No,No,No
+01-03-25 2:30,Female,18,Islamic education,year 1,3.50 - 4.00,No,No,No,No,No
+01-03-25 2:47,Female,19,BCS,year 2,3.00 - 3.49,Yes,Yes,Yes,No,Yes
+01-03-25 3:04,Female,24,KOE,year 1,0 - 1.99,No,No,No,Yes,No
+01-03-25 3:21,Male,18,Radiography,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
+01-03-25 3:38,Female,24,Usuluddin ,year 2,3.00 - 3.49,No,No,Yes,No,No
+01-03-25 3:55,Female,21,Benl,Year 3,2.50 - 2.99,No,No,No,Yes,No
+01-03-25 4:12,Female,21,KOE,Year 2,3.00 - 3.49,No,No,No,No,No
+01-03-25 4:29,Male,18,BCS,year 3,3.50 - 4.00,No,No,No,No,No
+01-03-25 4:46,Female,18,Islamic education,year 1,3.50 - 4.00,Yes,Yes,No,Yes,No
+01-03-25 5:03,Male,23,Laws,Year 2,3.00 - 3.49,Yes,Yes,No,Yes,Yes
+01-03-25 5:20,Female,18,DIPLOMA TESL,Year 1,3.00 - 3.49,No,No,Yes,No,No
+01-03-25 5:37,Female,18,Engineering,year 3,3.00 - 3.49,No,No,No,No,No
+01-03-25 5:54,Male,23,Islamic Education,year 1,3.50 - 4.00,No,No,No,No,No
+01-03-25 6:11,Female,24,Malcom,Year 3,3.50 - 4.00,Yes,Yes,Yes,No,No
+01-03-25 6:28,Male,18,Biomedical science,year 2,3.50 - 4.00,No,No,No,No,No
+01-03-25 6:45,Female,19,TAASL,Year 2,3.00 - 3.49,No,No,No,No,No
+01-03-25 7:02,Female,24,KENMS,year 1,3.50 - 4.00,No,Yes,No,No,No
+01-03-25 7:19,Male,18,KENMS,year 2,3.00 - 3.49,No,No,No,Yes,No
+01-03-25 7:36,Male,19,BCS,Year 2,3.00 - 3.49,No,Yes,No,Yes,No
+01-03-25 7:53,Female,18,KOE,year 4,3.50 - 4.00,No,Yes,Yes,Yes,No
+01-03-25 8:10,Male,22,Engineering,Year 3,3.00 - 3.49,No,No,Yes,No,No
+01-03-25 8:27,Female,18,Pendidikan islam,year 2,3.00 - 3.49,No,No,No,No,No
+01-03-25 8:44,Female,24,KENMS,year 1,3.00 - 3.49,No,No,No,No,No
+01-03-25 9:01,Male,24,BCS,year 3,3.00 - 3.49,No,No,No,Yes,No
+01-03-25 9:18,Female,18,Koe,Year 1,3.50 - 4.00,No,No,No,No,No
+01-03-25 9:35,Female,18,BIT,year 2,3.50 - 4.00,No,No,No,No,No
+01-03-25 9:52,Female,24,Fiqh,Year 3,3.50 - 4.00,No,No,No,No,No
+01-03-25 10:09,Female,18,BCS,year 1,3.00 - 3.49,No,No,No,No,No
+01-03-25 10:26,Female,24,BIT,Year 2,3.50 - 4.00 ,No,No,No,Yes,No
+01-03-25 10:43,Male,23,Human Resources,year 2,3.00 - 3.49,No,No,Yes,No,No
+01-03-25 11:00,Female,18,IT,Year 3,3.00 - 3.49,No,No,Yes,No,No
+01-03-25 11:17,Female,21,Engineering,year 1,3.50 - 4.00,Yes,Yes,Yes,Yes,No
+01-03-25 11:34,Female,24,BIT,Year 3,3.00 - 3.49,No,No,Yes,Yes,No
+01-03-25 11:51,Female,19,Biotechnology,year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
+01-03-25 12:08,Female,18,BIT,year 1,3.00 - 3.49,No,No,No,No,No
+01-03-25 12:25,Male,23,Engineering,year 1,3.50 - 4.00,No,Yes,No,No,No
+01-03-25 12:42,Female,19,KENMS,Year 2,2.00 - 2.49,Yes,Yes,Yes,Yes,No
+01-03-25 12:59,Male,24,Psychology,year 1,3.00 - 3.49,No,No,Yes,No,No
+01-03-25 13:16,Female,18,Islamic Education,year 3,2.50 - 2.99,No,No,No,Yes,No
+01-03-25 13:33,Female,18,Benl,Year 3,2.00 - 2.49,No,No,No,No,No
+01-03-25 13:50,Female,19,Fiqh,year 1,3.50 - 4.00,No,No,No,Yes,No
+01-03-25 14:07,Female,18,Banking Studies,Year 3,3.50 - 4.00,No,No,No,Yes,No
+01-03-25 14:24,Male,24,BCS,year 1,3.50 - 4.00,No,Yes,No,No,No
+01-03-25 14:41,Female,18,ALA,year 4,3.00 - 3.49,No,No,Yes,No,No
+01-03-25 14:58,Female,18,Engineering,year 1,3.50 - 4.00,No,Yes,No,No,No
+01-03-25 15:15,Male,18,Pendidikan Islam ,year 1,3.50 - 4.00,No,No,No,Yes,No
+01-03-25 15:32,Female,18,Engineering,Year 3,3.50 - 4.00,No,No,No,No,No
+01-03-25 15:49,Female,18,BIT,year 4,3.50 - 4.00,No,Yes,Yes,No,No
+01-03-25 16:06,Female,19,KOE,Year 3,3.00 - 3.49,No,No,Yes,No,No
+01-03-25 16:23,Female,20,Fiqh fatwa ,year 2,3.00 - 3.49,No,Yes,Yes,No,No
+01-03-25 16:40,Female,19,KOE,Year 3,3.00 - 3.49,No,No,No,No,No
+01-03-25 16:57,Female,18,Benl,Year 3,3.50 - 4.00,No,No,No,No,No
+01-03-25 17:14,Female,23,psychology,Year 2,3.00 - 3.49,No,Yes,Yes,Yes,No
+01-03-25 17:31,Female,22,Pendidikan Islam,year 1,3.50 - 4.00,No,No,No,No,No
+01-03-25 17:48,Female,18,KENMS,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+01-03-25 18:05,Female,24,BCS,year 1,3.50 - 4.00,No,Yes,Yes,No,No
+01-03-25 18:22,Female,20,Econs,Year 3,3.50 - 4.00,No,No,No,No,No
+01-03-25 18:39,Female,23,KOE,Year 3,3.50 - 4.00,No,No,Yes,No,No
+01-03-25 18:56,Female,18,Engineering,year 1,3.50 - 4.00,No,Yes,No,Yes,No
+01-03-25 19:13,Female,23,Radiography,year 1,3.00 - 3.49,No,No,No,No,No
+01-03-25 19:30,Female,20,Engineering,year 4,3.00 - 3.49,No,No,No,No,No
+01-03-25 19:47,Female,18,Laws,Year 2,3.00 - 3.49,No,No,No,No,No
+01-03-25 20:04,Female,18,BENL,year 1,3.50 - 4.00,No,Yes,Yes,No,No
+01-03-25 20:21,Male,18,KIRKHS,year 3,3.00 - 3.49,Yes,Yes,Yes,No,No
+01-03-25 20:38,Female,19,Islamic Education,Year 3,3.00 - 3.49,No,Yes,Yes,Yes,No
+01-03-25 20:55,Female,24,BCS,year 4,3.50 - 4.00,No,Yes,No,Yes,No
+01-03-25 21:12,Female,24,Marine science,year 1,3.00 - 3.49,No,No,No,No,No
+01-03-25 21:29,Female,23,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+01-03-25 21:46,Male,18,KOE,year 1,3.50 - 4.00,No,Yes,Yes,No,No
+01-03-25 22:03,Female,18,Engineering,Year 3,3.00 - 3.49,No,No,No,No,No
+01-03-25 22:20,Female,18,BIT,Year 3,3.50 - 4.00,No,No,No,No,No
+01-03-25 22:37,Female,24,BIT,year 1,3.50 - 4.00,No,No,No,No,No
+01-03-25 22:54,Female,19,BIT,year 1,3.00 - 3.49,No,Yes,Yes,No,No
+01-03-25 23:11,Female,24,Law,Year 3,3.50 - 4.00,Yes,Yes,Yes,Yes,Yes
+01-03-25 23:28,Female,18,KOE,year 1,3.50 - 4.00,Yes,Yes,No,No,No
+01-03-25 23:45,Female,18,Laws,year 1,3.50 - 4.00,No,No,Yes,No,No
+01-04-25 0:02,Female,19,Engineering,year 4,3.50 - 4.00,No,No,No,Yes,No
+01-04-25 0:19,Male,24,Banking Studies,Year 2,3.00 - 3.49,No,No,No,No,No
+01-04-25 0:36,Female,18,Human Resources,Year 3,3.50 - 4.00,Yes,Yes,No,No,No
+01-04-25 0:53,Male,23,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+01-04-25 1:10,Male,18,BIT,year 4,3.00 - 3.49,Yes,Yes,No,Yes,No
+01-04-25 1:27,Male,18,BCS,Year 2,3.50 - 4.00,No,No,Yes,No,No
+01-04-25 1:44,Female,18,Human Sciences ,Year 2,3.50 - 4.00,No,Yes,Yes,Yes,No
+01-04-25 2:01,Female,20,BCS,Year 2,3.50 - 4.00,No,No,No,No,No
+01-04-25 2:18,Male,18,Kop,Year 3,3.00 - 3.49,No,No,No,No,No
+01-04-25 2:35,Female,24,Psychology,year 1,3.00 - 3.49,No,No,No,No,No
+01-04-25 2:52,Female,20,Engineering,Year 3,3.00 - 3.49,Yes,Yes,No,Yes,No
+01-04-25 3:09,Female,19,Biomedical science,year 4,0 - 1.99,No,Yes,Yes,Yes,Yes
+01-04-25 3:26,Female,19,BIT,year 1,3.00 - 3.49,No,No,Yes,No,No
+01-04-25 3:43,Female,18,Laws,year 1,3.50 - 4.00,No,Yes,Yes,No,No
+01-04-25 4:00,Female,19,Usuluddin ,year 1,3.00 - 3.49,No,No,No,No,No
+01-04-25 4:17,Female,20,Human Resources,Year 2,3.00 - 3.49,No,No,No,No,No
+01-04-25 4:34,Male,24,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+01-04-25 4:51,Female,19,BCS,year 2,3.50 - 4.00,No,Yes,Yes,Yes,No
+01-04-25 5:08,Female,24,koe,Year 3,3.50 - 4.00,No,No,No,No,No
+01-04-25 5:25,Female,23,BIT,Year 3,3.00 - 3.49,No,No,No,Yes,No
+01-04-25 5:42,Female,19,BIT,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
+01-04-25 5:59,Female,24,BCS,Year 3,3.00 - 3.49,No,No,No,No,No
+01-04-25 6:16,Male,18,KIRKHS,year 2,3.00 - 3.49,No,No,Yes,Yes,No
+01-04-25 6:33,Female,23,BCS,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+01-04-25 6:50,Male,18,Islamic education,year 1,3.50 - 4.00,No,No,No,No,No
+01-04-25 7:07,Female,21,Benl,year 1,3.50 - 4.00,No,No,Yes,No,No
+01-04-25 7:24,Female,18,KOE,year 2,0 - 1.99,No,No,No,No,No
+01-04-25 7:41,Female,24,Pendidikan islam,year 2,3.00 - 3.49,No,No,No,Yes,No
+01-04-25 7:58,Female,24,Diploma Nursing,Year 1,3.00 - 3.49,No,No,No,No,No
+01-04-25 8:15,Male,24,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+01-04-25 8:32,Female,23,Engineering,year 2,3.50 - 4.00,No,No,No,No,No
+01-04-25 8:49,Female,24,Engineering,year 4,3.00 - 3.49,Yes,Yes,Yes,No,No
+01-04-25 9:06,Male,24,Engineering,Year 3,3.50 - 4.00,No,No,Yes,No,No
+01-04-25 9:23,Female,19,BCS,Year 2,3.00 - 3.49,No,No,No,Yes,No
+01-04-25 9:40,Male,24,Engineering,Year 3,3.00 - 3.49,Yes,Yes,Yes,Yes,Yes
+01-04-25 9:57,Female,24,Business Administration,year 1,2.00 - 2.49,No,No,No,No,No
+01-04-25 10:14,Female,18,BCS,Year 2,3.50 - 4.00,Yes,Yes,No,Yes,No
+01-04-25 10:31,Male,18,TAASL,year 2,3.50 - 4.00,No,Yes,Yes,Yes,No
+01-04-25 10:48,Female,19,BIT,year 1,3.50 - 4.00,No,Yes,No,Yes,No
+01-04-25 11:05,Female,18,Islamic education,year 1,3.50 - 4.00,No,No,No,Yes,No
+01-04-25 11:22,Male,23,Koe,Year 2,3.00 - 3.49,Yes,Yes,Yes,Yes,Yes
+01-04-25 11:39,Male,19,BCS,year 1,3.00 - 3.49,No,No,Yes,No,No
+01-04-25 11:56,Female,18,psychology,Year 3,2.00 - 2.49,No,No,Yes,No,No
+01-04-25 12:13,Male,19,Accounting ,year 4,3.00 - 3.49,No,No,No,No,No
+01-04-25 12:30,Female,20,IT,Year 2,3.00 - 3.49,No,No,Yes,No,No
+01-04-25 12:47,Male,19,BCS,year 1,3.50 - 4.00,No,No,No,No,No
+01-04-25 13:04,Female,21,Koe,year 4,3.50 - 4.00,No,No,No,No,No
+01-04-25 13:21,Female,19,BCS,year 1,0 - 1.99,Yes,Yes,Yes,No,Yes
+01-04-25 13:38,Male,23,Koe,year 1,3.50 - 4.00,No,No,No,Yes,No
+01-04-25 13:55,Male,20,Econs,Year 1,3.00 - 3.49,No,No,No,No,No
+01-04-25 14:12,Male,18,Biomedical science,year 2,3.50 - 4.00,No,No,No,Yes,No
+01-04-25 14:29,Male,24,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
+01-04-25 14:46,Female,19,KENMS,year 3,3.50 - 4.00,No,Yes,No,Yes,No
+01-04-25 15:03,Male,19,Engineering,year 2,3.50 - 4.00,No,No,Yes,No,No
+01-04-25 15:20,Female,19,BIT,Year 3,3.00 - 3.49,No,No,No,No,No
+01-04-25 15:37,Female,18,BIT,year 1,3.00 - 3.49,No,No,No,Yes,No
+01-04-25 15:54,Female,19,BCS,year 1,3.50 - 4.00,Yes,Yes,No,No,Yes
+01-04-25 16:11,Female,18,BCS,Year 2,3.00 - 3.49,No,No,Yes,No,No
+01-04-25 16:28,Female,18,Communication ,Year 2,3.50 - 4.00,No,No,No,No,No
+01-04-25 16:45,Female,23,Irkhs,year 1,3.50 - 4.00,No,No,No,No,No
+01-04-25 17:02,Female,19,BCS,year 3,3.00 - 3.49,No,No,Yes,No,No
+01-04-25 17:19,Female,24,Nursing ,year 3,3.50 - 4.00,No,No,No,No,No
+01-04-25 17:36,Female,18,Biotechnology,Year 3,2.00 - 2.49,Yes,Yes,Yes,Yes,No
+01-04-25 17:53,Female,18,engin,Year 3,3.00 - 3.49,No,No,No,No,No
+01-04-25 18:10,Female,18,KOE,year 1,3.50 - 4.00,No,No,No,No,No
+01-04-25 18:27,Female,20,CTS,year 2,3.00 - 3.49,No,No,No,No,No
+01-04-25 18:44,Female,18,Kirkhs,Year 2,2.50 - 2.99,No,Yes,No,Yes,No
+01-04-25 19:01,Female,23,psychology,year 3,3.00 - 3.49,No,No,No,No,No
+01-04-25 19:18,Female,23,BIT,Year 3,3.50 - 4.00,No,No,Yes,Yes,No
+01-04-25 19:35,Female,22,Benl,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
+01-04-25 19:52,Female,18,CTS,year 1,3.00 - 3.49,Yes,Yes,No,No,No
+01-04-25 20:09,Male,24,BCS,year 1,3.00 - 3.49,No,Yes,Yes,No,No
+01-04-25 20:26,Male,18,KOE,year 2,3.00 - 3.49,No,Yes,Yes,No,No
+01-04-25 20:43,Female,23,BIT,year 2,3.50 - 4.00,No,No,No,No,No
+01-04-25 21:00,Female,18,Islamic education,Year 3,3.00 - 3.49,No,No,No,Yes,No
+01-04-25 21:17,Female,18,BCS,year 1,3.00 - 3.49,No,No,No,Yes,No
+01-04-25 21:34,Female,18,BIT,year 1,2.50 - 2.99,Yes,Yes,Yes,No,No
+01-04-25 21:51,Male,18,BCS,year 1,3.00 - 3.49,Yes,Yes,No,Yes,No
+01-04-25 22:08,Female,18,CTS,Year 2,2.50 - 2.99,No,No,Yes,No,No
+01-04-25 22:25,Female,18,Pendidikan islam,year 1,2.50 - 2.99,Yes,Yes,Yes,No,No
+01-04-25 22:42,Female,23,Pendidikan islam,Year 1,2.50 - 2.99,No,No,No,No,No
+01-04-25 22:59,Male,19,Laws,year 2,3.00 - 3.49,No,Yes,No,Yes,No
+01-04-25 23:16,Male,24,BIT,Year 2,3.00 - 3.49,No,Yes,Yes,Yes,No
+01-04-25 23:33,Female,18,Human Resources,Year 2,3.50 - 4.00,No,Yes,Yes,No,No
+01-04-25 23:50,Female,20,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
+01-05-25 0:07,Female,19,Laws,Year 3,3.50 - 4.00,Yes,Yes,Yes,No,Yes
+01-05-25 0:24,Female,18,BIT,Year 3,3.50 - 4.00 ,No,Yes,No,No,No
+01-05-25 0:41,Female,19,Engineering,year 1,2.00 - 2.49,No,No,Yes,No,No
+01-05-25 0:58,Female,23,BIT,Year 2,3.00 - 3.49,No,No,Yes,No,No
+01-05-25 1:15,Male,18,Law,year 1,3.50 - 4.00,No,No,No,No,No
+01-05-25 1:32,Male,18,Islamic education,Year 2,2.00 - 2.49,No,No,No,No,No
+01-05-25 1:49,Female,24,BCS,year 1,3.50 - 4.00,No,No,No,Yes,No
+01-05-25 2:06,Female,24,Engineering,year 1,3.50 - 4.00,No,No,Yes,No,No
+01-05-25 2:23,Female,24,Islamic Education,Year 2,3.50 - 4.00,No,Yes,No,Yes,No
+01-05-25 2:40,Female,19,psychology,Year 3,3.00 - 3.49,No,Yes,Yes,Yes,No
+01-05-25 2:57,Female,24,DIPLOMA TESL,year 1,3.50 - 4.00,No,No,No,No,No
+01-05-25 3:14,Female,18,BENL,year 2,3.00 - 3.49,Yes,Yes,No,Yes,No
+01-05-25 3:31,Male,19,BCS,Year 2,3.50 - 4.00,Yes,Yes,No,No,No
+01-05-25 3:48,Female,18,KOE,year 2,3.50 - 4.00,No,No,No,No,No
+01-05-25 4:05,Male,18,Law,year 1,3.50 - 4.00,Yes,Yes,No,Yes,No
+01-05-25 4:22,Female,18,Engineering,Year 3,3.00 - 3.49,No,No,Yes,No,No
+01-05-25 4:39,Female,19,BCS,Year 3,3.50 - 4.00,No,No,No,No,No
+01-05-25 4:56,Female,18,Engineering,Year 3,3.50 - 4.00,No,No,Yes,Yes,No
+01-05-25 5:13,Female,19,TAASL,Year 2,3.50 - 4.00,No,No,No,No,No
+01-05-25 5:30,Female,24,BCS,Year 3,3.50 - 4.00,Yes,Yes,Yes,Yes,No
+01-05-25 5:47,Male,24,BIT,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+01-05-25 6:04,Male,23,BIT,Year 3,2.50 - 2.99,No,Yes,Yes,No,Yes
+01-05-25 6:21,Female,23,BIT,year 1,3.50 - 4.00,No,No,No,No,No
+01-05-25 6:38,Female,18,Benl,year 3,3.00 - 3.49,No,No,No,Yes,No
+01-05-25 6:55,Female,20,BIT,year 1,3.00 - 3.49,No,No,Yes,Yes,No
+01-05-25 7:12,Male,20,Radiography,Year 3,3.50 - 4.00,Yes,Yes,Yes,No,Yes
+01-05-25 7:29,Female,19,Engineering,year 1,3.50 - 4.00,No,Yes,Yes,No,No
+01-05-25 7:46,Female,19,BIT,Year 3,3.50 - 4.00,No,No,No,No,No
+01-05-25 8:03,Female,24,Engineering,Year 2,3.00 - 3.49,No,Yes,No,No,No
+01-05-25 8:20,Male,18,Islamic education,year 1,3.50 - 4.00 ,No,No,Yes,No,No
+01-05-25 8:37,Female,24,BCS,year 2,3.50 - 4.00,Yes,Yes,Yes,No,No
+01-05-25 8:54,Female,18,Engineering,year 1,3.50 - 4.00,No,No,Yes,Yes,No
+01-05-25 9:11,Male,23,BCS,Year 3,3.50 - 4.00,No,No,Yes,Yes,No
+01-05-25 9:28,Female,24,BIT,year 1,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+01-05-25 9:45,Male,24,Koe,Year 2,3.50 - 4.00,No,No,No,No,No
+01-05-25 10:02,Female,18,Engine,year 1,3.50 - 4.00,Yes,Yes,No,No,No
+01-05-25 10:19,Male,24,BIT,Year 3,3.00 - 3.49,No,No,Yes,No,No
+01-05-25 10:36,Female,24,engin,year 1,3.50 - 4.00,Yes,Yes,Yes,No,No
+01-05-25 10:53,Female,24,Biomedical science,year 1,3.00 - 3.49,No,No,No,Yes,No
+01-05-25 11:10,Female,18,BCS,year 4,3.00 - 3.49,No,No,Yes,Yes,No
+01-05-25 11:27,Female,18,Marine science,year 1,3.50 - 4.00,No,No,No,No,No
+01-05-25 11:44,Female,24,koe,year 1,3.50 - 4.00,No,No,No,No,No
+01-05-25 12:01,Female,24,Diploma Nursing,year 1,3.00 - 3.49,No,No,Yes,No,No
+01-05-25 12:18,Female,19,Biomedical science,year 3,3.50 - 4.00,No,No,No,No,No
+01-05-25 12:35,Female,19,BCS,Year 3,3.50 - 4.00,No,No,No,Yes,No
+01-05-25 12:52,Female,18,Engineering,Year 2,3.50 - 4.00,No,Yes,Yes,Yes,No
+01-05-25 13:09,Female,21,Biomedical science,year 1,3.00 - 3.49,No,Yes,Yes,No,No
+01-05-25 13:26,Female,23,KOE,year 2,3.50 - 4.00,No,Yes,Yes,No,No
+01-05-25 13:43,Male,19,Marine science,Year 3,3.50 - 4.00,No,No,No,Yes,No
+01-05-25 14:00,Female,19,Diploma Nursing,year 3,3.50 - 4.00,Yes,Yes,No,No,Yes
+01-05-25 14:17,Female,18,Laws,year 1,3.50 - 4.00,No,No,No,No,No
+01-05-25 14:34,Male,20,Human Resources,year 1,3.00 - 3.49,No,No,No,Yes,No
+01-05-25 14:51,Female,24,Kop,year 1,3.00 - 3.49,No,Yes,Yes,No,No
+01-05-25 15:08,Female,19,Engineering,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
+01-05-25 15:25,Male,24,Accounting ,Year 2,3.00 - 3.49,No,No,No,No,No
+01-05-25 15:42,Female,19,BCS,year 1,0 - 1.99,No,No,No,No,No
+01-05-25 15:59,Female,19,Fiqh,Year 2,3.50 - 4.00,Yes,Yes,Yes,Yes,Yes
+01-05-25 16:16,Male,19,Engineering,Year 3,3.50 - 4.00,No,No,No,No,No
+01-05-25 16:33,Male,24,BIT,Year 2,3.00 - 3.49,No,No,No,Yes,No
+01-05-25 16:50,Female,18,BCS,year 1,0 - 1.99,No,No,No,No,No
+01-05-25 17:07,Female,19,BCS,year 1,3.00 - 3.49,No,No,No,Yes,No
+01-05-25 17:24,Female,20,Biomedical science,Year 2,3.00 - 3.49,No,No,No,No,No
+01-05-25 17:41,Male,23,BIT,year 1,3.00 - 3.49,Yes,Yes,Yes,No,No
+01-05-25 17:58,Male,19,Pendidikan Islam ,year 1,3.00 - 3.49,No,No,No,No,No
+01-05-25 18:15,Female,20,Pendidikan islam,year 1,3.00 - 3.49,No,No,No,No,No
+01-05-25 18:32,Female,24,BENL,Year 3,3.50 - 4.00,No,No,No,Yes,No
+01-05-25 18:49,Female,18,Engineering,year 4,3.50 - 4.00,No,No,No,Yes,No
+01-05-25 19:06,Male,18,Marine science,year 1,3.00 - 3.49,No,Yes,No,Yes,No
+01-05-25 19:23,Female,19,KENMS,year 1,3.50 - 4.00,No,No,No,No,No
+01-05-25 19:40,Female,19,Islamic education,year 1,3.50 - 4.00,No,No,No,Yes,No
+01-05-25 19:57,Female,20,Mathemathics,year 1,3.50 - 4.00,No,Yes,Yes,No,No
+01-05-25 20:14,Male,18,Engineering,Year 3,3.50 - 4.00,No,No,Yes,No,No
+01-05-25 20:31,Male,23,Pendidikan Islam,year 1,3.50 - 4.00,No,No,No,No,No
+01-05-25 20:48,Female,18,Engine,year 1,3.50 - 4.00,No,No,No,No,No
+01-05-25 21:05,Female,24,Communication ,Year 2,3.00 - 3.49,Yes,Yes,Yes,Yes,No
+01-05-25 21:22,Female,18,Engineering,Year 3,2.50 - 2.99,Yes,Yes,No,No,No
+01-05-25 21:39,Female,18,Laws,year 2,3.50 - 4.00,No,No,Yes,No,No
+01-05-25 21:56,Male,19,BCS,year 1,3.00 - 3.49,No,No,No,No,No
+01-05-25 22:13,Female,19,BCS,year 1,3.00 - 3.49,No,No,No,No,No
+01-05-25 22:30,Female,23,KOE,year 1,3.50 - 4.00,No,No,Yes,No,No
+01-05-25 22:47,Female,19,BCS,year 1,3.50 - 4.00,Yes,Yes,Yes,Yes,Yes
+01-05-25 23:04,Female,18,BCS,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
+01-05-25 23:21,Male,18,BCS,Year 2,3.50 - 4.00,No,Yes,Yes,No,No
+01-05-25 23:38,Female,24,Accounting ,Year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
+01-05-25 23:55,Male,24,KOE,year 1,3.00 - 3.49,No,Yes,No,No,No
+01-06-25 0:12,Male,19,BIT,year 4,3.50 - 4.00,No,No,No,No,No
+01-06-25 0:29,Female,19,KOE,Year 2,3.00 - 3.49,No,No,No,Yes,No
+01-06-25 0:46,Male,23,psychology,year 1,3.50 - 4.00,No,No,No,No,No
+01-06-25 1:03,Female,24,Islamic education,Year 1,0 - 1.99,Yes,Yes,Yes,Yes,No
