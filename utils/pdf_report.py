@@ -94,7 +94,7 @@ def generate_pdf(model_name, student_name, result, prob,
     story.append(Paragraph("MindCheck", title_s))
     story.append(Spacer(6, 8))
     story.append(Paragraph(
-        "Student Depression Risk — Prediction Report", sub_s))
+        "Student Depression Risk - Prediction Report", sub_s))
     story.append(Paragraph(
         f"Generated: {datetime.datetime.now().strftime('%d %B %Y, %I:%M %p')}",
         sub_s))
