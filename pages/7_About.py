@@ -7,6 +7,85 @@ import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.sidebar import sidebar
 
+# ── Live metrics (no hardcode) ────────────────────────────────
+@st.cache_resource
+def get_live_metrics():
+    import warnings
+    warnings.filterwarnings('ignore')
+    from utils.preprocessing import load_and_clean_dataset
+    from sklearn.neighbors import KNeighborsClassifier
+    from sklearn.tree import DecisionTreeClassifier
+    from sklearn.svm import SVC
+    from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import (MinMaxScaler, StandardScaler,
+                                        LabelEncoder, OrdinalEncoder)
+    from sklearn.model_selection import train_test_split
+    from sklearn.metrics import (accuracy_score, precision_score,
+                                  recall_score, f1_score)
+    import pandas as pd
+
+    df = load_and_clean_dataset('dataset/Student_Mental_health.csv')
+    df['CGPA_Numeric'] = df['CGPA_Numeric'].fillna(df['CGPA_Numeric'].median())
+    le_c = LabelEncoder(); le_y = LabelEncoder()
+    df['Course_Enc'] = le_c.fit_transform(df['Course'])
+    df['Year_Enc']   = le_y.fit_transform(df['Year_of_Study'])
+
+    def _m(yt, yp):
+        return {'acc':accuracy_score(yt,yp)*100,
+                'prec':precision_score(yt,yp,zero_division=0)*100,
+                'rec':recall_score(yt,yp,zero_division=0)*100,
+                'f1':f1_score(yt,yp,zero_division=0)*100}
+
+    # KNN
+    knn_feat = ['Gender','Age','Course_Enc','Year_Enc','CGPA_Numeric','Anxiety','Panic_Attack']
+    X_k = df[knn_feat]; y_k = df['Depression']
+    sc_k = MinMaxScaler(); X_ks = sc_k.fit_transform(X_k)
+    Xtr_k,Xte_k,ytr_k,yte_k = train_test_split(X_ks,y_k,test_size=0.2,random_state=42,stratify=y_k)
+    best_k,best_a=5,0
+    for k in range(1,21):
+        m=KNeighborsClassifier(n_neighbors=k); m.fit(Xtr_k,ytr_k)
+        a=accuracy_score(yte_k,m.predict(Xte_k))
+        if a>best_a: best_a,best_k=a,k
+    knn=KNeighborsClassifier(n_neighbors=best_k,metric='euclidean')
+    knn.fit(Xtr_k,ytr_k)
+
+    # DT
+    dt_feat = ['Gender','Age','Course_Enc','Year_Enc','CGPA_Numeric',
+               'Anxiety','Panic_Attack','Marital_Status']
+    X_d=df[dt_feat]; y_d=df['Depression']
+    Xtr_d,Xte_d,ytr_d,yte_d=train_test_split(X_d,y_d,test_size=0.3,random_state=42,stratify=y_d)
+    dt=DecisionTreeClassifier(max_depth=5,criterion='gini',random_state=42)
+    dt.fit(Xtr_d,ytr_d)
+
+    # SVM
+    df_raw=pd.read_csv('dataset/Student_Mental_health.csv')
+    df_raw.columns=df_raw.columns.str.strip()
+    df_raw['Age']=df_raw['Age'].fillna(df_raw['Age'].median())
+    df_raw['Your current year of Study']=df_raw['Your current year of Study'].str.strip().str.lower()
+    df_raw['What is your CGPA?']=df_raw['What is your CGPA?'].str.strip()
+    def cat(c):
+        c=str(c).lower()
+        return 'STEM/IT' if any(x in c for x in ['technology','it','computer','cs','system','software','se','bit','bcs','cts']) else 'Other'
+    df_raw['Course_Category']=df_raw['What is your course?'].apply(cat)
+    df_raw=df_raw.drop(columns=['Timestamp','What is your course?'],errors='ignore')
+    X_sv=df_raw.drop(columns=['Do you have Depression?'])
+    y_sv=(df_raw['Do you have Depression?']=='Yes').astype(int)
+    pipe=Pipeline([('enc',OrdinalEncoder(handle_unknown='use_encoded_value',unknown_value=-1)),
+                   ('scl',StandardScaler()),
+                   ('svm',SVC(kernel='rbf',probability=True,class_weight='balanced',random_state=42))])
+    Xtr_sv,Xte_sv,ytr_sv,yte_sv=train_test_split(X_sv,y_sv,test_size=0.25,random_state=42,stratify=y_sv)
+    pipe.fit(Xtr_sv,ytr_sv)
+
+    return {
+        'knn': _m(yte_k, knn.predict(Xte_k)),
+        'dt':  _m(yte_d, dt.predict(Xte_d)),
+        'svm': _m(yte_sv, pipe.predict(Xte_sv)),
+        'best_k': best_k,
+        'n': len(df),
+    }
+
+_LM = get_live_metrics()
+
 st.set_page_config(
     page_title="About — MindCheck",
     page_icon="👥",
@@ -105,11 +184,11 @@ def draw_architecture():
 
     # ── Row 3: Evaluation ─────────────────────────────────
     box(3, 4.1, 2.4, 0.85, '#162B4F', '📊 KNN Metrics',
-        'Acc: 95.83%\nRec: 97.44% · F1: 93.83%')
+        f'Acc: {_LM["knn"]["acc"]:.2f}%\nRec: {_LM["knn"]["rec"]:.2f}% · F1: {_LM["knn"]["f1"]:.2f}%')
     box(8, 4.1, 2.4, 0.85, '#163D2A', '📊 DT Metrics',
-        'Acc: 91.11%\nPrec: 100% · Rec: 72.41%')
+        f'Acc: {_LM["dt"]["acc"]:.2f}%\nPrec: {_LM["dt"]["prec"]:.2f}% · Rec: {_LM["dt"]["rec"]:.2f}%')
     box(13, 4.1, 2.4, 0.85, '#4F1616', '📊 SVM Metrics',
-        'Acc: 94.67%\nPrec: 91.67% · F1: 91.67%')
+        f'Acc: {_LM["svm"]["acc"]:.2f}%\nPrec: {_LM["svm"]["prec"]:.2f}% · F1: {_LM["svm"]["f1"]:.2f}%')
 
     arrow(3, 5.05, 3, 4.53)
     arrow(8, 5.05, 8, 4.53)
@@ -303,13 +382,13 @@ t1, t2, t3 = st.columns(3)
 for col, name, student_id, role, algo, target, acc in [
     (t1, "Ho Jun Yon",        "2612634",
      "KNN Implementation",    "K-Nearest Neighbor (K=5)",
-     "Depression", "95.83%"),
+     "Depression", f'{_LM["knn"]["acc"]:.2f}%'),
     (t2, "Irvin Tan Wei Shen","2612638",
      "Decision Tree",         "CART (Depth 5, Gini)",
-     "Depression", "91.11%"),
+     "Depression", f'{_LM["dt"]["acc"]:.2f}%'),
     (t3, "Chiang Jun Hang",   "2612610",
      "SVM Implementation",    "SVC (RBF Kernel)",
-     "Depression", "94.67%"),
+     "Depression", f'{_LM["svm"]["acc"]:.2f}%'),
 ]:
     with col:
         with st.container(border=True):
@@ -336,7 +415,7 @@ with d1:
         st.write("**Author:** Shariful07")
         st.write("**Platform:** Kaggle (2020)")
         st.write("**University:** IIUM, Malaysia")
-        st.write("**Records:** 600 students")
+        st.write(f"**Records:** {_LM['n']} students")
         st.write("**Features:** 11 original")
 
 with d2:

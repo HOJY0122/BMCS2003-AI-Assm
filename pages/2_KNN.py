@@ -2,142 +2,78 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import seaborn as sns
 import sys, os, warnings
 warnings.filterwarnings('ignore')
 
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.preprocessing import MinMaxScaler, LabelEncoder
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.metrics import (accuracy_score, precision_score,
-                             recall_score, f1_score, confusion_matrix)
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils.preprocessing import load_and_clean_dataset
 from utils.sidebar import sidebar
+from utils.models import load_all_models
 from utils.pdf_report import generate_pdf
 
-st.set_page_config(page_title="KNN Predictor", page_icon="🔵",
-                   layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="KNN Predictor — MindCheck",
+                   page_icon="🔵", layout="wide",
+                   initial_sidebar_state="expanded")
 sidebar("knn")
 
-# ── Train model (live) ─────────────────────────────────────────
-@st.cache_resource
-def get_knn():
-    df = load_and_clean_dataset('dataset/Student_Mental_health.csv')
-    df['CGPA_Numeric'] = df['CGPA_Numeric'].fillna(df['CGPA_Numeric'].median())
-    le_c = LabelEncoder(); le_y = LabelEncoder()
-    df['Course_Enc'] = le_c.fit_transform(df['Course'])
-    df['Year_Enc']   = le_y.fit_transform(df['Year_of_Study'])
-
-    feat = ['Gender','Age','Course_Enc','Year_Enc',
-            'CGPA_Numeric','Anxiety','Panic_Attack']
-    X = df[feat]; y = df['Depression']
-    sc = MinMaxScaler(); Xs = sc.fit_transform(X)
-    Xtr,Xte,ytr,yte = train_test_split(
-        Xs, y, test_size=0.2, random_state=42, stratify=y)
-
-    k_train, k_test = [], []
-    for k in range(1, 21):
-        m = KNeighborsClassifier(n_neighbors=k)
-        m.fit(Xtr, ytr)
-        k_train.append(accuracy_score(ytr, m.predict(Xtr)))
-        k_test.append(accuracy_score(yte, m.predict(Xte)))
-
-    best_k  = k_test.index(max(k_test)) + 1
-    model   = KNeighborsClassifier(n_neighbors=best_k, metric='euclidean')
-    model.fit(Xtr, ytr)
-    yp = model.predict(Xte)
-    cv = cross_val_score(
-        KNeighborsClassifier(n_neighbors=best_k, metric='euclidean'),
-        Xs, y, cv=5, scoring='accuracy')
-
-    # Feature importance via correlation
-    corr = df[feat + ['Depression']].corr()['Depression'].drop('Depression').abs()
-    corr.index = ['Gender','Age','Course','Year','CGPA','Anxiety','Panic Attack']
-
-    return {
-        'model': model, 'scaler': sc,
-        'le_c': le_c, 'le_y': le_y, 'feat': feat,
-        'best_k': best_k,
-        'k_train': k_train, 'k_test': k_test,
-        'cv': cv,
-        'corr': corr,
-        'acc' : accuracy_score(yte,yp)*100,
-        'prec': precision_score(yte,yp,zero_division=0)*100,
-        'rec' : recall_score(yte,yp,zero_division=0)*100,
-        'f1'  : f1_score(yte,yp,zero_division=0)*100,
-        'cm'  : confusion_matrix(yte,yp),
-    }
-
-M = get_knn()
-
-CGPA_MAP = {'0 - 1.99':1.0,'2.00 - 2.49':2.25,'2.50 - 2.99':2.75,
-            '3.00 - 3.49':3.25,'3.50 - 4.00':3.75}
-COURSES = ["Computer Science","Information Technology","Engineering",
-           "Law","Psychology","Language","Islamic Studies",
-           "Health Sciences","Business","Science & Math","Arts & Social","Others"]
+M = load_all_models()
 
 if 'knn_result' not in st.session_state:
     st.session_state.knn_result = None
+
+# ── Prefill from Comparison page ──────────────────────────────
+_pre = st.session_state.pop('knn_prefill', None)
+if _pre:
+    st.info(f"📋 Data from Comparison page: **{_pre.get('name','Student')}** — form pre-filled below.")
 
 # ── Header ─────────────────────────────────────────────────────
 st.markdown("##### 🔵 KNN PREDICTOR")
 st.title("Depression Risk Predictor")
 st.caption(f"K-Nearest Neighbor · K={M['best_k']} · "
-           f"Member 1: Ho Jun Yon · Live trained on 600 records")
+           f"Member: Ho Jun Yon · Live trained on {M['n_records']} records")
 st.divider()
 
-# ── Live metrics ───────────────────────────────────────────────
 c1,c2,c3,c4 = st.columns(4)
-c1.metric("Accuracy",  f"{M['acc']:.2f}%")
-c2.metric("Precision", f"{M['prec']:.2f}%")
-c3.metric("Recall",    f"{M['rec']:.2f}%")
-c4.metric("F1 Score",  f"{M['f1']:.2f}%")
+c1.metric("Accuracy",  f"{M['knn_m']['acc']:.2f}%")
+c2.metric("Precision", f"{M['knn_m']['prec']:.2f}%")
+c3.metric("Recall",    f"{M['knn_m']['rec']:.2f}%")
+c4.metric("F1 Score",  f"{M['knn_m']['f1']:.2f}%")
 st.divider()
 
-# ══════════════════════════════════════════════════════════════
-# 1. USER INPUT
-# ══════════════════════════════════════════════════════════════
+# ── Input form ─────────────────────────────────────────────────
 st.subheader("Student Information")
-st.caption("Fill in the details below and click Predict")
-
 col1, col2, col3 = st.columns(3)
 with col1:
-    name    = st.text_input("Name", placeholder="e.g. Ahmad", key="knn_name")
-    gender  = st.selectbox("Gender", ["Female","Male"], key="knn_gender")
-    age     = st.slider("Age", 17, 30, 20, key="knn_age")
+    _pn = _pre.get('name','')  if _pre else ''
+    name   = st.text_input("Name", value=_pn, placeholder="e.g. Ahmad", key="knn_name")
+    _gi = ["Female","Male"].index(_pre['gender']) if _pre and _pre.get('gender') in ["Female","Male"] else 0
+    gender = st.selectbox("Gender", ["Female","Male"], index=_gi, key="knn_gender")
+    _ai = int(_pre.get('age',20)) if _pre else 20
+    age    = st.slider("Age", 17, 30, _ai, key="knn_age")
 with col2:
-    course  = st.selectbox("Course", COURSES, key="knn_course")
-    year    = st.selectbox("Year of Study",
-                ["Year 1","Year 2","Year 3","Year 4"], key="knn_year")
-    cgpa    = st.selectbox("CGPA Range", list(CGPA_MAP.keys()), key="knn_cgpa")
+    course = st.selectbox("Course", M['courses'], key="knn_course")
+    _yi = ["Year 1","Year 2","Year 3","Year 4"].index(_pre['year']) if _pre and _pre.get('year') in ["Year 1","Year 2","Year 3","Year 4"] else 0
+    year   = st.selectbox("Year of Study", ["Year 1","Year 2","Year 3","Year 4"], index=_yi, key="knn_year")
+    cgpa   = st.selectbox("CGPA Range", list(M['cgpa_map'].keys()), key="knn_cgpa")
 with col3:
-    anxiety = st.selectbox("Do you have Anxiety?",
-                ["No","Yes"], key="knn_anxiety")
-    panic   = st.selectbox("Do you have Panic Attack?",
-                ["No","Yes"], key="knn_panic")
+    _axi = ["No","Yes"].index(_pre['anxiety']) if _pre and _pre.get('anxiety') in ["No","Yes"] else 0
+    anxiety = st.selectbox("Do you have Anxiety?",      ["No","Yes"], index=_axi, key="knn_anxiety")
+    _pai = ["No","Yes"].index(_pre['panic']) if _pre and _pre.get('panic') in ["No","Yes"] else 0
+    panic   = st.selectbox("Do you have Panic Attack?", ["No","Yes"], index=_pai, key="knn_panic")
     st.write(""); st.write(""); st.write("")
     predict_btn = st.button("🔍  Predict Depression Risk",
-                            use_container_width=True,
-                            key="knn_predict", type="primary")
+                            use_container_width=True, type="primary", key="knn_predict")
 
 if predict_btn:
-    # ── Input Validation ───────────────────────────────────────
     _errors = []
     if name.strip() and name.strip().isdigit():
         _errors.append("❌ Name cannot be numbers only.")
     if age < 17 or age > 35:
         _errors.append(f"❌ Age {age} is outside valid range (17–35).")
-    if cgpa not in CGPA_MAP:
-        _errors.append("❌ Invalid CGPA range selected.")
-
-    # ── Business Rules ─────────────────────────────────────────
-    _high_concern   = (anxiety == "Yes" and panic == "Yes")
-    _academic_risk  = (year in ["Year 3","Year 4"] and cgpa == "0 - 1.99")
-
+    _high_concern  = (anxiety == "Yes" and panic == "Yes")
+    _academic_risk = (year in ["Year 3","Year 4"] and cgpa == "0 - 1.99")
     if _errors:
-        for e in _errors:
-            st.error(e)
+        for e in _errors: st.error(e)
         st.warning("⚠️ Please fix the errors above before predicting.")
     else:
         try:
@@ -146,11 +82,11 @@ if predict_btn:
             pa = 1 if panic   == "Yes"  else 0
             ce = M['le_c'].transform([course])[0] if course in M['le_c'].classes_ else 0
             ye = M['le_y'].transform([year])[0]   if year   in M['le_y'].classes_ else 0
-            cn = CGPA_MAP.get(cgpa, 3.25)
-            inp   = pd.DataFrame([[g,age,ce,ye,cn,ax,pa]], columns=M['feat'])
-            inp_s = M['scaler'].transform(inp)
-            pred  = int(M['model'].predict(inp_s)[0])
-            prob  = M['model'].predict_proba(inp_s)[0].tolist()
+            cn = M['cgpa_map'].get(cgpa, 3.25)
+            inp   = pd.DataFrame([[g,age,ce,ye,cn,ax,pa]], columns=M['knn_feat'])
+            inp_s = M['sc_knn'].transform(inp)
+            pred  = int(M['knn'].predict(inp_s)[0])
+            prob  = M['knn'].predict_proba(inp_s)[0].tolist()
             st.session_state.knn_result = {
                 'pred': pred, 'prob': prob,
                 'name': name.strip() or "Student",
@@ -159,73 +95,50 @@ if predict_btn:
                 'anxiety': anxiety, 'panic': panic,
                 'high_concern': _high_concern,
                 'academic_risk': _academic_risk,
+                'inp_s': inp_s,
             }
         except Exception as ex:
             st.error(f"❌ Prediction failed: {ex}")
-            st.caption("Please check your inputs and try again.")
 
-# ══════════════════════════════════════════════════════════════
-# 2. TEST RESULT
-# ══════════════════════════════════════════════════════════════
+# ── Result ─────────────────────────────────────────────────────
 if st.session_state.knn_result:
-    R = st.session_state.knn_result
+    R    = st.session_state.knn_result
     pred = R['pred']; prob = R['prob']; name_lbl = R['name']
-
     st.divider()
     st.subheader("Prediction Result")
-
     if pred == 1:
         st.error(f"### ⚠️  {name_lbl} — Depression Risk Detected\n\n"
-                 "The KNN model predicts a **high risk of depression**. "
-                 "Please consider seeking professional support.")
+                 "Please consider speaking with a counsellor or mental health professional.")
     else:
         st.success(f"### ✅  {name_lbl} — No Depression Detected\n\n"
-                   "The KNN model predicts **low depression risk**. "
-                   "Keep maintaining a healthy lifestyle!")
+                   "Keep maintaining a healthy academic and social lifestyle!")
 
-    # ── Business Rule Alerts ──────────────────────────────────
     if R.get('high_concern'):
-        st.warning("⚠️ **High Concern:** Student has both Anxiety AND Panic Attack. "
-                   "Immediate counselling referral is strongly recommended.")
+        st.warning("⚠️ **High Concern:** Student has both Anxiety AND Panic Attack. Immediate counselling referral recommended.")
     if R.get('academic_risk'):
-        st.warning("⚠️ **Academic Risk:** Senior year student with very low CGPA (0–1.99). "
-                   "Combined academic and mental health support is advised.")
+        st.warning("⚠️ **Academic Risk:** Senior year student with very low CGPA (0–1.99). Combined support advised.")
 
     st.write("")
     r1, r2, r3 = st.columns([1.2, 1.2, 1])
-
     with r1:
         st.markdown("**Prediction Confidence**")
         fig, ax2 = plt.subplots(figsize=(4, 0.8))
         ax2.barh([""], [prob[0]*100], color="#10B981", height=0.5)
-        ax2.barh([""], [prob[1]*100], left=[prob[0]*100],
-                 color="#EF4444", height=0.5)
+        ax2.barh([""], [prob[1]*100], left=[prob[0]*100], color="#EF4444", height=0.5)
         ax2.set_xlim(0,100); ax2.axis('off')
-        for xp, val, lbl in [
-            (prob[0]*50,             prob[0], "No Risk"),
-            (prob[0]*100+prob[1]*50, prob[1], "At Risk"),
-        ]:
+        for xp, val, lbl in [(prob[0]*50,prob[0],"No Risk"),(prob[0]*100+prob[1]*50,prob[1],"At Risk")]:
             if val > 0.12:
-                ax2.text(xp, 0, f"{lbl}\n{val*100:.0f}%",
-                         ha='center', va='center',
-                         fontsize=8, color='white', fontweight='bold')
-        plt.tight_layout(pad=0)
-        st.pyplot(fig, use_container_width=True); plt.close()
+                ax2.text(xp,0,f"{lbl}\n{val*100:.0f}%",ha='center',va='center',fontsize=8,color='white',fontweight='bold')
+        plt.tight_layout(pad=0); st.pyplot(fig,use_container_width=True); plt.close()
         st.write("")
-        pa_c, pb_c = st.columns(2)
+        pa_c,pb_c = st.columns(2)
         pa_c.metric("No Depression", f"{prob[0]*100:.1f}%")
         pb_c.metric("Depression",    f"{prob[1]*100:.1f}%")
-
     with r2:
         st.markdown("**Input Summary**")
-        st.table(pd.DataFrame({
-            "Field": ["Name","Gender","Age","Course",
-                      "Year","CGPA","Anxiety","Panic Attack"],
-            "Value": [R['name'], R['gender'], str(R['age']),
-                      R['course'], R['year'], R['cgpa'],
-                      R['anxiety'], R['panic']]
-        }).set_index("Field"))
-
+        st.table(pd.DataFrame({"Field":["Name","Gender","Age","Course","Year","CGPA","Anxiety","Panic Attack"],
+                               "Value":[R['name'],R['gender'],str(R['age']),R['course'],R['year'],R['cgpa'],R['anxiety'],R['panic']]
+                              }).set_index("Field"))
     with r3:
         st.markdown("**Model Info**")
         with st.container(border=True):
@@ -234,428 +147,245 @@ if st.session_state.knn_result:
             st.write(f"**Scaling:** MinMax")
             st.write(f"**Distance:** Euclidean")
             st.write(f"**Split:** 80 / 20")
-            st.write(f"**CV Mean:** {M['cv'].mean()*100:.2f}%")
-            st.write(f"**Accuracy:** {M['acc']:.2f}%")
+            st.write(f"**CV Mean:** {M['cv_scores'].mean()*100:.2f}%")
+            st.write(f"**Accuracy:** {M['knn_m']['acc']:.2f}%")
 
-
-    # ══════════════════════════════════════════════════════════
-    # PREDICTION EXPLANATION — WHY did KNN decide this?
-    # ══════════════════════════════════════════════════════════
-    st.write("")
-    st.markdown("---")
+    # Explanation
+    st.write(""); st.markdown("---")
     st.markdown("### 🧠 Why did KNN predict this?")
-    st.caption("Explanation based on feature contribution and nearest neighbours.")
-
-    import numpy as _np
-
     ex1, ex2 = st.columns(2)
-
     with ex1:
-        st.markdown("**Feature Contribution to Prediction**")
-        st.caption("How much each feature pushed the result toward Depression (red) or away (green).")
-
-        # Get feature contributions
-        _feat_lbl = ['Gender','Age','Course','Year','CGPA','Anxiety','Panic Attack']
-        _Xs_df    = pd.DataFrame(
-            M['scaler'].transform(M['scaler'].inverse_transform(
-                _np.zeros((1, len(M['feat'])))
-            ) * 0 + 0),  # dummy
-            columns=_feat_lbl
-        )
-        # Compute scaled input values
-        _inp_vals = _np.array([[
-            R['prob'][1],  # placeholder
-        ]])
-
-        # Use correlation as proxy for feature importance direction
-        _corr_feats = M['corr']  # already computed, index=feat_label
-        _input_dict = {
-            'Gender'      : 1 if R['gender']  == 'Male' else 0,
-            'Age'         : R['age'],
-            'Course'      : 0,
-            'Year'        : 0,
-            'CGPA'        : CGPA_MAP.get(R['cgpa'], 3.25),
-            'Anxiety'     : 1 if R['anxiety'] == 'Yes'  else 0,
-            'Panic Attack': 1 if R['panic']   == 'Yes'  else 0,
-        }
-        # Contribution = input_val * correlation_sign
-        _contribs = {}
-        for f, v in _input_dict.items():
-            _corr_val = _corr_feats.get(f, 0)
-            # If corr positive: high value → more depression
-            # If corr negative: high value → less depression
-            _contribs[f] = v * _corr_val if v > 0.5 else -abs(_corr_val) * 0.3
-
-        _contrib_s = pd.Series(_contribs).sort_values()
-        _colors_ex = ['#EF4444' if v > 0 else '#10B981' for v in _contrib_s.values]
-
-        fig_ex, ax_ex = plt.subplots(figsize=(5, 3.5))
-        bars_ex = ax_ex.barh(_contrib_s.index, _contrib_s.values,
-                              color=_colors_ex, edgecolor='none', height=0.6)
-        ax_ex.axvline(0, color='black', lw=1)
-        for bar, val in zip(bars_ex, _contrib_s.values):
-            ha = 'left' if val >= 0 else 'right'
-            offset = 0.005 if val >= 0 else -0.005
-            ax_ex.text(val + offset,
-                       bar.get_y() + bar.get_height()/2,
-                       f'{val:+.3f}', va='center', ha=ha,
-                       fontsize=8, fontweight='bold')
-        ax_ex.set_xlabel('Contribution (→ Depression vs ← No Depression)')
-        ax_ex.set_title('Feature Contribution', fontweight='bold')
-        ax_ex.spines['top'].set_visible(False)
-        ax_ex.spines['right'].set_visible(False)
-        plt.tight_layout()
-        st.pyplot(fig_ex, use_container_width=True); plt.close()
-
+        st.markdown("**Feature Contribution**")
+        _input_vals = {'Gender':1 if R['gender']=='Male' else 0,'Age':R['age'],
+                       'Course':0,'Year':0,'CGPA':M['cgpa_map'].get(R['cgpa'],3.25),
+                       'Anxiety':1 if R['anxiety']=='Yes' else 0,'Panic Attack':1 if R['panic']=='Yes' else 0}
+        _contrib = {f: v * M['knn_corr'].get(f,0) if v>0.5 else -abs(M['knn_corr'].get(f,0))*0.3
+                    for f,v in _input_vals.items()}
+        _cs = pd.Series(_contrib).sort_values()
+        fig_ex,ax_ex = plt.subplots(figsize=(5,3.5))
+        colors_ex = ['#EF4444' if v>0 else '#10B981' for v in _cs.values]
+        ax_ex.barh(_cs.index,_cs.values,color=colors_ex,edgecolor='none',height=0.6)
+        ax_ex.axvline(0,color='black',lw=1)
+        ax_ex.set_xlabel('Contribution (→ Depression  ← No Depression)')
+        ax_ex.set_title('Feature Contribution',fontweight='bold')
+        ax_ex.spines['top'].set_visible(False); ax_ex.spines['right'].set_visible(False)
+        plt.tight_layout(); st.pyplot(fig_ex,use_container_width=True); plt.close()
     with ex2:
-        st.markdown("**K Nearest Neighbours Analysis**")
-        st.caption(f"The {M['best_k']} most similar students in the training data.")
-
-        # Get neighbours
-        _g  = 1 if R['gender']  == 'Male' else 0
-        _ax = 1 if R['anxiety'] == 'Yes'  else 0
-        _pa = 1 if R['panic']   == 'Yes'  else 0
-        _ce = M['le_c'].transform([R['course']])[0] if R['course'] in M['le_c'].classes_ else 0
-        _ye = M['le_y'].transform([R['year']])[0]   if R['year']   in M['le_y'].classes_ else 0
-        _cn = CGPA_MAP.get(R['cgpa'], 3.25)
-        _inp_raw = pd.DataFrame([[_g, R['age'], _ce, _ye, _cn, _ax, _pa]],
-                                 columns=M['feat'])
-        _inp_sc  = M['scaler'].transform(_inp_raw)
-
+        st.markdown("**K Nearest Neighbours**")
         try:
-            _dists, _idxs = M['model'].kneighbors(_inp_sc)
-            _nbr_labels   = []
-            _nbr_dists    = _dists[0]
-
-            # Get labels from training set - use model internal
-            from sklearn.neighbors import KNeighborsClassifier as _KNN
-            _nbr_preds = [M['model']._y[i] for i in _idxs[0]]
-
-            _dep_count  = sum(_nbr_preds)
-            _ndep_count = len(_nbr_preds) - _dep_count
-
+            g=1 if R['gender']=='Male' else 0; ax=1 if R['anxiety']=='Yes' else 0
+            pa=1 if R['panic']=='Yes' else 0
+            ce=M['le_c'].transform([R['course']])[0] if R['course'] in M['le_c'].classes_ else 0
+            ye=M['le_y'].transform([R['year']])[0]   if R['year']   in M['le_y'].classes_ else 0
+            cn=M['cgpa_map'].get(R['cgpa'],3.25)
+            inp_r=pd.DataFrame([[g,R['age'],ce,ye,cn,ax,pa]],columns=M['knn_feat'])
+            inp_s2=M['sc_knn'].transform(inp_r)
+            dists,idxs=M['knn'].kneighbors(inp_s2)
+            nbr_preds=[M['knn']._y[i] for i in idxs[0]]
+            dep_n=sum(nbr_preds); ndep_n=len(nbr_preds)-dep_n
             with st.container(border=True):
-                st.markdown(f"**Among the {M['best_k']} nearest neighbours:**")
-                st.write(f"🔴 **Depressed:** {_dep_count} students")
-                st.write(f"🟢 **Not Depressed:** {_ndep_count} students")
+                st.write(f"**Among {M['best_k']} nearest neighbours:**")
+                st.write(f"🔴 Depressed: **{dep_n}** students")
+                st.write(f"🟢 Not Depressed: **{ndep_n}** students")
                 st.write("")
-                st.markdown("**Neighbour Distances:**")
-                for i, (dist, lbl) in enumerate(zip(_nbr_dists, _nbr_preds), 1):
-                    icon = "🔴" if lbl == 1 else "🟢"
-                    st.write(f"Neighbour {i}: {icon} {'Depressed' if lbl==1 else 'Not Depressed'} "
-                             f"(distance: {dist:.4f})")
+                for i,(dist,lbl) in enumerate(zip(dists[0],nbr_preds),1):
+                    icon="🔴" if lbl==1 else "🟢"
+                    st.write(f"Neighbour {i}: {icon} {'Depressed' if lbl==1 else 'Not Depressed'} (dist: {dist:.4f})")
                 st.write("")
-                st.caption(
-                    f"**Majority vote:** {_dep_count}/{M['best_k']} neighbours are depressed "
-                    f"→ Prediction: **{'Depression' if _dep_count > _ndep_count else 'No Depression'}**"
-                )
-        except Exception as _nex:
-            st.info(f"Neighbour analysis unavailable: {_nex}")
-
-    st.markdown("**What the features mean for this student:**")
-    _explain_items = []
-    if R['anxiety'] == 'Yes':
-        _explain_items.append("• **Anxiety = Yes** — Anxiety is the 2nd strongest predictor of depression (r=0.257)")
-    if R['panic'] == 'Yes':
-        _explain_items.append("• **Panic Attack = Yes** — Panic attack is the strongest predictor (r=0.341)")
-    if R['gender'] == 'Female':
-        _explain_items.append("• **Gender = Female** — Female students show higher depression rates in this dataset")
-    if CGPA_MAP.get(R['cgpa'], 3.25) < 2.5:
-        _explain_items.append("• **Low CGPA** — Academic struggles may contribute to mental health risk")
-    if not _explain_items:
-        _explain_items.append("• No major risk factors detected in this student's profile")
-    for item in _explain_items:
-        st.write(item)
+                st.caption(f"Majority vote: {dep_n}/{M['best_k']} → **{'Depression' if dep_n>ndep_n else 'No Depression'}**")
+        except Exception as _ne: st.info(f"Neighbour analysis: {_ne}")
 
     st.write("")
-    # ── PDF Export ────────────────────────────────────────────
-    _alerts = []
-    if R.get('high_concern'):
-        _alerts.append("High Concern: Student has both Anxiety and Panic Attack.")
-    if R.get('academic_risk'):
-        _alerts.append("Academic Risk: Senior year student with very low CGPA.")
-    _notes = []
-    if R['anxiety'] == 'Yes':
-        _notes.append("Anxiety = Yes — 2nd strongest predictor of depression (r=0.257)")
-    if R['panic'] == 'Yes':
-        _notes.append("Panic Attack = Yes — strongest predictor (r=0.341)")
+    _alerts_knn=[]; _notes_knn=[]
+    if R.get('high_concern'): _alerts_knn.append("High Concern: Both Anxiety and Panic Attack present.")
+    if R.get('academic_risk'): _alerts_knn.append("Academic Risk: Senior year with CGPA 0-1.99.")
+    if R['anxiety']=='Yes': _notes_knn.append("Anxiety = Yes — 2nd strongest predictor (r=0.257)")
+    if R['panic']=='Yes':   _notes_knn.append("Panic Attack = Yes — strongest predictor (r=0.341)")
     try:
-        _pdf_buf = generate_pdf(
-            model_name   = f"KNN (K={M['best_k']})",
-            student_name = R['name'],
-            result       = R['pred'],
-            prob         = R['prob'],
-            input_data   = {
-                "Gender":       R['gender'],
-                "Age":          str(R['age']),
-                "Course":       R['course'],
-                "Year":         R['year'],
-                "CGPA":         R['cgpa'],
-                "Anxiety":      R['anxiety'],
-                "Panic Attack": R['panic'],
-            },
-            metrics        = {'acc':M['acc'],'prec':M['prec'],'rec':M['rec'],'f1':M['f1']},
-            business_alerts = _alerts,
-            explanation_notes = _notes,
-        )
-        st.download_button(
-            label="📥  Download PDF Report",
-            data=_pdf_buf,
-            file_name=f"mindcheck_knn_{R['name'].replace(' ','_')}.pdf",
-            mime="application/pdf",
-            use_container_width=True,
-            key="knn_pdf_dl",
-        )
-    except Exception as _pdfe:
-        st.caption(f"PDF export unavailable: {_pdfe}")
+        _pdf=generate_pdf(model_name=f"KNN (K={M['best_k']})",student_name=R['name'],
+                          result=R['pred'],prob=R['prob'],
+                          input_data={"Gender":R['gender'],"Age":str(R['age']),"Course":R['course'],
+                                      "Year":R['year'],"CGPA":R['cgpa'],"Anxiety":R['anxiety'],"Panic":R['panic']},
+                          metrics=M['knn_m'],business_alerts=_alerts_knn,explanation_notes=_notes_knn)
+        st.download_button("📥  Download PDF Report",data=_pdf,
+                           file_name=f"mindcheck_knn_{R['name'].replace(' ','_')}.pdf",
+                           mime="application/pdf",use_container_width=True,key="knn_pdf")
+    except Exception as _pe: st.caption(f"PDF unavailable: {_pe}")
 
     st.write("")
     if st.button("Clear Result", key="knn_clear"):
-        st.session_state.knn_result = None
-        st.rerun()
+        st.session_state.knn_result = None; st.rerun()
 
 st.divider()
 
-# ══════════════════════════════════════════════════════════════
-# 3. LIVE FEATURE IMPORTANCE
-# ══════════════════════════════════════════════════════════════
+# ── Live Feature Importance ────────────────────────────────────
 st.subheader("Live Feature Importance")
-st.caption("Pearson correlation of each feature with Depression. "
-           "Computed live from dataset — no hardcode.")
-
-fi = M['corr'].sort_values(ascending=True)
-fi_c1, fi_c2 = st.columns([2, 1])
+st.caption("Pearson correlation — computed live from dataset")
+fi = M['knn_corr'].sort_values(ascending=True)
+fi_c1,fi_c2 = st.columns([2,1])
 with fi_c1:
-    fig_fi, ax_fi = plt.subplots(figsize=(7, 3.5))
-    colors = ['#3B82F6' if v >= fi.mean() else '#9CA3AF' for v in fi.values]
-    bars = ax_fi.barh(fi.index, fi.values, color=colors,
-                      edgecolor='none', height=0.6)
-    ax_fi.axvline(fi.mean(), color='red', linestyle='--',
-                  linewidth=1.2, alpha=0.7, label=f'Mean = {fi.mean():.3f}')
-    for bar, val in zip(bars, fi.values):
-        ax_fi.text(val+0.005, bar.get_y()+bar.get_height()/2,
-                   f'{val:.3f}', va='center', fontsize=9, fontweight='bold')
+    fig_fi,ax_fi=plt.subplots(figsize=(7,3.5))
+    colors_fi=['#3B82F6' if v>=fi.mean() else '#9CA3AF' for v in fi.values]
+    bars_fi=ax_fi.barh(fi.index,fi.values,color=colors_fi,edgecolor='none',height=0.6)
+    ax_fi.axvline(fi.mean(),color='red',ls='--',lw=1.2,alpha=0.7,label=f'Mean={fi.mean():.3f}')
+    for bar,val in zip(bars_fi,fi.values):
+        ax_fi.text(val+0.005,bar.get_y()+bar.get_height()/2,f'{val:.3f}',va='center',fontsize=9,fontweight='bold')
     ax_fi.set_xlabel('Absolute Correlation with Depression')
-    ax_fi.set_title('Feature Importance — Pearson Correlation (Live)',
-                    fontweight='bold')
-    ax_fi.legend(fontsize=9)
-    ax_fi.spines['top'].set_visible(False)
-    ax_fi.spines['right'].set_visible(False)
-    ax_fi.grid(axis='x', alpha=0.3)
-    plt.tight_layout()
-    st.pyplot(fig_fi, use_container_width=True); plt.close()
-
+    ax_fi.set_title('Feature Importance — Pearson Correlation (Live)',fontweight='bold')
+    ax_fi.legend(fontsize=9); ax_fi.spines['top'].set_visible(False); ax_fi.spines['right'].set_visible(False)
+    ax_fi.grid(axis='x',alpha=0.3); plt.tight_layout(); st.pyplot(fig_fi,use_container_width=True); plt.close()
 with fi_c2:
     with st.container(border=True):
         st.markdown("**Feature Ranking**")
-        for feat_n, val in fi.sort_values(ascending=False).items():
-            icon = "🔵" if val >= fi.mean() else "⚪"
+        for feat_n,val in fi.sort_values(ascending=False).items():
+            icon="🔵" if val>=fi.mean() else "⚪"
             st.write(f"{icon} **{feat_n}** — {val:.3f}")
         st.caption("🔵 Above average importance")
 
 st.divider()
 
-# ══════════════════════════════════════════════════════════════
-# 4. LEARN MORE (K-OPT + CV + CONFUSION MATRIX)
-# ══════════════════════════════════════════════════════════════
+# ── Learn More ─────────────────────────────────────────────────
 with st.expander("📚  Learn More — K-Value Optimization, Cross Validation & Confusion Matrix"):
-
     st.markdown("### K-Value Optimization")
-    st.caption("How test accuracy changes across K=1 to K=20. Best K selected automatically.")
-    fig_k, ax_k = plt.subplots(figsize=(10, 4))
-    k_range = list(range(1, 21))
-    ax_k.plot(k_range, [s*100 for s in M['k_train']],
-              'b-o', label='Train Accuracy', markersize=4, linewidth=1.5)
-    ax_k.plot(k_range, [s*100 for s in M['k_test']],
-              'r-o', label='Test Accuracy', markersize=4, linewidth=1.5)
-    ax_k.axvline(x=M['best_k'], color='green', linestyle='--',
-                 linewidth=2, label=f'Best K = {M["best_k"]}')
+    fig_k,ax_k=plt.subplots(figsize=(10,4))
+    k_range=list(range(1,21))
+    ax_k.plot(k_range,[s*100 for s in M['k_scores']],'r-o',label='Test Accuracy',markersize=4,lw=2)
+    ax_k.axvline(x=M['best_k'],color='green',ls='--',lw=2,label=f'Best K={M["best_k"]}')
     ax_k.set_xlabel('K Value'); ax_k.set_ylabel('Accuracy (%)')
-    ax_k.set_title('KNN: Train vs Test Accuracy for Different K Values', fontweight='bold')
-    ax_k.set_xticks(k_range)
-    ax_k.legend(); ax_k.grid(True, alpha=0.3)
+    ax_k.set_title('KNN: Test Accuracy for Different K Values',fontweight='bold')
+    ax_k.set_xticks(k_range); ax_k.legend(); ax_k.grid(True,alpha=0.3)
     ax_k.spines['top'].set_visible(False); ax_k.spines['right'].set_visible(False)
-    plt.tight_layout()
-    st.pyplot(fig_k, use_container_width=True); plt.close()
+    plt.tight_layout(); st.pyplot(fig_k,use_container_width=True); plt.close()
 
-    st.write("")
     st.markdown("### 5-Fold Cross Validation")
-    cv = M['cv']
-    cv1, cv2, cv3 = st.columns(3)
-    cv1.metric("CV Mean", f"{cv.mean()*100:.2f}%")
-    cv2.metric("CV Std Dev", f"{cv.std()*100:.2f}%")
-    cv3.metric("CV Max", f"{cv.max()*100:.2f}%")
-    st.write("")
-    fig_cv, ax_cv = plt.subplots(figsize=(8, 3))
-    folds  = [f"Fold {i+1}" for i in range(5)]
-    colors = ['#3B82F6','#10B981','#EF4444','#F59E0B','#8B5CF6']
-    bars   = ax_cv.bar(folds, cv*100, color=colors, edgecolor='none', alpha=0.9)
-    ax_cv.axhline(y=cv.mean()*100, color='red', linestyle='--',
-                  linewidth=1.5, label=f'Mean = {cv.mean()*100:.2f}%')
+    cv=M['cv_scores']
+    cv1,cv2,cv3=st.columns(3)
+    cv1.metric("CV Mean",f"{cv.mean()*100:.2f}%")
+    cv2.metric("CV Std",f"{cv.std()*100:.2f}%")
+    cv3.metric("CV Max",f"{cv.max()*100:.2f}%")
+    fig_cv,ax_cv=plt.subplots(figsize=(8,3))
+    colors_cv=['#3B82F6','#10B981','#EF4444','#F59E0B','#8B5CF6']
+    bars_cv=ax_cv.bar([f"Fold {i+1}" for i in range(5)],cv*100,color=colors_cv,edgecolor='none',alpha=0.9)
+    ax_cv.axhline(y=cv.mean()*100,color='red',ls='--',lw=1.5,label=f'Mean={cv.mean()*100:.2f}%')
     ax_cv.set_ylabel('Accuracy (%)'); ax_cv.set_ylim(0,110)
-    ax_cv.set_title('5-Fold Cross Validation Scores', fontweight='bold')
-    ax_cv.legend(); ax_cv.grid(axis='y', alpha=0.3)
+    ax_cv.set_title('5-Fold Cross Validation Scores',fontweight='bold')
+    ax_cv.legend(); ax_cv.grid(axis='y',alpha=0.3)
     ax_cv.spines['top'].set_visible(False); ax_cv.spines['right'].set_visible(False)
-    for bar, val in zip(bars, cv*100):
-        ax_cv.text(bar.get_x()+bar.get_width()/2, bar.get_height()+0.8,
-                   f'{val:.1f}%', ha='center', fontsize=9, fontweight='bold')
-    plt.tight_layout()
-    st.pyplot(fig_cv, use_container_width=True); plt.close()
+    for bar,val in zip(bars_cv,cv*100):
+        ax_cv.text(bar.get_x()+bar.get_width()/2,bar.get_height()+0.8,f'{val:.1f}%',ha='center',fontsize=9,fontweight='bold')
+    plt.tight_layout(); st.pyplot(fig_cv,use_container_width=True); plt.close()
 
-    st.write("")
     st.markdown("### Confusion Matrix")
-    import seaborn as sns
-    fig_cm, ax_cm = plt.subplots(figsize=(5, 4))
-    sns.heatmap(M['cm'], annot=True, fmt='d', cmap='Blues', ax=ax_cm,
+    fig_cm,ax_cm=plt.subplots(figsize=(5,4))
+    sns.heatmap(M['knn_m']['cm'],annot=True,fmt='d',cmap='Blues',ax=ax_cm,
                 xticklabels=['No Depression','Depression'],
                 yticklabels=['No Depression','Depression'],
-                linewidths=0.5, annot_kws={'size':12,'weight':'bold'})
+                linewidths=0.5,annot_kws={'size':12,'weight':'bold'})
     ax_cm.set_xlabel('Predicted'); ax_cm.set_ylabel('Actual')
-    ax_cm.set_title('KNN Confusion Matrix', fontweight='bold')
-    plt.tight_layout()
-    st.pyplot(fig_cm, use_container_width=True); plt.close()
-    tn,fp,fn,tp = M['cm'].ravel()
-    a,b,c,d = st.columns(4)
-    a.metric("TN", str(tn)); b.metric("FP", str(fp))
-    c.metric("FN", str(fn)); d.metric("TP", str(tp))
+    ax_cm.set_title('KNN Confusion Matrix',fontweight='bold')
+    plt.tight_layout(); st.pyplot(fig_cm,use_container_width=True); plt.close()
+    tn,fp,fn,tp=M['knn_m']['cm'].ravel()
+    a,b,c,d=st.columns(4)
+    a.metric("TN",str(tn)); b.metric("FP",str(fp))
+    c.metric("FN",str(fn)); d.metric("TP",str(tp))
 
-
-# ══════════════════════════════════════════════════════════════
-# BATCH PREDICTION — KNN
-# ══════════════════════════════════════════════════════════════
+# ── Batch Prediction ───────────────────────────────────────────
 st.divider()
 st.subheader("Batch Prediction — 🔵 KNN")
-st.caption("Upload a CSV with multiple students. KNN predicts each one instantly using the live trained model.")
+st.caption("Upload a CSV to predict multiple students at once using KNN.")
 
-_knn_sample = pd.DataFrame({
-    'Name':          ['Ahmad','Siti','Wei Ming'],
-    'Gender':        ['Male','Female','Male'],
-    'Age':           [20, 21, 19],
-    'Course':        ['Computer Science','Engineering','Information Technology'],
-    'Year_of_Study': ['Year 2','Year 3','Year 1'],
-    'CGPA':          ['3.00 - 3.49','2.50 - 2.99','3.50 - 4.00'],
-    'Anxiety':       ['Yes','No','No'],
-    'Panic_Attack':  ['No','Yes','No'],
-})
-
+_knn_sample=pd.DataFrame({'Name':['Ahmad','Siti','Wei Ming'],'Gender':['Male','Female','Male'],
+    'Age':[20,21,19],'Course':['Computer Science','Engineering','Information Technology'],
+    'Year_of_Study':['Year 2','Year 3','Year 1'],'CGPA':['3.00 - 3.49','2.50 - 2.99','3.50 - 4.00'],
+    'Anxiety':['Yes','No','No'],'Panic_Attack':['No','Yes','No']})
 with st.expander("📋  View / Download CSV Template"):
-    st.dataframe(_knn_sample, use_container_width=True, hide_index=True)
+    st.dataframe(_knn_sample,use_container_width=True,hide_index=True)
     st.download_button("⬇️  Download KNN Template",
         data=_knn_sample.to_csv(index=False).encode(),
-        file_name="knn_batch_template.csv", mime="text/csv",
-        use_container_width=True, key="knn_tmpl_dl")
+        file_name="knn_batch_template.csv",mime="text/csv",
+        use_container_width=True,key="knn_tmpl_dl")
 
-_knn_file = st.file_uploader("Upload CSV for KNN Batch",
-                              type=["csv"], key="knn_batch_file")
+_knn_file=st.file_uploader("Upload CSV — drag & drop or click to browse",
+                            type=["csv"],key="knn_batch_file")
 if _knn_file:
     try:
-        _kdf = pd.read_csv(_knn_file)
-        _kdf.columns = _kdf.columns.str.strip()
+        _kdf=pd.read_csv(_knn_file); _kdf.columns=_kdf.columns.str.strip()
         st.success(f"✅ {len(_kdf)} students loaded")
-        _kresults = []
-        for _ki, _krow in _kdf.iterrows():
+        _kresults=[]
+        for _ki,_krow in _kdf.iterrows():
             try:
-                _kname  = str(_krow.get('Name', f'Student {_ki+1}')).strip()
-                _kg     = 1 if str(_krow.get('Gender','')).lower()=='male' else 0
-                _kax    = 1 if str(_krow.get('Anxiety','')).lower()=='yes' else 0
-                _kpa    = 1 if str(_krow.get('Panic_Attack','')).lower()=='yes' else 0
-                try: _kage = int(float(_krow.get('Age',20)))
-                except: _kage = 20
-                _kcourse = str(_krow.get('Course','Others'))
-                _kyear   = str(_krow.get('Year_of_Study','Year 1'))
-                _kcgpa   = str(_krow.get('CGPA','3.00 - 3.49')).strip()
-                _kce = M['le_c'].transform([_kcourse])[0] if _kcourse in M['le_c'].classes_ else 0
-                _kye = M['le_y'].transform([_kyear])[0]   if _kyear   in M['le_y'].classes_ else 0
-                _kcn = CGPA_MAP.get(_kcgpa, 3.25)
-                _kinp   = pd.DataFrame([[_kg,_kage,_kce,_kye,_kcn,_kax,_kpa]],columns=M['feat'])
-                _kinp_s = M['scaler'].transform(_kinp)
-                _kpred  = int(M['model'].predict(_kinp_s)[0])
-                _kprob  = M['model'].predict_proba(_kinp_s)[0][1]
-                _kresults.append({
-                    'Name': _kname, 'Gender': _krow.get('Gender',''),
-                    'Age': _kage, 'Course': _kcourse, 'Year': _kyear,
-                    'CGPA': _kcgpa, 'Anxiety': _krow.get('Anxiety',''),
-                    'Panic Attack': _krow.get('Panic_Attack',''),
-                    'Result':     '⚠️ Depression' if _kpred==1 else '✅ No Depression',
-                    'Confidence': f"{_kprob*100:.1f}%",
-                    'Risk':       'HIGH' if _kpred==1 else 'LOW',
-                    '_pred': _kpred, '_prob': _kprob,
-                })
-            except Exception as _ke:
-                _kresults.append({'Name': str(_krow.get('Name','')), 'Error': str(_ke)})
-
-        _kres = pd.DataFrame(_kresults)
-        _ktotal = len(_kres)
-        _kdep   = int(_kres['_pred'].sum()) if '_pred' in _kres else 0
-        _knodep = _ktotal - _kdep
-
-        _km1,_km2,_km3 = st.columns(3)
-        _km1.metric("Total Students",  str(_ktotal))
-        _km2.metric("⚠️ At Risk",      str(_kdep),
-                    delta=f"{_kdep/_ktotal*100:.0f}%", delta_color="inverse")
-        _km3.metric("✅ No Risk",       str(_knodep),
-                    delta=f"{_knodep/_ktotal*100:.0f}%")
-
-        _kc1, _kc2 = st.columns(2)
-        with _kc1:
-            _kfig, _kax2 = plt.subplots(figsize=(4,3))
-            _kax2.pie([_kdep, _knodep],
-                labels=[f'Depression ({_kdep})',f'No Depression ({_knodep})'],
-                colors=['#EF4444','#10B981'], autopct='%1.1f%%', startangle=90,
-                wedgeprops={'edgecolor':'white','linewidth':2},
-                textprops={'fontsize':10,'fontweight':'bold'})
-            _kax2.set_title('KNN Batch Results', fontweight='bold')
-            plt.tight_layout(); st.pyplot(_kfig, use_container_width=True); plt.close()
-        with _kc2:
-            _kfig2, _kax3 = plt.subplots(figsize=(4,3))
-            _kax3.hist(_kres['_prob']*100, bins=10,
-                color='#3B82F6', edgecolor='white', alpha=0.85)
-            _kax3.axvline(50, color='red', ls='--', lw=1.5, label='Threshold 50%')
-            _kax3.set_xlabel('Depression Probability (%)'); _kax3.set_ylabel('Count')
-            _kax3.set_title('Confidence Distribution', fontweight='bold')
-            _kax3.legend(fontsize=9)
-            _kax3.spines['top'].set_visible(False); _kax3.spines['right'].set_visible(False)
-            plt.tight_layout(); st.pyplot(_kfig2, use_container_width=True); plt.close()
-
-        _kdisp = _kres[['Name','Gender','Age','Course','Year','CGPA',
-                         'Anxiety','Panic Attack','Result','Confidence','Risk']]
-        def _kstyle(val):
-            if '⚠️' in str(val) or val=='HIGH':
-                return 'background-color:#FEE2E2;color:#991B1B;font-weight:bold'
-            if '✅' in str(val) or val=='LOW':
-                return 'background-color:#DCFCE7;color:#166534;font-weight:bold'
+                _kname=str(_krow.get('Name',f'Student {_ki+1}')).strip()
+                _kg=1 if str(_krow.get('Gender','')).lower()=='male' else 0
+                _kax=1 if str(_krow.get('Anxiety','')).lower()=='yes' else 0
+                _kpa=1 if str(_krow.get('Panic_Attack','')).lower()=='yes' else 0
+                try: _kage=int(float(_krow.get('Age',20)))
+                except: _kage=20
+                _kcourse=str(_krow.get('Course','Others'))
+                _kyear=str(_krow.get('Year_of_Study','Year 1'))
+                _kcgpa=str(_krow.get('CGPA','3.00 - 3.49')).strip()
+                _kce=M['le_c'].transform([_kcourse])[0] if _kcourse in M['le_c'].classes_ else 0
+                _kye=M['le_y'].transform([_kyear])[0]   if _kyear   in M['le_y'].classes_ else 0
+                _kcn=M['cgpa_map'].get(_kcgpa,3.25)
+                _kinp=pd.DataFrame([[_kg,_kage,_kce,_kye,_kcn,_kax,_kpa]],columns=M['knn_feat'])
+                _kinp_s=M['sc_knn'].transform(_kinp)
+                _kpred=int(M['knn'].predict(_kinp_s)[0])
+                _kprob=M['knn'].predict_proba(_kinp_s)[0][1]
+                _kresults.append({'Name':_kname,'Gender':_krow.get('Gender',''),
+                    'Age':_kage,'Course':_kcourse,'Year':_kyear,'CGPA':_kcgpa,
+                    'Anxiety':_krow.get('Anxiety',''),'Panic Attack':_krow.get('Panic_Attack',''),
+                    'Result':'⚠️ Depression' if _kpred==1 else '✅ No Depression',
+                    'Confidence':f"{_kprob*100:.1f}%",'Risk':'HIGH' if _kpred==1 else 'LOW',
+                    '_pred':_kpred,'_prob':_kprob})
+            except Exception as _ke: _kresults.append({'Name':str(_krow.get('Name','')),'Error':str(_ke)})
+        _kres=pd.DataFrame(_kresults)
+        _ktotal=len(_kres); _kdep=int(_kres['_pred'].sum()) if '_pred' in _kres else 0
+        _bm1,_bm2,_bm3=st.columns(3)
+        _bm1.metric("Total Students",str(_ktotal))
+        _bm2.metric("⚠️ At Risk",str(_kdep),delta=f"{_kdep/_ktotal*100:.0f}%",delta_color="inverse")
+        _bm3.metric("✅ No Risk",str(_ktotal-_kdep),delta=f"{(_ktotal-_kdep)/_ktotal*100:.0f}%")
+        _bc1,_bc2=st.columns(2)
+        with _bc1:
+            fig_b,ax_b=plt.subplots(figsize=(4,3))
+            ax_b.pie([_kdep,_ktotal-_kdep],labels=[f'Depression ({_kdep})',f'No Depression ({_ktotal-_kdep})'],
+                colors=['#EF4444','#10B981'],autopct='%1.1f%%',startangle=90,
+                wedgeprops={'edgecolor':'white','linewidth':2},textprops={'fontsize':10,'fontweight':'bold'})
+            ax_b.set_title('KNN Batch Results',fontweight='bold')
+            plt.tight_layout(); st.pyplot(fig_b,use_container_width=True); plt.close()
+        with _bc2:
+            if '_prob' in _kres:
+                fig_p,ax_p=plt.subplots(figsize=(4,3))
+                ax_p.hist(_kres['_prob']*100,bins=min(10,_ktotal),color='#3B82F6',edgecolor='white',alpha=0.85)
+                ax_p.axvline(50,color='red',ls='--',lw=1.5,label='Threshold 50%')
+                ax_p.set_xlabel('Depression Probability (%)'); ax_p.set_ylabel('Count')
+                ax_p.set_title('Confidence Distribution',fontweight='bold')
+                ax_p.legend(fontsize=9); ax_p.spines['top'].set_visible(False); ax_p.spines['right'].set_visible(False)
+                plt.tight_layout(); st.pyplot(fig_p,use_container_width=True); plt.close()
+        _kdisp=_kres[['Name','Gender','Age','Course','Year','CGPA','Anxiety','Panic Attack','Result','Confidence','Risk']]
+        def _kst(val):
+            if '⚠️' in str(val) or val=='HIGH': return 'background-color:#FEE2E2;color:#991B1B;font-weight:bold'
+            if '✅' in str(val) or val=='LOW':  return 'background-color:#DCFCE7;color:#166534;font-weight:bold'
             return ''
-        try:    _kstyled = _kdisp.style.map(_kstyle, subset=['Result','Risk'])
-        except: _kstyled = _kdisp.style.applymap(_kstyle, subset=['Result','Risk'])
-        st.dataframe(_kstyled, use_container_width=True, hide_index=True)
-
-        st.write("")
-        st.markdown("**Individual Student Cards**")
-        for _, _kr in _kres.iterrows():
+        try:    _kstyled=_kdisp.style.map(_kst,subset=['Result','Risk'])
+        except: _kstyled=_kdisp.style.applymap(_kst,subset=['Result','Risk'])
+        st.dataframe(_kstyled,use_container_width=True,hide_index=True)
+        st.write(""); st.markdown("**Individual Student Cards**")
+        for _,_kr in _kres.iterrows():
             if '_pred' not in _kr: continue
-            _kicon = "⚠️" if _kr['_pred']==1 else "✅"
-            with st.expander(f"{_kicon} {_kr['Name']} — {_kr['Result']} ({_kr['Confidence']})"):
-                if _kr['_pred']==1:
-                    st.error(f"**Depression Risk Detected** | KNN Confidence: {_kr['Confidence']}")
-                else:
-                    st.success(f"**No Depression Detected** | KNN Confidence: {_kr['Confidence']}")
-
-        _kdl1, _kdl2 = st.columns(2)
+            with st.expander(f"{'⚠️' if _kr['_pred']==1 else '✅'} {_kr['Name']} — {_kr['Result']} ({_kr['Confidence']})"):
+                if _kr['_pred']==1: st.error(f"**Depression Risk** | Confidence: {_kr['Confidence']}")
+                else:               st.success(f"**No Depression** | Confidence: {_kr['Confidence']}")
+        _kdl1,_kdl2=st.columns(2)
         with _kdl1:
-            st.download_button("⬇️  Download All Results",
-                data=_kdisp.to_csv(index=False).encode(),
-                file_name="knn_batch_results.csv", mime="text/csv",
-                use_container_width=True, key="knn_dl_all")
+            st.download_button("⬇️  Download All Results",data=_kdisp.to_csv(index=False).encode(),
+                file_name="knn_batch_results.csv",mime="text/csv",use_container_width=True,key="knn_dl_all")
         with _kdl2:
-            _khigh = _kres[_kres['_pred']==1][['Name','Gender','Age',
-                'Course','Year','CGPA','Anxiety','Panic Attack','Result','Confidence']]
+            _khigh=_kres[_kres['_pred']==1][list(_kdisp.columns)] if '_pred' in _kres else pd.DataFrame()
             if len(_khigh):
                 st.download_button(f"⬇️  At-Risk Only ({len(_khigh)})",
                     data=_khigh.to_csv(index=False).encode(),
-                    file_name="knn_at_risk.csv", mime="text/csv",
-                    use_container_width=True, key="knn_dl_risk")
+                    file_name="knn_at_risk.csv",mime="text/csv",use_container_width=True,key="knn_dl_risk")
     except Exception as _kerr:
-        st.error(f"Error processing file: {str(_kerr)}")
+        st.error(f"Error: {str(_kerr)}")
         st.caption("Please check your CSV matches the template format.")
 
 st.divider()

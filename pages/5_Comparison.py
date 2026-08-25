@@ -75,17 +75,38 @@ def load_all_models():
     dt.fit(Xtr_d, ytr_d)
     dt_p = dt.predict(Xte_d)
 
-    # ── SVM — Target: Panic Attack ───────────────────────────
-    svm_feat = ['Gender','Age','Course_Enc','Year_of_Study_Enc',
-                'CGPA_Numeric','Anxiety','Marital_Status','Seek_Treatment']
-    X_s = df[svm_feat]; y_s = df['Panic_Attack']
-    sc_svm = StandardScaler()
-    X_ss   = sc_svm.fit_transform(X_s)
+    # ── SVM — Target: Depression (same as predictor page) ──────
+    from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import OrdinalEncoder
+    import pandas as _pd2
+    _df_raw = _pd2.read_csv('dataset/Student_Mental_health.csv')
+    _df_raw.columns = _df_raw.columns.str.strip()
+    _df_raw['Age'] = _df_raw['Age'].fillna(_df_raw['Age'].median())
+    _df_raw['Your current year of Study'] = _df_raw['Your current year of Study'].str.strip().str.lower()
+    _df_raw['What is your CGPA?'] = _df_raw['What is your CGPA?'].str.strip()
+    def _cat(c):
+        c = str(c).lower()
+        return 'STEM/IT' if any(x in c for x in [
+            'technology','it','computer','cs','system',
+            'software','se','bit','bcs','cts']) else 'Other'
+    _df_raw['Course_Category'] = _df_raw['What is your course?'].apply(_cat)
+    _df_raw = _df_raw.drop(columns=['Timestamp','What is your course?'], errors='ignore')
+    X_s  = _df_raw.drop(columns=['Do you have Depression?'])
+    y_s  = (_df_raw['Do you have Depression?'] == 'Yes').astype(int)
+    svm_pipe = Pipeline([
+        ('enc', OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)),
+        ('scl', StandardScaler()),
+        ('svm', SVC(kernel='rbf', probability=True,
+                    class_weight='balanced', random_state=42))
+    ])
+    svm_col_order = list(X_s.columns)
     Xtr_s, Xte_s, ytr_s, yte_s = train_test_split(
-        X_ss, y_s, test_size=0.25, random_state=42, stratify=y_s)
-    svm = SVC(kernel='rbf', probability=True, random_state=42)
-    svm.fit(Xtr_s, ytr_s)
-    svm_p = svm.predict(Xte_s)
+        X_s, y_s, test_size=0.25, random_state=42, stratify=y_s)
+    svm_pipe.fit(Xtr_s, ytr_s)
+    svm_p = svm_pipe.predict(Xte_s)
+    svm   = svm_pipe   # alias
+    sc_svm = None      # pipeline handles scaling internally
+    svm_feat = svm_col_order
 
     def _m(yt, yp):
         return {
@@ -253,13 +274,22 @@ if run:
     dt_pred  = M['dt'].predict(dt_in)[0]
     dt_prob  = M['dt'].predict_proba(dt_in)[0]
 
-    # ── SVM ──────────────────────────────────────────────────
-    svm_in = pd.DataFrame(
-        [[g, t_age, ce, ye, cg, ax, ma, sk]],
-        columns=M['svm_feat'])
-    svm_in_s = M['sc_svm'].transform(svm_in)
-    svm_pred  = M['svm'].predict(svm_in_s)[0]
-    svm_prob  = M['svm'].predict_proba(svm_in_s)[0]
+    # ── SVM ── uses pipeline (same as 4_SVM.py predictor page) ─
+    _yr_n = t_year.split()[-1]
+    svm_in = pd.DataFrame([{
+        'Choose your gender'                           : t_gender,
+        'Age'                                          : t_age,
+        'Your current year of Study'                   : f'year {_yr_n}',
+        'What is your CGPA?'                           : t_cgpa,
+        'Marital status'                               : t_marital,
+        'Do you have Anxiety?'                         : t_anxiety,
+        'Do you have Panic attack?'                    : t_panic,
+        'Did you seek any specialist for a treatment?' : t_seek,
+        'Course_Category': 'STEM/IT' if any(x in t_course.lower() for x in
+            ['technology','it','computer','cs','system','software','se']) else 'Other',
+    }])[M['svm_col_order']]
+    svm_pred = M['svm'].predict(svm_in)[0]
+    svm_prob = M['svm'].predict_proba(svm_in)[0]
 
     # ── Actual labels ─────────────────────────────────────────
     act_dep   = None if t_actual_dep   == "Unknown" else (1 if t_actual_dep   == "Yes" else 0)
@@ -717,13 +747,22 @@ if as_btn:
     _dt_pred = int(M['dt'].predict(_dt_inp)[0])
     _dt_prob = M['dt'].predict_proba(_dt_inp)[0]
 
-    # SVM — uses same encoded features as comparison model
-    _svm_raw = pd.DataFrame([[
-        _g, as_age, _ce, _ye, _cn, _ax, _ma, _sk
-    ]], columns=M['svm_feat'])
-    _svm_scaled = M['sc_svm'].transform(_svm_raw)
-    _svm_pred = int(M['svm'].predict(_svm_scaled)[0])
-    _svm_prob = M['svm'].predict_proba(_svm_scaled)[0]
+    # SVM — uses same pipeline as predictor page
+    _yr_n2 = as_year.split()[-1]
+    _svm_inp2 = pd.DataFrame([{
+        'Choose your gender'                           : as_gender,
+        'Age'                                          : as_age,
+        'Your current year of Study'                   : f'year {_yr_n2}',
+        'What is your CGPA?'                           : as_cgpa,
+        'Marital status'                               : as_marital,
+        'Do you have Anxiety?'                         : as_anxiety,
+        'Do you have Panic attack?'                    : as_panic,
+        'Did you seek any specialist for a treatment?' : as_treat,
+        'Course_Category': 'STEM/IT' if any(x in as_course.lower() for x in
+            ['technology','it','computer','cs','system','software','se']) else 'Other',
+    }])[M['svm_col_order']]
+    _svm_pred = int(M['svm'].predict(_svm_inp2)[0])
+    _svm_prob = M['svm'].predict_proba(_svm_inp2)[0]
 
     # ── Scoring logic — find best model ───────────────────────
     # Score each model based on profile characteristics
@@ -736,7 +775,7 @@ if as_btn:
         _scores['KNN']          += 3
         _scores['Decision Tree'] += 2
         _scores['SVM']           += 2
-        _reasons['KNN'].append("All 3 models agree — KNN selected as highest accuracy model (95.83%)")
+        _reasons['KNN'].append(f"All 3 models agree — KNN selected as highest accuracy model ({M['knn_m']['acc']:.2f}%)")
 
     # Rule 2: Marital status = Yes → DT is better (root feature)
     if as_marital == "Yes":
