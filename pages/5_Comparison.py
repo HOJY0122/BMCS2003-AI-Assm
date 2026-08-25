@@ -152,58 +152,51 @@ st.write(
 st.divider()
 
 # ══════════════════════════════════════════════════════════════
-# SECTION 1 — SCORE CARDS WITH NAVIGATION
 # ══════════════════════════════════════════════════════════════
-c1, c2, c3 = st.columns(3)
+# SECTION 1 — SCORE CARDS (collapseable)
+# ══════════════════════════════════════════════════════════════
+with st.expander("📊  Trained Model Performance", expanded=True):
+    st.caption("Live computed metrics — same numbers shown on each predictor page")
+    c1, c2, c3 = st.columns(3)
 
-with c1:
-    with st.container(border=True):
-        st.markdown("### 🔵 KNN")
-        st.caption(f"Ho Jun Yon · K={M['best_k']} · Target: Depression")
-        st.divider()
-        # Accuracy big
-        st.metric("Accuracy",  f"{M['knn_m']['acc']:.2f}%")
-        ma, mb = st.columns(2)
-        ma.metric("Precision", f"{M['knn_m']['prec']:.2f}%")
-        mb.metric("Recall",    f"{M['knn_m']['rec']:.2f}%")
-        mc, md = st.columns(2)
-        mc.metric("F1 Score",  f"{M['knn_m']['f1']:.2f}%")
-        md.metric("Split",     "80 / 20")
-        st.divider()
-        if st.button("Open KNN Page →", key="go_knn", use_container_width=True):
-            st.switch_page("pages/2_KNN.py")
+    with c1:
+        with st.container(border=True):
+            st.markdown("### 🔵 KNN")
+            st.caption(f"Ho Jun Yon · K={M['best_k']} · Target: Depression")
+            st.divider()
+            st.metric("Accuracy",  f"{M['knn_m']['acc']:.2f}%")
+            ma, mb = st.columns(2)
+            ma.metric("Precision", f"{M['knn_m']['prec']:.2f}%")
+            mb.metric("Recall",    f"{M['knn_m']['rec']:.2f}%")
+            mc, md = st.columns(2)
+            mc.metric("F1 Score",  f"{M['knn_m']['f1']:.2f}%")
+            md.metric("Split",     "80 / 20")
 
-with c2:
-    with st.container(border=True):
-        st.markdown("### 🌳 Decision Tree")
-        st.caption("Irvin Tan · Depth 5 · Target: Depression")
-        st.divider()
-        st.metric("Accuracy",  f"{M['dt_m']['acc']:.2f}%")
-        ma, mb = st.columns(2)
-        ma.metric("Precision", f"{M['dt_m']['prec']:.2f}%")
-        mb.metric("Recall",    f"{M['dt_m']['rec']:.2f}%")
-        mc, md = st.columns(2)
-        mc.metric("F1 Score",  f"{M['dt_m']['f1']:.2f}%")
-        md.metric("Split",     "70 / 30")
-        st.divider()
-        if st.button("Open Decision Tree Page →", key="go_dt", use_container_width=True):
-            st.switch_page("pages/3_Decision_Tree.py")
+    with c2:
+        with st.container(border=True):
+            st.markdown("### 🌳 Decision Tree")
+            st.caption("Irvin Tan · Depth 5 · Target: Depression")
+            st.divider()
+            st.metric("Accuracy",  f"{M['dt_m']['acc']:.2f}%")
+            ma, mb = st.columns(2)
+            ma.metric("Precision", f"{M['dt_m']['prec']:.2f}%")
+            mb.metric("Recall",    f"{M['dt_m']['rec']:.2f}%")
+            mc, md = st.columns(2)
+            mc.metric("F1 Score",  f"{M['dt_m']['f1']:.2f}%")
+            md.metric("Split",     "70 / 30")
 
-with c3:
-    with st.container(border=True):
-        st.markdown("### 🔴 SVM")
-        st.caption("Chiang Jun Hang · RBF · Target: Panic Attack")
-        st.divider()
-        st.metric("Accuracy",  f"{M['svm_m']['acc']:.2f}%")
-        ma, mb = st.columns(2)
-        ma.metric("Precision", f"{M['svm_m']['prec']:.2f}%")
-        mb.metric("Recall",    f"{M['svm_m']['rec']:.2f}%")
-        mc, md = st.columns(2)
-        mc.metric("F1 Score",  f"{M['svm_m']['f1']:.2f}%")
-        md.metric("Split",     "75 / 25")
-        st.divider()
-        if st.button("Open SVM Page →", key="go_svm", use_container_width=True):
-            st.switch_page("pages/4_SVM.py")
+    with c3:
+        with st.container(border=True):
+            st.markdown("### 🔴 SVM")
+            st.caption("Chiang Jun Hang · RBF · Target: Depression")
+            st.divider()
+            st.metric("Accuracy",  f"{M['svm_m']['acc']:.2f}%")
+            ma, mb = st.columns(2)
+            ma.metric("Precision", f"{M['svm_m']['prec']:.2f}%")
+            mb.metric("Recall",    f"{M['svm_m']['rec']:.2f}%")
+            mc, md = st.columns(2)
+            mc.metric("F1 Score",  f"{M['svm_m']['f1']:.2f}%")
+            md.metric("Split",     "75 / 25")
 
 st.divider()
 
@@ -1012,95 +1005,80 @@ if as_btn:
                 st.switch_page("pages/4_SVM.py")
 
 
-# ══════════════════════════════════════════════════════════════
-# AUTO-SELECTOR RESULT DISPLAY (persists via session state)
+# AUTO-SELECTOR RESULT — COMPACT QUICK NAVIGATE BANNER
 # ══════════════════════════════════════════════════════════════
 if st.session_state.get('as_result'):
-    _ar = st.session_state['as_result']
+    _ar        = st.session_state['as_result']
+    _best_lbl  = _ar['best']
+    _icons     = {'KNN':'🔵','Decision Tree':'🌳','SVM':'🔴'}
+    _preds     = {'KNN':(_ar['knn_pred'],_ar['knn_prob']),
+                  'Decision Tree':(_ar['dt_pred'],_ar['dt_prob']),
+                  'SVM':(_ar['svm_pred'],_ar['svm_prob'])}
+    _pages_map = {'KNN':'pages/2_KNN.py',
+                  'Decision Tree':'pages/3_Decision_Tree.py',
+                  'SVM':'pages/4_SVM.py'}
+    _ckeys     = {'KNN':'knn_carry','Decision Tree':'dt_carry','SVM':'svm_carry'}
+    _cdata     = {
+        'KNN': {
+            'pred':_ar['knn_pred'],'prob':_ar['knn_prob'],
+            'name':_ar['name'],'gender':_ar['gender'],'age':_ar['age'],
+            'course':_ar['course'],'year':_ar['year'],'cgpa':_ar['cgpa'],
+            'anxiety':_ar['anxiety'],'panic':_ar['panic'],
+            'high_concern':(_ar['anxiety']=="Yes" and _ar['panic']=="Yes"),
+            'academic_risk':(_ar['year'] in ["Year 3","Year 4"] and _ar['cgpa']=="0 - 1.99"),
+        },
+        'Decision Tree': {
+            'pred':_ar['dt_pred'],'prob':_ar['dt_prob'],
+            'name':_ar['name'],'gender':_ar['gender'],'age':_ar['age'],
+            'course':_ar['course'],'year':_ar['year'],'cgpa':_ar['cgpa'],
+            'marital':_ar['marital'],'anxiety':_ar['anxiety'],'panic':_ar['panic'],
+            'high_concern':(_ar['anxiety']=="Yes" and _ar['panic']=="Yes"),
+            'married_risk':(_ar['marital']=="Yes" and _ar['age']<21),
+            'academic_risk':(_ar['year'] in ["Year 3","Year 4"] and _ar['cgpa']=="0 - 1.99"),
+        },
+        'SVM': {
+            'pred':_ar['svm_pred'],'prob':_ar['svm_prob'],
+            'inp':_ar.get('svm_inp'),
+            'name':_ar['name'],'gender':_ar['gender'],'age':_ar['age'],
+            'course':_ar['course'],'year':_ar['year'],'cgpa':_ar['cgpa'],
+            'marital':_ar['marital'],'anxiety':_ar['anxiety'],
+            'panic':_ar['panic'],'treat':_ar['treat'],
+            'high_concern':(_ar['anxiety']=="Yes" and _ar['panic']=="Yes"),
+            'treat_flag':(_ar['treat']=="Yes"),
+            'academic_risk':(_ar['year'] in ["Year 3","Year 4"] and _ar['cgpa']=="0 - 1.99"),
+        },
+    }
+
     st.divider()
-    st.subheader(f"Quick Navigate — {_ar['name']}")
-    st.caption("Result already computed — click to open page with result pre-loaded. No need to predict again!")
+    with st.container(border=True):
+        _hcol, _xcol = st.columns([5, 1])
+        with _hcol:
+            st.markdown(f"#### ⚡ Quick Navigate — **{_ar['name']}**")
+            st.caption("Result already computed — no re-prediction needed. Click **Open →** to view full details.")
+        with _xcol:
+            st.write("")
+            if st.button("✖ Clear", key="ar_clear", use_container_width=True):
+                st.session_state['as_result'] = None
+                st.rerun()
 
-    _icons = {'KNN':'🔵','Decision Tree':'🌳','SVM':'🔴'}
-    _best_label = _ar['best']
-
-    qn1, qn2, qn3 = st.columns(3)
-
-    with qn1:
-        _kpred = _ar['knn_pred']; _kprob = _ar['knn_prob']
-        _klbl  = "⚠️ Depression" if _kpred==1 else "✅ No Depression"
-        is_best = (_best_label == 'KNN')
-        with st.container(border=True):
-            st.markdown(f"### 🔵 KNN {'⭐ BEST' if is_best else ''}")
-            if _kpred==1: st.error(f"**{_klbl}** — {_kprob[1]*100:.1f}%")
-            else:         st.success(f"**{_klbl}** — {_kprob[0]*100:.1f}%")
-            if st.button("🔵 Open KNN with Result →", key="ar_nav_knn",
-                         use_container_width=True,
-                         type="primary" if is_best else "secondary"):
-                st.session_state['knn_carry'] = {
-                    'pred': _kpred, 'prob': _kprob,
-                    'name': _ar['name'], 'gender': _ar['gender'],
-                    'age': _ar['age'], 'course': _ar['course'],
-                    'year': _ar['year'], 'cgpa': _ar['cgpa'],
-                    'anxiety': _ar['anxiety'], 'panic': _ar['panic'],
-                    'high_concern': (_ar['anxiety']=="Yes" and _ar['panic']=="Yes"),
-                    'academic_risk': (_ar['year'] in ["Year 3","Year 4"] and _ar['cgpa']=="0 - 1.99"),
-                }
-                st.switch_page("pages/2_KNN.py")
-
-    with qn2:
-        _dpred = _ar['dt_pred']; _dprob = _ar['dt_prob']
-        _dlbl  = "⚠️ Depression" if _dpred==1 else "✅ No Depression"
-        is_best = (_best_label == 'Decision Tree')
-        with st.container(border=True):
-            st.markdown(f"### 🌳 Decision Tree {'⭐ BEST' if is_best else ''}")
-            if _dpred==1: st.error(f"**{_dlbl}** — {_dprob[1]*100:.1f}%")
-            else:         st.success(f"**{_dlbl}** — {_dprob[0]*100:.1f}%")
-            if st.button("🌳 Open DT with Result →", key="ar_nav_dt",
-                         use_container_width=True,
-                         type="primary" if is_best else "secondary"):
-                st.session_state['dt_carry'] = {
-                    'pred': _dpred, 'prob': _dprob,
-                    'name': _ar['name'], 'gender': _ar['gender'],
-                    'age': _ar['age'], 'course': _ar['course'],
-                    'year': _ar['year'], 'cgpa': _ar['cgpa'],
-                    'marital': _ar['marital'],
-                    'anxiety': _ar['anxiety'], 'panic': _ar['panic'],
-                    'high_concern': (_ar['anxiety']=="Yes" and _ar['panic']=="Yes"),
-                    'married_risk': (_ar['marital']=="Yes" and _ar['age']<21),
-                    'academic_risk': (_ar['year'] in ["Year 3","Year 4"] and _ar['cgpa']=="0 - 1.99"),
-                }
-                st.switch_page("pages/3_Decision_Tree.py")
-
-    with qn3:
-        _spred = _ar['svm_pred']; _sprob = _ar['svm_prob']
-        _slbl  = "⚠️ Depression" if _spred==1 else "✅ No Depression"
-        is_best = (_best_label == 'SVM')
-        with st.container(border=True):
-            st.markdown(f"### 🔴 SVM {'⭐ BEST' if is_best else ''}")
-            if _spred==1: st.error(f"**{_slbl}** — {_sprob[1]*100:.1f}%")
-            else:         st.success(f"**{_slbl}** — {_sprob[0]*100:.1f}%")
-            if st.button("🔴 Open SVM with Result →", key="ar_nav_svm",
-                         use_container_width=True,
-                         type="primary" if is_best else "secondary"):
-                st.session_state['svm_carry'] = {
-                    'pred': _spred, 'prob': _sprob,
-                    'inp': _ar.get('svm_inp'),
-                    'name': _ar['name'], 'gender': _ar['gender'],
-                    'age': _ar['age'], 'course': _ar['course'],
-                    'year': _ar['year'], 'cgpa': _ar['cgpa'],
-                    'marital': _ar['marital'],
-                    'anxiety': _ar['anxiety'], 'panic': _ar['panic'],
-                    'treat': _ar['treat'],
-                    'high_concern': (_ar['anxiety']=="Yes" and _ar['panic']=="Yes"),
-                    'treat_flag': (_ar['treat']=="Yes"),
-                    'academic_risk': (_ar['year'] in ["Year 3","Year 4"] and _ar['cgpa']=="0 - 1.99"),
-                }
-                st.switch_page("pages/4_SVM.py")
-
-    if st.button("Clear Auto-Selector Result", key="ar_clear"):
-        st.session_state['as_result'] = None
-        st.rerun()
-
+        st.write("")
+        _qcols = st.columns(3)
+        for _qcol, _model in zip(_qcols, ['KNN','Decision Tree','SVM']):
+            _pred, _prob = _preds[_model]
+            _is_best     = (_model == _best_lbl)
+            _star        = " ⭐ BEST" if _is_best else ""
+            _lbl         = "⚠️ Depression" if _pred==1 else "✅ No Depression"
+            _conf        = f"{_prob[1]*100:.1f}%" if _pred==1 else f"{_prob[0]*100:.1f}%"
+            with _qcol:
+                with st.container(border=True):
+                    st.markdown(f"**{_icons[_model]} {_model}**{_star}")
+                    if _pred==1: st.error(f"{_lbl} · {_conf} confidence")
+                    else:        st.success(f"{_lbl} · {_conf} confidence")
+                    if st.button(f"Open {_model.split()[0]} →",
+                                  key=f"qn_{_model.replace(' ','_')}",
+                                  use_container_width=True,
+                                  type="primary" if _is_best else "secondary"):
+                        st.session_state[_ckeys[_model]] = _cdata[_model]
+                        st.switch_page(_pages_map[_model])
 st.divider()
 st.caption("MindCheck · BMCS2003 AI · 202605 Session · Tutorial Group 3 · Tutor: Dr Goh · TARUMT")
