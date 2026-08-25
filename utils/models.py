@@ -14,6 +14,10 @@ import numpy as np
 import warnings
 warnings.filterwarnings('ignore')
 
+# ── Shared batch-upload limits (used by KNN, Decision Tree, SVM pages) ──
+MAX_BATCH_ROWS = 500   # max records processed per batch CSV upload
+MAX_BATCH_MB   = 5     # max upload file size in megabytes
+
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
