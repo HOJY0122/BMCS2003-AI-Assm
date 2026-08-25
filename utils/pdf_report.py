@@ -11,6 +11,7 @@ from reportlab.lib.units import cm, mm
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
+from reportlab.pdfbase.pdfmetrics import stringWidth
 import numpy as np
 import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
@@ -22,6 +23,7 @@ matplotlib.use('Agg')
 
 PAGE_W, PAGE_H = A4
 W = 17 * cm
+PAD = 8  # unified horizontal cell padding, used on both left and right
 
 C_NAVY      = colors.HexColor('#0F172A')
 C_PRIMARY   = colors.HexColor('#1D4ED8')
@@ -65,8 +67,6 @@ def _styles():
                                     spaceAfter=4, leftIndent=8, leading=15),
         'footer'  : ParagraphStyle('FT', fontSize=8, textColor=C_SLATE,
                                     alignment=TA_CENTER, leading=12),
-        'disc'    : ParagraphStyle('DC', fontSize=8, textColor=C_SLATE,
-                                    leading=12, spaceAfter=3, alignment=TA_JUSTIFY),
         'center'  : ParagraphStyle('CN', fontSize=10, textColor=C_NAVY,
                                     alignment=TA_CENTER),
     }
@@ -81,6 +81,7 @@ def _section_header(title, S):
         ('TOPPADDING',    (0,0), (-1,-1), 6),
         ('BOTTOMPADDING', (0,0), (-1,-1), 6),
         ('LEFTPADDING',   (0,0), (-1,-1), 10),
+        ('RIGHTPADDING',  (0,0), (-1,-1), 10),
     ]))
     return tbl
 
@@ -98,15 +99,27 @@ def _info_table(rows, col_w=None):
         ('ROWBACKGROUNDS', (0,0), (-1,-1), [C_WHITE, C_LIGHT]),
         ('TOPPADDING',     (0,0), (-1,-1), 6),
         ('BOTTOMPADDING',  (0,0), (-1,-1), 6),
-        ('LEFTPADDING',    (0,0), (-1,-1), 8),
+        ('LEFTPADDING',    (0,0), (-1,-1), PAD),
+        ('RIGHTPADDING',   (0,0), (-1,-1), PAD),
         ('VALIGN',         (0,0), (-1,-1), 'MIDDLE'),
     ]))
     return tbl
 
 
+def _fit_label(candidates, avail_width, font='Helvetica-Bold', size=10):
+    """Return the longest candidate string that fits avail_width at the
+    given font/size, so a narrow confidence-bar segment never wraps
+    onto multiple lines. Falls back to the shortest candidate."""
+    for label in candidates:
+        if stringWidth(label, font, size) <= avail_width:
+            return label
+    return candidates[-1]
+
+
 def _confidence_bar(prob_no, prob_dep):
     pct_dep = int(round(prob_dep * 100))
     pct_no  = int(round(prob_no  * 100))
+    CELL_PAD = 16  # combined left+right padding inside each segment
     MIN_W   = 0.05 * W
     dep_w   = max(MIN_W, prob_dep * W) if prob_dep > 0 else 0
     no_w    = max(MIN_W, prob_no  * W) if prob_no  > 0 else 0
@@ -120,10 +133,13 @@ def _confidence_bar(prob_no, prob_dep):
         no_w  = no_w  / total * W
         dep_w = dep_w / total * W
 
+    cb_style = ParagraphStyle('CB', fontSize=10, textColor=C_WHITE,
+                               fontName='Helvetica-Bold', alignment=TA_CENTER)
+
     if dep_w == 0:
-        row = [[Paragraph(f'<b>No Depression  {pct_no}%</b>',
-                    ParagraphStyle('CB', fontSize=10, textColor=C_WHITE,
-                                   fontName='Helvetica-Bold', alignment=TA_CENTER))]]
+        label = _fit_label([f'No Depression  {pct_no}%', f'No Depression',
+                             f'{pct_no}%'], W - CELL_PAD)
+        row = [[Paragraph(f'<b>{label}</b>', cb_style)]]
         tbl = Table(row, colWidths=[W])
         tbl.setStyle(TableStyle([
             ('BACKGROUND',    (0,0), (-1,-1), C_SUCCESS),
@@ -131,9 +147,9 @@ def _confidence_bar(prob_no, prob_dep):
             ('BOTTOMPADDING', (0,0), (-1,-1), 10),
         ]))
     elif no_w == 0:
-        row = [[Paragraph(f'<b>Depression Risk  {pct_dep}%</b>',
-                    ParagraphStyle('CB', fontSize=10, textColor=C_WHITE,
-                                   fontName='Helvetica-Bold', alignment=TA_CENTER))]]
+        label = _fit_label([f'Depression Risk  {pct_dep}%', f'Depression Risk',
+                             f'{pct_dep}%'], W - CELL_PAD)
+        row = [[Paragraph(f'<b>{label}</b>', cb_style)]]
         tbl = Table(row, colWidths=[W])
         tbl.setStyle(TableStyle([
             ('BACKGROUND',    (0,0), (-1,-1), C_DANGER),
@@ -141,13 +157,13 @@ def _confidence_bar(prob_no, prob_dep):
             ('BOTTOMPADDING', (0,0), (-1,-1), 10),
         ]))
     else:
+        no_label  = _fit_label([f'No Depression  {pct_no}%', 'No Depression',
+                                 f'{pct_no}%'], no_w - CELL_PAD)
+        dep_label = _fit_label([f'Depression Risk  {pct_dep}%', 'Depression Risk',
+                                 f'{pct_dep}%'], dep_w - CELL_PAD)
         row = [[
-            Paragraph(f'<b>No Depression  {pct_no}%</b>',
-                ParagraphStyle('CB', fontSize=10, textColor=C_WHITE,
-                               fontName='Helvetica-Bold', alignment=TA_CENTER)),
-            Paragraph(f'<b>Depression Risk  {pct_dep}%</b>',
-                ParagraphStyle('CB', fontSize=10, textColor=C_WHITE,
-                               fontName='Helvetica-Bold', alignment=TA_CENTER)),
+            Paragraph(f'<b>{no_label}</b>', cb_style),
+            Paragraph(f'<b>{dep_label}</b>', cb_style),
         ]]
         tbl = Table(row, colWidths=[no_w, dep_w])
         tbl.setStyle(TableStyle([
@@ -155,6 +171,8 @@ def _confidence_bar(prob_no, prob_dep):
             ('BACKGROUND',    (1,0), (1,0), C_DANGER),
             ('TOPPADDING',    (0,0), (-1,-1), 10),
             ('BOTTOMPADDING', (0,0), (-1,-1), 10),
+            ('LEFTPADDING',   (0,0), (-1,-1), 4),
+            ('RIGHTPADDING',  (0,0), (-1,-1), 4),
             ('VALIGN',        (0,0), (-1,-1), 'MIDDLE'),
         ]))
     return tbl
@@ -211,11 +229,12 @@ def generate_pdf(
     story.append(Spacer(1, 0.2*cm))
     story.append(Paragraph(
         "Student Mental Health Screening Report",
-        ParagraphStyle('DT2', fontSize=12, textColor=C_SLATE, fontName='Helvetica-Bold')
+        ParagraphStyle('DT2', fontSize=12, textColor=C_SLATE,
+                       fontName='Helvetica-Bold', alignment=TA_LEFT)
     ))
     story.append(Paragraph(
         f"AI-Assisted Depression Risk Assessment  ·  {model_name}",
-        ParagraphStyle('MT2', fontSize=8, textColor=C_SLATE)
+        ParagraphStyle('MT2', fontSize=8, textColor=C_SLATE, alignment=TA_LEFT)
     ))
     story.append(Spacer(1, 0.4*cm))
     story.append(HRFlowable(width='100%', thickness=2,
@@ -223,7 +242,7 @@ def generate_pdf(
 
     # ── RESULT BANNER ─────────────────────────────────────────
     risk_color = C_DANGER if result == 1 else C_SUCCESS
-    risk_icon  = "⚠" if result == 1 else "✓"
+    risk_icon  = "!" if result == 1 else "OK"
     risk_text  = "DEPRESSION RISK DETECTED" if result == 1 else "NO DEPRESSION DETECTED"
     risk_sub   = ("This student shows indicators of depression risk. "
                   "Professional follow-up is recommended."
@@ -292,7 +311,8 @@ def generate_pdf(
         ('GRID',          (0,0), (-1,-1), 0.4, C_BORDER),
         ('TOPPADDING',    (0,0), (-1,-1), 6),
         ('BOTTOMPADDING', (0,0), (-1,-1), 6),
-        ('LEFTPADDING',   (0,0), (-1,-1), 8),
+        ('LEFTPADDING',   (0,0), (-1,-1), PAD),
+        ('RIGHTPADDING',  (0,0), (-1,-1), PAD),
         ('VALIGN',        (0,0), (-1,-1), 'MIDDLE'),
     ]
     for i, rc in enumerate(row_colors):
@@ -303,7 +323,6 @@ def generate_pdf(
     story.append(Spacer(1, 0.4*cm))
 
     # ── SECTION C — RISK INDICATORS ───────────────────────────
-    # Status column: Yes (red) / No (green) instead of Present/Absent
     story.append(_section_header("C.  RISK INDICATORS IDENTIFIED", S))
     story.append(Spacer(1, 0.2*cm))
 
@@ -352,7 +371,8 @@ def generate_pdf(
             ('ROWBACKGROUNDS',(0,1), (-1,-1), [C_WHITE, C_LIGHT]),
             ('TOPPADDING',    (0,0), (-1,-1), 7),
             ('BOTTOMPADDING', (0,0), (-1,-1), 7),
-            ('LEFTPADDING',   (0,0), (-1,-1), 8),
+            ('LEFTPADDING',   (0,0), (-1,-1), PAD),
+            ('RIGHTPADDING',  (0,0), (-1,-1), PAD),
             ('VALIGN',        (0,0), (-1,-1), 'MIDDLE'),
         ]))
         story.append(ri_tbl)
@@ -362,7 +382,7 @@ def generate_pdf(
     if business_alerts:
         story.append(Spacer(1, 0.3*cm))
         for alert in business_alerts:
-            story.append(Paragraph(f"⚠  {alert}", S['alert']))
+            story.append(Paragraph(f"!  {alert}", S['alert']))
     story.append(Spacer(1, 0.4*cm))
 
     # ── SECTION D — SCREENING NOTES ───────────────────────────
@@ -373,30 +393,22 @@ def generate_pdf(
             story.append(Paragraph(f"•   {note}", S['body_sm']))
         story.append(Spacer(1, 0.4*cm))
 
-    # ── GENERATED BY ──────────────────────────────────────────
-    story.append(Spacer(1, 0.3*cm))
-    story.append(Paragraph(
-        "This report was automatically generated by the MindCheck AI Screening System. "
-        "It is not a clinical diagnosis and should not replace professional medical advice.",
-        ParagraphStyle('GEN', fontSize=8, textColor=C_SLATE,
-                       alignment=TA_CENTER, leading=13)
-    ))
-    story.append(Spacer(1, 0.4*cm))
-
     # ── FOOTER ────────────────────────────────────────────────
+    # Single consolidated, centered footer block — replaces the old
+    # "Generated by" note + separate footer line + justified
+    # confidentiality notice (which broke the centered alignment of
+    # everything else at the bottom of the report).
     story.append(HRFlowable(width='100%', thickness=0.5,
-                              color=C_BORDER, spaceAfter=0.2*cm))
+                              color=C_BORDER, spaceAfter=0.25*cm))
     story.append(Paragraph(
         f"Report Ref: {ref_no}  ·  Generated: {now.strftime('%d %b %Y %H:%M')}  ·  "
         f"MindCheck AI Screening System",
         S['footer']
     ))
-    story.append(Spacer(1, 0.15*cm))
     story.append(Paragraph(
-        "CONFIDENTIALITY NOTICE: This report contains sensitive mental health information. "
-        "It is intended solely for the authorised recipient. This is an AI-assisted "
-        "SCREENING TOOL ONLY and does not constitute a clinical diagnosis.",
-        S['disc']
+        "This report was automatically generated and is not a clinical diagnosis. "
+        "It should not replace professional medical advice.",
+        S['footer']
     ))
 
     doc.build(story)
