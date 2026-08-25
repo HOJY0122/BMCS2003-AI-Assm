@@ -34,8 +34,8 @@ def load_features():
     df = load_and_clean_dataset('dataset/Student_Mental_health.csv')
     df['CGPA_Numeric'] = df['CGPA_Numeric'].fillna(df['CGPA_Numeric'].median())
     le_c = LabelEncoder(); le_y = LabelEncoder()
-    df['Course_Enc'] = le_c.fit_transform(df['Course'])
-    df['Year_Enc']   = le_y.fit_transform(df['Year_of_Study'])
+    df['Course_Enc'] = np.asarray(le_c.fit_transform(df['Course']))
+    df['Year_Enc']   = np.asarray(le_y.fit_transform(df['Year_of_Study']))
 
     all_feat = ['Gender','Age','Course_Enc','Year_Enc','CGPA_Numeric',
                 'Anxiety','Panic_Attack','Marital_Status',
@@ -156,7 +156,7 @@ corr_sorted = D['corr'].sort_values(ascending=True)
 fig_corr, ax = plt.subplots(figsize=(9, 5))
 colors = ['#EF4444' if v >= 0.2 else '#3B82F6' if v >= 0.1 else '#64748B'
           for v in corr_sorted.values]
-bars = ax.barh(corr_sorted.index, corr_sorted.values,
+bars = ax.barh(list(corr_sorted.index), corr_sorted.values,
                color=colors, edgecolor='none', height=0.6)
 ax.axvline(0.2, color='#EF4444', linestyle='--', lw=1.5,
            label='Strong (≥ 0.2)')
@@ -239,10 +239,7 @@ def color_pval(val):
     except:
         return 'color: #1A1A1A'
 
-try:
-    styled_pval = pval_df.style.map(color_pval, subset=['p-value'])
-except AttributeError:
-    styled_pval = pval_df.style.applymap(color_pval, subset=['p-value'])
+styled_pval = pval_df.style.map(color_pval, subset=['p-value'])
 st.dataframe(styled_pval, use_container_width=True)
 sig_count = sum(1 for v in D['pvals'].values() if v < 0.05)
 st.info(f"**{sig_count} out of {len(D['pvals'])} features** are statistically "

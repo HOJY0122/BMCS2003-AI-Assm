@@ -170,7 +170,7 @@ if st.session_state['knn_result']:
         _cs = pd.Series(_contrib).sort_values()
         fig_ex,ax_ex = plt.subplots(figsize=(5,3.5))
         colors_ex = ['#EF4444' if v>0 else '#10B981' for v in _cs.values]
-        ax_ex.barh(_cs.index,_cs.values,color=colors_ex,edgecolor='none',height=0.6)
+        ax_ex.barh(list(_cs.index),_cs.values,color=colors_ex,edgecolor='none',height=0.6)
         ax_ex.axvline(0,color='black',lw=1)
         ax_ex.set_xlabel('Contribution (→ Depression  ← No Depression)')
         ax_ex.set_title('Feature Contribution',fontweight='bold')
@@ -253,7 +253,7 @@ fi_c1,fi_c2 = st.columns([2,1])
 with fi_c1:
     fig_fi,ax_fi=plt.subplots(figsize=(7,3.5))
     colors_fi=['#3B82F6' if v>=fi.mean() else '#64748B' for v in fi.values]
-    bars_fi=ax_fi.barh(fi.index,fi.values,color=colors_fi,edgecolor='none',height=0.6)
+    bars_fi=ax_fi.barh(list(fi.index),fi.values,color=colors_fi,edgecolor='none',height=0.6)
     ax_fi.axvline(fi.mean(),color='red',ls='--',lw=1.2,alpha=0.7,label=f'Mean={fi.mean():.3f}')
     for bar,val in zip(bars_fi,fi.values):
         ax_fi.text(val+0.005,bar.get_y()+bar.get_height()/2,f'{val:.3f}',va='center',fontsize=9,fontweight='bold')
@@ -341,7 +341,7 @@ if _knn_file:
         _kresults=[]
         for _ki,_krow in _kdf.iterrows():
             try:
-                _kname=str(_krow.get('Name',f'Student {_ki+1}')).strip()
+                _kname=str(_krow.get('Name',f'Student {int(_ki)+1}')).strip()
                 _kg=1 if str(_krow.get('Gender','')).lower()=='male' else 0
                 _kax=1 if str(_krow.get('Anxiety','')).lower()=='yes' else 0
                 _kpa=1 if str(_krow.get('Panic_Attack','')).lower()=='yes' else 0
@@ -392,8 +392,7 @@ if _knn_file:
             if '⚠️' in str(val) or val=='HIGH': return 'background-color:#FEE2E2;color:#991B1B;font-weight:bold'
             if '✅' in str(val) or val=='LOW':  return 'background-color:#DCFCE7;color:#166534;font-weight:bold'
             return ''
-        try:    _kstyled=_kdisp.style.map(_kst,subset=['Result','Risk'])
-        except: _kstyled=_kdisp.style.applymap(_kst,subset=['Result','Risk'])
+        _kstyled=_kdisp.style.map(_kst,subset=['Result','Risk'])
         st.dataframe(_kstyled,use_container_width=True,hide_index=True)
         st.write(""); st.markdown("**Individual Student Cards**")
         for _,_kr in _kres.iterrows():
