@@ -1,13 +1,5 @@
 """
-MindCheck — Enhanced PDF Report Generator
-Produces a professional A4 PDF with:
-  - Result banner
-  - Confidence gauge chart
-  - Feature contribution chart
-  - Model performance table + bar chart
-  - Confusion matrix table
-  - Student info table
-  - Risk alerts + recommendations
+MindCheck — Mental Health Report Generator
 """
 import io
 import datetime
@@ -20,413 +12,541 @@ import numpy as np
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import cm
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from reportlab.lib.units import cm, mm
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
 from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Table,
-    TableStyle, HRFlowable, Image, KeepTogether
+    TableStyle, HRFlowable, Image, KeepTogether,
+    PageBreak
 )
 
-# ── Colour palette ─────────────────────────────────────────────
-C_PRIMARY   = colors.HexColor('#2563EB')
-C_DANGER    = colors.HexColor('#DC2626')
-C_SUCCESS   = colors.HexColor('#16A34A')
-C_WARNING   = colors.HexColor('#D97706')
-C_DARK      = colors.HexColor('#1E293B')
-C_GREY      = colors.HexColor('#64748B')
+PAGE_W, PAGE_H = A4
+W = 17 * cm
+
+# ── Colours ───────────────────────────────────────────────────
+C_NAVY      = colors.HexColor('#0F172A')
+C_PRIMARY   = colors.HexColor('#1D4ED8')
+C_DANGER    = colors.HexColor('#B91C1C')
+C_SUCCESS   = colors.HexColor('#15803D')
+C_WARNING   = colors.HexColor('#B45309')
+C_GREY      = colors.HexColor('#475569')
 C_LIGHT     = colors.HexColor('#F8FAFC')
-C_BORDER    = colors.HexColor('#E2E8F0')
-C_BLUE_LIGHT= colors.HexColor('#EFF6FF')
-C_GREEN_LT  = colors.HexColor('#F0FDF4')
+C_BORDER    = colors.HexColor('#CBD5E1')
+C_RED_DARK  = colors.HexColor('#7F1D1D')
+C_GREEN_DARK= colors.HexColor('#14532D')
+C_BLUE_LT   = colors.HexColor('#EFF6FF')
 C_RED_LT    = colors.HexColor('#FEF2F2')
+C_GREEN_LT  = colors.HexColor('#F0FDF4')
 C_AMBER_LT  = colors.HexColor('#FFFBEB')
-
-W = 17 * cm  # usable page width
-
-
-# ── Helper: chart → ReportLab Image ──────────────────────────
-def _fig_to_img(fig, width_cm=17, height_cm=6):
-    buf = io.BytesIO()
-    fig.savefig(buf, format='PNG', dpi=150, bbox_inches='tight',
-                facecolor='white', edgecolor='none')
-    buf.seek(0)
-    plt.close(fig)
-    return Image(buf, width=width_cm*cm, height=height_cm*cm)
+C_SLATE     = colors.HexColor('#64748B')
+C_WHITE     = colors.white
 
 
-# ── Helper: styled paragraph styles ──────────────────────────
 def _styles():
-    base = getSampleStyleSheet()
     return {
-        'title'  : ParagraphStyle('T', fontSize=26, textColor=C_PRIMARY,
-                                   fontName='Helvetica-Bold',
-                                   alignment=TA_CENTER, spaceAfter=4),
-        'sub'    : ParagraphStyle('S', fontSize=10, textColor=C_GREY,
-                                   alignment=TA_CENTER, spaceAfter=3),
-        'h1'     : ParagraphStyle('H1', fontSize=13, textColor=C_PRIMARY,
-                                   fontName='Helvetica-Bold',
-                                   spaceBefore=14, spaceAfter=6),
-        'h2'     : ParagraphStyle('H2', fontSize=11, textColor=C_DARK,
-                                   fontName='Helvetica-Bold',
-                                   spaceBefore=10, spaceAfter=4),
-        'body'   : ParagraphStyle('B', fontSize=10, textColor=C_DARK,
-                                   spaceAfter=4, leading=15),
-        'small'  : ParagraphStyle('SM', fontSize=8, textColor=C_GREY,
-                                   spaceAfter=3, leading=12),
-        'alert'  : ParagraphStyle('AL', fontSize=10, textColor=C_DANGER,
-                                   spaceAfter=5, leftIndent=8, leading=15),
-        'note'   : ParagraphStyle('NT', fontSize=10,
-                                   textColor=colors.HexColor('#1D4ED8'),
-                                   spaceAfter=5, leftIndent=8, leading=15),
-        'footer' : ParagraphStyle('F', fontSize=8, textColor=C_GREY,
-                                   alignment=TA_CENTER),
-        'disc'   : ParagraphStyle('D', fontSize=8, textColor=C_GREY,
-                                   leading=12, spaceAfter=4),
-        'center' : ParagraphStyle('C', fontSize=10, textColor=C_DARK,
-                                   alignment=TA_CENTER),
+        'brand'   : ParagraphStyle('BR', fontSize=28, textColor=C_PRIMARY,
+                                    fontName='Helvetica-Bold',
+                                    alignment=TA_CENTER, spaceAfter=2,
+                                    spaceBefore=8),
+        'tagline' : ParagraphStyle('TG', fontSize=10, textColor=C_GREY,
+                                    alignment=TA_CENTER, spaceAfter=2),
+        'doc_title': ParagraphStyle('DT', fontSize=13, textColor=C_NAVY,
+                                    fontName='Helvetica-Bold',
+                                    alignment=TA_CENTER, spaceAfter=2),
+        'meta'    : ParagraphStyle('MT', fontSize=9, textColor=C_SLATE,
+                                    alignment=TA_CENTER, spaceAfter=2),
+        'h1'      : ParagraphStyle('H1', fontSize=11, textColor=C_PRIMARY,
+                                    fontName='Helvetica-Bold',
+                                    spaceBefore=12, spaceAfter=5,
+                                    borderPad=0),
+        'h2'      : ParagraphStyle('H2', fontSize=10, textColor=C_NAVY,
+                                    fontName='Helvetica-Bold',
+                                    spaceBefore=8, spaceAfter=4),
+        'body'    : ParagraphStyle('BD', fontSize=10, textColor=C_NAVY,
+                                    leading=16, spaceAfter=4,
+                                    alignment=TA_JUSTIFY),
+        'body_sm' : ParagraphStyle('BS', fontSize=9, textColor=C_GREY,
+                                    leading=14, spaceAfter=3),
+        'label'   : ParagraphStyle('LB', fontSize=8, textColor=C_SLATE,
+                                    fontName='Helvetica-Bold',
+                                    spaceAfter=1, leading=10),
+        'small'   : ParagraphStyle('SM', fontSize=8, textColor=C_SLATE,
+                                    leading=12, spaceAfter=2),
+        'alert'   : ParagraphStyle('AL', fontSize=10, textColor=C_DANGER,
+                                    fontName='Helvetica-Bold',
+                                    spaceAfter=4, leftIndent=8, leading=15),
+        'note'    : ParagraphStyle('NT', fontSize=10, textColor=C_PRIMARY,
+                                    spaceAfter=4, leftIndent=8, leading=15),
+        'footer'  : ParagraphStyle('FT', fontSize=8, textColor=C_SLATE,
+                                    alignment=TA_CENTER, leading=12),
+        'disc'    : ParagraphStyle('DC', fontSize=8, textColor=C_SLATE,
+                                    leading=12, spaceAfter=3,
+                                    alignment=TA_JUSTIFY),
+        'center'  : ParagraphStyle('CN', fontSize=10, textColor=C_NAVY,
+                                    alignment=TA_CENTER),
+        'result_dep' : ParagraphStyle('RD', fontSize=15, textColor=C_WHITE,
+                                       fontName='Helvetica-Bold',
+                                       alignment=TA_CENTER),
+        'result_ok'  : ParagraphStyle('RO', fontSize=15, textColor=C_WHITE,
+                                       fontName='Helvetica-Bold',
+                                       alignment=TA_CENTER),
     }
 
 
-def _tbl(data, col_widths, header=True, row_colors=None):
-    """Build a styled table."""
-    tbl = Table(data, colWidths=col_widths)
-    style = [
-        ('FONTSIZE',     (0,0), (-1,-1), 10),
-        ('GRID',         (0,0), (-1,-1), 0.5, C_BORDER),
-        ('TOPPADDING',   (0,0), (-1,-1), 7),
-        ('BOTTOMPADDING',(0,0), (-1,-1), 7),
+def _section_header(title, S):
+    """Coloured section header bar."""
+    tbl = Table([[Paragraph(title, ParagraphStyle('SH', fontSize=10,
+                  textColor=C_WHITE, fontName='Helvetica-Bold'))]],
+                colWidths=[W])
+    tbl.setStyle(TableStyle([
+        ('BACKGROUND',   (0,0), (-1,-1), C_PRIMARY),
+        ('TOPPADDING',   (0,0), (-1,-1), 6),
+        ('BOTTOMPADDING',(0,0), (-1,-1), 6),
         ('LEFTPADDING',  (0,0), (-1,-1), 10),
-        ('VALIGN',       (0,0), (-1,-1), 'MIDDLE'),
-    ]
-    if header:
-        style += [
-            ('BACKGROUND', (0,0), (-1,0), C_PRIMARY),
-            ('TEXTCOLOR',  (0,0), (-1,0), colors.white),
-            ('FONTNAME',   (0,0), (-1,0), 'Helvetica-Bold'),
-        ]
-    if row_colors:
-        for i, c in enumerate(row_colors):
-            if c:
-                style.append(('BACKGROUND', (0,i), (-1,i), c))
-    tbl.setStyle(TableStyle(style))
+    ]))
     return tbl
 
 
-# ── Chart 1: Confidence gauge (horizontal bar) ────────────────
-def _chart_confidence(prob_no, prob_dep, model_name):
-    fig, ax = plt.subplots(figsize=(8, 1.2))
-    ax.barh([''], [prob_no*100], color='#16A34A', height=0.5)
-    ax.barh([''], [prob_dep*100], left=[prob_no*100],
-            color='#DC2626', height=0.5)
-    ax.axvline(50, color='white', lw=2, ls='--', alpha=0.8)
-
-    if prob_no > 0.12:
-        ax.text(prob_no*50, 0, f'No Depression\n{prob_no*100:.1f}%',
-                ha='center', va='center', fontsize=10,
-                fontweight='bold', color='white')
-    if prob_dep > 0.08:
-        ax.text(prob_no*100 + prob_dep*50, 0,
-                f'Depression\n{prob_dep*100:.1f}%',
-                ha='center', va='center', fontsize=10,
-                fontweight='bold', color='white')
-
-    ax.set_xlim(0, 100)
-    ax.set_xlabel('Probability (%)', fontsize=9)
-    ax.set_title(f'{model_name} — Prediction Confidence',
-                 fontsize=11, fontweight='bold')
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.spines['left'].set_visible(False)
-    ax.set_yticks([])
-    plt.tight_layout()
-    return _fig_to_img(fig, width_cm=17, height_cm=3)
+def _info_table(rows, col_w=None):
+    """Two-column key-value table."""
+    if col_w is None:
+        col_w = [5.5*cm, 11.5*cm]
+    tbl = Table(rows, colWidths=col_w)
+    tbl.setStyle(TableStyle([
+        ('FONTSIZE',      (0,0), (-1,-1), 9),
+        ('FONTNAME',      (0,0), (0,-1), 'Helvetica-Bold'),
+        ('TEXTCOLOR',     (0,0), (0,-1), C_SLATE),
+        ('TEXTCOLOR',     (1,0), (1,-1), C_NAVY),
+        ('GRID',          (0,0), (-1,-1), 0.4, C_BORDER),
+        ('ROWBACKGROUNDS',(0,0), (-1,-1), [C_WHITE, C_LIGHT]),
+        ('TOPPADDING',    (0,0), (-1,-1), 6),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ('LEFTPADDING',   (0,0), (-1,-1), 8),
+        ('VALIGN',        (0,0), (-1,-1), 'MIDDLE'),
+    ]))
+    return tbl
 
 
-# ── Chart 2: Model metrics bar chart ─────────────────────────
-def _chart_metrics(metrics, model_name, color):
-    fig, ax = plt.subplots(figsize=(8, 3))
-    m_names = ['Accuracy', 'Precision', 'Recall', 'F1 Score']
-    m_vals  = [metrics['acc'], metrics['prec'], metrics['rec'], metrics['f1']]
-    bars = ax.bar(m_names, m_vals,
-                  color=color, edgecolor='white', alpha=0.9, width=0.5)
-    for bar, val in zip(bars, m_vals):
-        ax.text(bar.get_x()+bar.get_width()/2,
-                bar.get_height()+0.8,
-                f'{val:.1f}%', ha='center', va='bottom',
-                fontsize=11, fontweight='bold', color='#1E293B')
-    ax.set_ylim(0, 115)
-    ax.set_ylabel('Score (%)', fontsize=10)
-    ax.set_title(f'{model_name} — Live Model Performance',
-                 fontsize=11, fontweight='bold')
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    ax.axhline(100, color='#E2E8F0', ls='--', lw=1)
-    plt.tight_layout()
-    return _fig_to_img(fig, width_cm=17, height_cm=5)
+def _metric_table(metrics):
+    """4-column metrics summary."""
+    header = [
+        Paragraph('<b>Accuracy</b>',  ParagraphStyle('MH', fontSize=9, textColor=C_WHITE, alignment=TA_CENTER, fontName='Helvetica-Bold')),
+        Paragraph('<b>Precision</b>', ParagraphStyle('MH', fontSize=9, textColor=C_WHITE, alignment=TA_CENTER, fontName='Helvetica-Bold')),
+        Paragraph('<b>Recall</b>',    ParagraphStyle('MH', fontSize=9, textColor=C_WHITE, alignment=TA_CENTER, fontName='Helvetica-Bold')),
+        Paragraph('<b>F1 Score</b>',  ParagraphStyle('MH', fontSize=9, textColor=C_WHITE, alignment=TA_CENTER, fontName='Helvetica-Bold')),
+    ]
+    vals = [
+        Paragraph(f"{metrics['acc']:.2f}%",  ParagraphStyle('MV', fontSize=14, textColor=C_PRIMARY, alignment=TA_CENTER, fontName='Helvetica-Bold')),
+        Paragraph(f"{metrics['prec']:.2f}%", ParagraphStyle('MV', fontSize=14, textColor=C_PRIMARY, alignment=TA_CENTER, fontName='Helvetica-Bold')),
+        Paragraph(f"{metrics['rec']:.2f}%",  ParagraphStyle('MV', fontSize=14, textColor=C_PRIMARY, alignment=TA_CENTER, fontName='Helvetica-Bold')),
+        Paragraph(f"{metrics['f1']:.2f}%",   ParagraphStyle('MV', fontSize=14, textColor=C_PRIMARY, alignment=TA_CENTER, fontName='Helvetica-Bold')),
+    ]
+    desc = [
+        Paragraph('Overall correct predictions', ParagraphStyle('MD', fontSize=7, textColor=C_SLATE, alignment=TA_CENTER)),
+        Paragraph('Of Depression predictions,\nhow many were correct', ParagraphStyle('MD', fontSize=7, textColor=C_SLATE, alignment=TA_CENTER)),
+        Paragraph('Of actual cases,\nhow many were caught', ParagraphStyle('MD', fontSize=7, textColor=C_DANGER, alignment=TA_CENTER, fontName='Helvetica-Bold')),
+        Paragraph('Balance between\nPrecision & Recall', ParagraphStyle('MD', fontSize=7, textColor=C_SLATE, alignment=TA_CENTER)),
+    ]
+    tbl = Table([header, vals, desc], colWidths=[W/4]*4)
+    tbl.setStyle(TableStyle([
+        ('BACKGROUND',    (0,0), (-1,0), C_PRIMARY),
+        ('BACKGROUND',    (0,1), (-1,1), C_BLUE_LT),
+        ('BACKGROUND',    (0,2), (-1,2), C_LIGHT),
+        ('GRID',          (0,0), (-1,-1), 0.4, C_BORDER),
+        ('TOPPADDING',    (0,0), (-1,-1), 8),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 8),
+        ('VALIGN',        (0,0), (-1,-1), 'MIDDLE'),
+    ]))
+    return tbl
 
 
-# ── Chart 3: Feature contribution ────────────────────────────
-def _chart_features(feature_importance: dict):
-    """feature_importance: {feature_name: contribution_value}"""
-    if not feature_importance:
-        return None
-    sorted_items = sorted(feature_importance.items(), key=lambda x: x[1])
-    names  = [k for k,v in sorted_items]
-    values = [v for k,v in sorted_items]
-    colors_bar = ['#DC2626' if v > 0 else '#16A34A' for v in values]
+def _confidence_bar(prob_no, prob_dep):
+    """Simple visual confidence indicator as a table."""
+    pct_dep   = int(round(prob_dep * 100))
+    pct_no    = int(round(prob_no  * 100))
+    dep_w     = (prob_dep * W)
+    no_w      = (prob_no  * W)
 
-    fig, ax = plt.subplots(figsize=(8, max(3, len(names)*0.5)))
-    bars = ax.barh(names, values, color=colors_bar,
-                   edgecolor='white', height=0.6, alpha=0.9)
-    ax.axvline(0, color='#1E293B', lw=1.5)
-    for bar, val in zip(bars, values):
-        ha = 'left' if val >= 0 else 'right'
-        offset = 0.003 if val >= 0 else -0.003
-        ax.text(val+offset, bar.get_y()+bar.get_height()/2,
-                f'{val:+.3f}', va='center', ha=ha,
-                fontsize=9, fontweight='bold')
-    ax.set_xlabel('Contribution (→ Depression   ← No Depression)', fontsize=9)
-    ax.set_title('Feature Contribution to This Prediction',
-                 fontsize=11, fontweight='bold')
-    ax.spines['top'].set_visible(False)
-    ax.spines['right'].set_visible(False)
-    plt.tight_layout()
-    return _fig_to_img(fig, width_cm=17, height_cm=max(4, len(names)*0.7))
-
-
-# ── Chart 4: Confusion matrix heatmap ────────────────────────
-def _chart_confusion(cm_array, model_name, color_hex):
-    fig, ax = plt.subplots(figsize=(5, 4))
-    tn, fp, fn, tp = cm_array.ravel()
-    data = [[tn, fp], [fn, tp]]
-    labels = [['TN', 'FP'], ['FN', 'TP']]
-
-    base_color = colors.HexColor(color_hex)
-    cmap = plt.cm.Blues if color_hex == '#2563EB' else \
-           plt.cm.Greens if color_hex == '#16A34A' else plt.cm.Reds
-
-    im = ax.imshow(data, cmap=cmap, alpha=0.7, aspect='auto')
-    for i in range(2):
-        for j in range(2):
-            ax.text(j, i,
-                    f'{labels[i][j]}\n{data[i][j]}',
-                    ha='center', va='center',
-                    fontsize=16, fontweight='bold',
-                    color='white' if data[i][j] > max(tn,fp,fn,tp)*0.5 else '#1E293B')
-
-    ax.set_xticks([0, 1])
-    ax.set_yticks([0, 1])
-    ax.set_xticklabels(['Pred: No Depression', 'Pred: Depression'], fontsize=9)
-    ax.set_yticklabels(['Actual: No Depression', 'Actual: Depression'], fontsize=9)
-    ax.set_title(f'{model_name} — Confusion Matrix',
-                 fontsize=11, fontweight='bold')
-    plt.tight_layout()
-    return _fig_to_img(fig, width_cm=10, height_cm=6)
+    row = [
+        Paragraph(
+            f'<b>No Depression</b>  {pct_no}%',
+            ParagraphStyle('CB', fontSize=10, textColor=C_WHITE,
+                           fontName='Helvetica-Bold', alignment=TA_CENTER)
+        ),
+        Paragraph(
+            f'<b>Depression Risk</b>  {pct_dep}%',
+            ParagraphStyle('CB', fontSize=10, textColor=C_WHITE,
+                           fontName='Helvetica-Bold', alignment=TA_CENTER)
+        ),
+    ]
+    tbl = Table([row], colWidths=[no_w, dep_w])
+    tbl.setStyle(TableStyle([
+        ('BACKGROUND',   (0,0), (0,0), C_SUCCESS),
+        ('BACKGROUND',   (1,0), (1,0), C_DANGER),
+        ('TOPPADDING',   (0,0), (-1,-1), 10),
+        ('BOTTOMPADDING',(0,0), (-1,-1), 10),
+        ('VALIGN',       (0,0), (-1,-1), 'MIDDLE'),
+    ]))
+    return tbl
 
 
 # ══════════════════════════════════════════════════════════════
-# MAIN GENERATE FUNCTION
+# MAIN FUNCTION
 # ══════════════════════════════════════════════════════════════
 def generate_pdf(
-    model_name:        str,
-    student_name:      str,
-    result:            int,
-    prob:              list,
-    input_data:        dict,
-    metrics:           dict,
-    business_alerts:   list = [],
-    explanation_notes: list = [],
+    model_name:         str,
+    student_name:       str,
+    result:             int,
+    prob:               list,
+    input_data:         dict,
+    metrics:            dict,
+    business_alerts:    list = [],
+    explanation_notes:  list = [],
     feature_importance: dict = {},
-    cm_array           = None,
-    model_color:       str  = '#2563EB',
+    cm_array                 = None,
+    model_color:        str  = '#1D4ED8',
 ) -> io.BytesIO:
-    """
-    Generate a full professional PDF report with charts and tables.
 
-    Args:
-        model_name:         e.g. "KNN (K=5)"
-        student_name:       student's name
-        result:             0 or 1
-        prob:               [prob_no_dep, prob_dep]
-        input_data:         dict of field→value
-        metrics:            dict with acc, prec, rec, f1, cm
-        business_alerts:    list of alert strings
-        explanation_notes:  list of explanation strings
-        feature_importance: dict {feature: contribution_value}
-        cm_array:           confusion matrix numpy array (optional)
-        model_color:        hex color for this model's charts
-    """
-    S = _styles()
+    S   = _styles()
     buf = io.BytesIO()
     doc = SimpleDocTemplate(
         buf, pagesize=A4,
-        topMargin=1.5*cm, bottomMargin=1.5*cm,
+        topMargin=1.8*cm, bottomMargin=1.8*cm,
         leftMargin=2*cm,  rightMargin=2*cm
     )
     story = []
+    now   = datetime.datetime.now()
+    ref_no = f"MC-{now.strftime('%Y%m%d')}-{hash(student_name) % 9000 + 1000}"
 
-    risk_color = C_DANGER if result == 1 else C_SUCCESS
-    risk_label = ("⚠  DEPRESSION RISK DETECTED"
-                  if result == 1 else "✓  NO DEPRESSION DETECTED")
+    # ═══════════════════════════════════════════════════════════
+    # HEADER
+    # ═══════════════════════════════════════════════════════════
+    story.append(Spacer(1, 0.3*cm))
 
-    # ── PAGE 1 ────────────────────────────────────────────────
-
-    # Header
-    story.append(Paragraph("MindCheck", S['title']))
-    story.append(Paragraph("Student Depression Risk — Prediction Report", S['sub']))
-    story.append(Paragraph(
-        f"Generated: {datetime.datetime.now().strftime('%d %B %Y, %I:%M %p')}  ·  "
-        f"Model: {model_name}", S['sub']))
-    story.append(HRFlowable(
-        width='100%', thickness=2, color=C_PRIMARY, spaceAfter=14))
-
-    # Result banner
-    story.append(KeepTogether([
-        Table([[Paragraph(f"<b>{risk_label}</b>",
-                           ParagraphStyle('BN', fontSize=16,
-                                          textColor=colors.white,
-                                          alignment=TA_CENTER))]],
-              colWidths=[W],
-              style=TableStyle([
-                  ('BACKGROUND',   (0,0),(-1,-1), risk_color),
-                  ('TOPPADDING',   (0,0),(-1,-1), 14),
-                  ('BOTTOMPADDING',(0,0),(-1,-1), 14),
-                  ('ROUNDEDCORNERS', [8]),
-              ])),
-        Spacer(1, 10),
+    # Logo row
+    logo_tbl = Table([[
+        Paragraph("Mind<font color='#1D4ED8'>Check</font>",
+                  ParagraphStyle('LG', fontSize=26, textColor=C_NAVY,
+                                  fontName='Helvetica-Bold')),
+        Paragraph(
+            f"<b>Report No:</b> {ref_no}<br/>"
+            f"<b>Date:</b> {now.strftime('%d %B %Y')}<br/>"
+            f"<b>Time:</b> {now.strftime('%I:%M %p')}",
+            ParagraphStyle('RF', fontSize=8, textColor=C_SLATE,
+                           alignment=TA_RIGHT, leading=13)
+        )
+    ]], colWidths=[9*cm, 8*cm])
+    logo_tbl.setStyle(TableStyle([
+        ('VALIGN',   (0,0),(-1,-1),'MIDDLE'),
+        ('LEFTPADDING',(0,0),(-1,-1),0),
+        ('RIGHTPADDING',(0,0),(-1,-1),0),
     ]))
+    story.append(logo_tbl)
+    story.append(Spacer(1, 0.2*cm))
+    story.append(Paragraph(
+        "Student Mental Health Screening Report",
+        ParagraphStyle('DT2', fontSize=12, textColor=C_SLATE,
+                        fontName='Helvetica-Bold')
+    ))
+    story.append(Paragraph(
+        f"AI-Assisted Depression Risk Assessment  ·  {model_name}  ·  "
+        f"BMCS2003 Artificial Intelligence  ·  TARUMT",
+        ParagraphStyle('MT2', fontSize=8, textColor=C_SLATE)
+    ))
+    story.append(Spacer(1, 0.4*cm))
+    story.append(HRFlowable(width='100%', thickness=2,
+                              color=C_PRIMARY, spaceAfter=0.5*cm))
 
-    # Confidence chart
-    story.append(Paragraph("Prediction Confidence", S['h1']))
-    story.append(_chart_confidence(prob[0], prob[1], model_name))
-    story.append(Spacer(1, 10))
+    # ═══════════════════════════════════════════════════════════
+    # SCREENING RESULT BANNER
+    # ═══════════════════════════════════════════════════════════
+    risk_color = C_DANGER if result == 1 else C_SUCCESS
+    risk_icon  = "⚠" if result == 1 else "✓"
+    risk_text  = "DEPRESSION RISK DETECTED" if result == 1 else "NO DEPRESSION DETECTED"
+    risk_sub   = ("This student shows indicators of depression risk. "
+                  "Professional follow-up is recommended."
+                  if result == 1 else
+                  "This student shows no significant depression indicators "
+                  "at this time. Continue routine monitoring.")
 
-    # Prediction summary table
-    story.append(Paragraph("Prediction Summary", S['h1']))
-    dep_pct   = f"{prob[1]*100:.1f}%"
-    nodep_pct = f"{prob[0]*100:.1f}%"
-    summary_rows = [
-        ["Field", "Value"],
-        ["Model Used",          model_name],
-        ["Student Name",        student_name],
-        ["No Depression Prob",  nodep_pct],
-        ["Depression Risk Prob",dep_pct],
-        ["Final Prediction",    "Depression" if result==1 else "No Depression"],
+    banner = Table([
+        [Paragraph(f"<b>{risk_icon}  {risk_text}</b>",
+                   ParagraphStyle('BN', fontSize=16, textColor=C_WHITE,
+                                   fontName='Helvetica-Bold',
+                                   alignment=TA_CENTER))],
+        [Paragraph(risk_sub,
+                   ParagraphStyle('BS2', fontSize=9, textColor=C_WHITE,
+                                   alignment=TA_CENTER, leading=13))],
+    ], colWidths=[W])
+    banner.setStyle(TableStyle([
+        ('BACKGROUND',    (0,0), (-1,-1), risk_color),
+        ('TOPPADDING',    (0,0), (-1,0), 12),
+        ('BOTTOMPADDING', (0,0), (-1,0), 4),
+        ('TOPPADDING',    (0,1), (-1,1), 0),
+        ('BOTTOMPADDING', (0,1), (-1,1), 12),
+        ('LEFTPADDING',   (0,0), (-1,-1), 12),
+        ('RIGHTPADDING',  (0,0), (-1,-1), 12),
+    ]))
+    story.append(banner)
+    story.append(Spacer(1, 0.4*cm))
+
+    # Confidence bar
+    story.append(_confidence_bar(prob[0], prob[1]))
+    story.append(Paragraph(
+        "← No Depression Risk                                        Depression Risk →",
+        ParagraphStyle('CBL', fontSize=7, textColor=C_SLATE, alignment=TA_CENTER)
+    ))
+    story.append(Spacer(1, 0.5*cm))
+
+    # ═══════════════════════════════════════════════════════════
+    # SECTION A — STUDENT PROFILE
+    # ═══════════════════════════════════════════════════════════
+    story.append(_section_header("A.  STUDENT PROFILE", S))
+    story.append(Spacer(1, 0.2*cm))
+
+    # Build two-column student info
+    info_rows = []
+    for k, v in input_data.items():
+        info_rows.append([k, str(v)])
+    # Add screening info
+    info_rows.insert(0, ["Student Name", student_name])
+    story.append(_info_table(info_rows))
+    story.append(Spacer(1, 0.4*cm))
+
+    # ═══════════════════════════════════════════════════════════
+    # SECTION B — SCREENING RESULT
+    # ═══════════════════════════════════════════════════════════
+    story.append(_section_header("B.  SCREENING RESULT", S))
+    story.append(Spacer(1, 0.2*cm))
+
+    result_rows = [
+        ["Assessment Method",   f"Machine Learning — {model_name}"],
+        ["Target Variable",     "Depression (Binary: Yes / No)"],
+        ["Depression Probability",  f"{prob[1]*100:.1f}%"],
+        ["No Depression Probability", f"{prob[0]*100:.1f}%"],
+        ["Screening Outcome",   "AT RISK — Depression Detected" if result==1
+                                else "LOW RISK — No Depression Detected"],
+        ["Confidence Level",    "High" if max(prob) > 0.80
+                                else "Moderate" if max(prob) > 0.60
+                                else "Low"],
+        ["Screening Date",      now.strftime("%d %B %Y, %I:%M %p")],
+        ["Report Reference",    ref_no],
     ]
-    row_c = [None, None,
-             C_GREEN_LT, C_RED_LT,
-             C_RED_LT if result==1 else C_GREEN_LT, None]
-    story.append(_tbl(summary_rows, [6*cm, 11*cm], header=True, row_colors=row_c))
-    story.append(Spacer(1, 12))
-
-    # Student info table
-    story.append(Paragraph("Student Information", S['h1']))
-    info_rows = [["Field", "Value"]] + [[k, str(v)] for k,v in input_data.items()]
-    story.append(_tbl(info_rows, [6*cm, 11*cm], header=True))
-    story.append(Spacer(1, 12))
-
-    # Business alerts
-    if business_alerts:
-        story.append(Paragraph("⚠  Risk Alerts", S['h1']))
-        for alert in business_alerts:
-            story.append(Paragraph(f"•  {alert}", S['alert']))
-        story.append(Spacer(1, 8))
-
-    # ── PAGE 2 — CHARTS ───────────────────────────────────────
-
-    # Model performance bar chart
-    story.append(Paragraph("Live Model Performance", S['h1']))
-    story.append(_chart_metrics(metrics, model_name, model_color))
-    story.append(Spacer(1, 8))
-
-    # Performance table
-    perf_rows = [
-        ["Metric", "Score", "Interpretation"],
-        ["Accuracy",  f"{metrics['acc']:.2f}%",
-         "Overall correct predictions"],
-        ["Precision", f"{metrics['prec']:.2f}%",
-         "Of Depression predictions, how many were correct"],
-        ["Recall",    f"{metrics['rec']:.2f}%",
-         "Of actual Depression cases, how many were caught ← most critical"],
-        ["F1 Score",  f"{metrics['f1']:.2f}%",
-         "Balance between Precision and Recall"],
+    row_colors = [None, None,
+                  C_RED_LT   if result==1 else C_GREEN_LT,
+                  C_GREEN_LT if result==1 else C_RED_LT,
+                  C_RED_LT   if result==1 else C_GREEN_LT,
+                  None, None, None]
+    tbl_r = Table(result_rows, colWidths=[5.5*cm, 11.5*cm])
+    style_r = [
+        ('FONTSIZE',      (0,0), (-1,-1), 9),
+        ('FONTNAME',      (0,0), (0,-1), 'Helvetica-Bold'),
+        ('TEXTCOLOR',     (0,0), (0,-1), C_SLATE),
+        ('TEXTCOLOR',     (1,0), (1,-1), C_NAVY),
+        ('GRID',          (0,0), (-1,-1), 0.4, C_BORDER),
+        ('TOPPADDING',    (0,0), (-1,-1), 6),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+        ('LEFTPADDING',   (0,0), (-1,-1), 8),
+        ('VALIGN',        (0,0), (-1,-1), 'MIDDLE'),
     ]
-    story.append(_tbl(perf_rows, [4*cm, 4*cm, 9*cm], header=True))
-    story.append(Spacer(1, 12))
+    for i, rc in enumerate(row_colors):
+        if rc:
+            style_r.append(('BACKGROUND', (0,i), (-1,i), rc))
+    tbl_r.setStyle(TableStyle(style_r))
+    story.append(tbl_r)
+    story.append(Spacer(1, 0.4*cm))
 
-    # Confusion matrix
-    if cm_array is not None:
-        story.append(Paragraph("Confusion Matrix", S['h1']))
-        tn,fp,fn,tp = cm_array.ravel()
-        cm_rows = [
-            ["",                "Predicted: No Depression", "Predicted: Depression"],
-            ["Actual: No Dep",  str(tn) + " ✅ (True Negative)",
-                                str(fp) + " ❌ (False Positive)"],
-            ["Actual: Dep",     str(fn) + " ⚠️ (False Negative — missed!)",
-                                str(tp) + " ✅ (True Positive)"],
+    # ═══════════════════════════════════════════════════════════
+    # SECTION C — RISK INDICATORS
+    # ═══════════════════════════════════════════════════════════
+    story.append(_section_header("C.  RISK INDICATORS IDENTIFIED", S))
+    story.append(Spacer(1, 0.2*cm))
+
+    # Build risk table from input data + alerts
+    risk_items = []
+    risk_map = {
+        'Anxiety':      ('Anxiety Present',      'Co-morbid factor — strongly associated with depression'),
+        'Panic Attack': ('Panic Attack Present',  'Strongest predictor of depression in dataset (r=0.341)'),
+        'Panic':        ('Panic Attack Present',  'Strongest predictor of depression in dataset (r=0.341)'),
+        'Marital':      ('Marital Status: Married','Additional personal stress — significant predictor'),
+        'Treatment':    ('Sought Treatment',       'Indicates awareness of condition — monitor progress'),
+    }
+    for k, v in input_data.items():
+        if str(v).lower() == 'yes' and k in risk_map:
+            risk_items.append([f"⚠  {risk_map[k][0]}", risk_map[k][1], 'Present'])
+        elif str(v).lower() == 'no' and k in risk_map:
+            risk_items.append([f"✓  {risk_map[k][0]}", risk_map[k][1], 'Absent'])
+
+    if risk_items:
+        ri_hdr = [
+            Paragraph('<b>Indicator</b>',   ParagraphStyle('RH', fontSize=9, textColor=C_WHITE, fontName='Helvetica-Bold')),
+            Paragraph('<b>Significance</b>',ParagraphStyle('RH', fontSize=9, textColor=C_WHITE, fontName='Helvetica-Bold')),
+            Paragraph('<b>Status</b>',      ParagraphStyle('RH', fontSize=9, textColor=C_WHITE, fontName='Helvetica-Bold')),
         ]
-        story.append(_tbl(cm_rows, [4.5*cm, 6.25*cm, 6.25*cm], header=False,
-                          row_colors=[
-                              colors.HexColor('#F1F5F9'),
-                              None, None
-                          ]))
-        story.append(Spacer(1, 6))
-        if fn > 0:
-            story.append(Paragraph(
-                f"⚠  False Negatives = {fn}: {fn} depressed student(s) were "
-                f"missed by this model (not predicted as depressed). "
-                f"False Negative Rate: {fn/(fn+tp)*100:.1f}%",
-                S['alert']))
-        story.append(Spacer(1, 12))
-
-    # Feature contribution chart
-    if feature_importance:
-        story.append(Paragraph("Feature Contribution to This Prediction", S['h1']))
-        story.append(_chart_features(feature_importance))
-        story.append(Spacer(1, 8))
-
-    # Explanation notes
-    if explanation_notes:
-        story.append(Paragraph("Prediction Explanation", S['h1']))
-        for note in explanation_notes:
-            story.append(Paragraph(f"•  {note}", S['note']))
-        story.append(Spacer(1, 8))
-
-    # Recommendation
-    story.append(Paragraph("Recommendation", S['h1']))
-    if result == 1:
-        rec_text = (
-            "This student has been flagged as <b>at risk for depression</b>. "
-            "Recommended actions: "
-            "(1) Arrange a follow-up appointment with a counsellor or mental health professional. "
-            "(2) Monitor academic performance and attendance closely. "
-            "(3) Connect the student with campus mental health resources and peer support groups. "
-            "(4) Consider re-screening after 4–6 weeks of intervention."
-        )
+        ri_rows = [ri_hdr]
+        for item in risk_items:
+            is_present = item[2] == 'Present'
+            ri_rows.append([
+                Paragraph(item[0], ParagraphStyle('RI', fontSize=9,
+                    textColor=C_DANGER if is_present else C_SUCCESS,
+                    fontName='Helvetica-Bold')),
+                Paragraph(item[1], ParagraphStyle('RI2', fontSize=9, textColor=C_NAVY)),
+                Paragraph(f"<b>{item[2]}</b>", ParagraphStyle('RS', fontSize=9,
+                    textColor=C_DANGER if is_present else C_SUCCESS,
+                    fontName='Helvetica-Bold', alignment=TA_CENTER)),
+            ])
+        ri_tbl = Table(ri_rows, colWidths=[5.5*cm, 9.5*cm, 2*cm])
+        ri_tbl.setStyle(TableStyle([
+            ('BACKGROUND',   (0,0), (-1,0), C_PRIMARY),
+            ('GRID',         (0,0), (-1,-1), 0.4, C_BORDER),
+            ('ROWBACKGROUNDS',(0,1),(-1,-1), [C_WHITE, C_LIGHT]),
+            ('TOPPADDING',   (0,0), (-1,-1), 7),
+            ('BOTTOMPADDING',(0,0), (-1,-1), 7),
+            ('LEFTPADDING',  (0,0), (-1,-1), 8),
+            ('VALIGN',       (0,0), (-1,-1), 'MIDDLE'),
+        ]))
+        story.append(ri_tbl)
     else:
-        rec_text = (
-            "This student shows <b>low risk of depression</b> based on their current profile. "
-            "Recommended actions: "
-            "(1) Maintain awareness of changes in behaviour or academic performance. "
-            "(2) Encourage participation in campus wellness programmes. "
-            "(3) Re-screen if new risk factors emerge (anxiety, panic attacks, academic difficulties)."
-        )
-    story.append(Paragraph(rec_text, S['body']))
-    story.append(Spacer(1, 14))
+        story.append(Paragraph("No major risk indicators identified.", S['body_sm']))
 
-    # Footer
-    story.append(HRFlowable(
-        width='100%', thickness=1, color=C_BORDER, spaceAfter=8))
+    if business_alerts:
+        story.append(Spacer(1, 0.3*cm))
+        for alert in business_alerts:
+            story.append(Paragraph(f"⚠  {alert}", S['alert']))
+
+    story.append(Spacer(1, 0.4*cm))
+
+    # ═══════════════════════════════════════════════════════════
+    # SECTION D — MODEL PERFORMANCE
+    # ═══════════════════════════════════════════════════════════
+    story.append(_section_header("D.  AI MODEL PERFORMANCE", S))
+    story.append(Spacer(1, 0.2*cm))
+    story.append(_metric_table(metrics))
+    story.append(Spacer(1, 0.2*cm))
     story.append(Paragraph(
-        "<i>This report is generated by MindCheck — an AI-powered student mental health "
-        "screening tool built for BMCS2003 Artificial Intelligence, TARUMT 202605. "
-        "This is a <b>screening tool only</b> and does not constitute professional "
-        "medical advice. Please consult a qualified mental health professional.</i>",
-        S['disc']))
+        "<b>Note:</b> Recall is the most critical metric in mental health screening — "
+        "it measures how many actual depression cases the model correctly identifies. "
+        "A high recall minimises the risk of missing students who need support.",
+        S['body_sm']
+    ))
+    story.append(Spacer(1, 0.4*cm))
+
+    # ═══════════════════════════════════════════════════════════
+    # SECTION E — CLINICAL RECOMMENDATION
+    # ═══════════════════════════════════════════════════════════
+    story.append(_section_header("E.  CLINICAL RECOMMENDATION", S))
+    story.append(Spacer(1, 0.2*cm))
+
+    if result == 1:
+        rec_level = "URGENT" if max(prob) > 0.80 else "MODERATE"
+        rec_color = C_RED_LT if rec_level == "URGENT" else C_AMBER_LT
+        rec_border = C_DANGER if rec_level == "URGENT" else colors.HexColor('#B45309')
+
+        recs = [
+            ("Immediate Action",
+             "Arrange a confidential consultation with a licensed counsellor "
+             "or mental health professional within 5–7 working days."),
+            ("Academic Support",
+             "Notify the academic advisor (with student consent) to explore "
+             "possible academic accommodations or extensions."),
+            ("Follow-Up Screening",
+             "Re-administer this screening tool after 4–6 weeks of intervention "
+             "to track progress and adjust support accordingly."),
+            ("Campus Resources",
+             "Provide information on campus mental health services, student "
+             "support groups, and 24-hour crisis helplines."),
+        ]
+    else:
+        rec_color  = C_GREEN_LT
+        rec_border = C_SUCCESS
+        rec_level  = "ROUTINE"
+        recs = [
+            ("Routine Monitoring",
+             "Continue standard student wellbeing check-ins. No immediate "
+             "clinical intervention is required at this time."),
+            ("Preventive Support",
+             "Encourage participation in campus wellness programmes, stress "
+             "management workshops, and peer support groups."),
+            ("Re-Screening",
+             "Re-administer screening at the next academic term or "
+             "if new risk factors emerge (anxiety, academic difficulty, life events)."),
+            ("Open Door Policy",
+             "Remind the student that counselling services are available "
+             "on a voluntary, confidential basis at any time."),
+        ]
+
+    rec_rows = []
+    for i, (action, detail) in enumerate(recs, 1):
+        rec_rows.append([
+            Paragraph(f"<b>{i}.  {action}</b>",
+                      ParagraphStyle('RA', fontSize=9, textColor=C_NAVY,
+                                     fontName='Helvetica-Bold')),
+            Paragraph(detail, ParagraphStyle('RD2', fontSize=9,
+                                              textColor=C_NAVY, leading=14)),
+        ])
+
+    rec_tbl = Table(rec_rows, colWidths=[4.5*cm, 12.5*cm])
+    rec_tbl.setStyle(TableStyle([
+        ('BACKGROUND',   (0,0), (-1,-1), rec_color),
+        ('GRID',         (0,0), (-1,-1), 0.4, C_BORDER),
+        ('TOPPADDING',   (0,0), (-1,-1), 8),
+        ('BOTTOMPADDING',(0,0), (-1,-1), 8),
+        ('LEFTPADDING',  (0,0), (-1,-1), 10),
+        ('VALIGN',       (0,0), (-1,-1), 'TOP'),
+        ('LINEAFTER',    (0,0), (0,-1), 1.5, rec_border),
+    ]))
+    story.append(rec_tbl)
+    story.append(Spacer(1, 0.4*cm))
+
+    # ═══════════════════════════════════════════════════════════
+    # SECTION F — ADDITIONAL NOTES (if any)
+    # ═══════════════════════════════════════════════════════════
+    if explanation_notes:
+        story.append(_section_header("F.  SCREENING NOTES", S))
+        story.append(Spacer(1, 0.2*cm))
+        for note in explanation_notes:
+            story.append(Paragraph(f"•   {note}", S['body_sm']))
+        story.append(Spacer(1, 0.4*cm))
+
+    # ═══════════════════════════════════════════════════════════
+    # SIGN-OFF BOX
+    # ═══════════════════════════════════════════════════════════
+    sign_rows = [[
+        Paragraph("Screened by (AI System)\n\nMindCheck v1.0\nBMCS2003 AI · TARUMT",
+                  ParagraphStyle('SG', fontSize=9, textColor=C_NAVY, leading=14)),
+        Paragraph("Reviewed by\n\n\n_________________________\nCounsellor / Advisor",
+                  ParagraphStyle('SG', fontSize=9, textColor=C_NAVY, leading=14)),
+        Paragraph("Acknowledged by\n\n\n_________________________\nStudent Signature",
+                  ParagraphStyle('SG', fontSize=9, textColor=C_NAVY, leading=14)),
+    ]]
+    sign_tbl = Table(sign_rows, colWidths=[W/3]*3)
+    sign_tbl.setStyle(TableStyle([
+        ('GRID',          (0,0), (-1,-1), 0.4, C_BORDER),
+        ('TOPPADDING',    (0,0), (-1,-1), 10),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 25),
+        ('LEFTPADDING',   (0,0), (-1,-1), 10),
+        ('BACKGROUND',    (0,0), (-1,-1), C_LIGHT),
+        ('VALIGN',        (0,0), (-1,-1), 'TOP'),
+    ]))
+    story.append(sign_tbl)
+    story.append(Spacer(1, 0.4*cm))
+
+    # ═══════════════════════════════════════════════════════════
+    # FOOTER
+    # ═══════════════════════════════════════════════════════════
+    story.append(HRFlowable(width='100%', thickness=0.5,
+                              color=C_BORDER, spaceAfter=0.2*cm))
     story.append(Paragraph(
-        "MindCheck  ·  BMCS2003 Artificial Intelligence  ·  "
-        "Tutorial Group 3  ·  Tutor: Dr Goh  ·  TARUMT 202605",
-        S['footer']))
+        f"Report Ref: {ref_no}  ·  Generated: {now.strftime('%d %b %Y %H:%M')}  ·  "
+        f"MindCheck AI Screening Tool  ·  BMCS2003 Artificial Intelligence  ·  "
+        f"Tutorial Group 3  ·  Tutor: Dr Goh  ·  TARUMT 202605",
+        S['footer']
+    ))
+    story.append(Spacer(1, 0.15*cm))
+    story.append(Paragraph(
+        "CONFIDENTIALITY NOTICE: This report contains sensitive mental health information. ",
+        S['disc']
+    ))
 
     doc.build(story)
     buf.seek(0)
