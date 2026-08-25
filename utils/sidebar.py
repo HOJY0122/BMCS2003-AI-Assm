@@ -6,6 +6,23 @@ SIDEBAR_CSS = """
 footer    { visibility: hidden; }
 [data-testid="stSidebarNav"] { display: none !important; }
 
+/* ── Fix collapsed sidebar gap ── */
+[data-testid="collapsedControl"] {
+    display: flex !important;
+    visibility: visible !important;
+}
+section[data-testid="stSidebar"][aria-expanded="false"] {
+    width: 0px !important;
+    min-width: 0px !important;
+    overflow: hidden !important;
+}
+.main .block-container {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+    max-width: 1200px !important;
+    transition: all 0.3s ease !important;
+}
+
 /* ── Sidebar base ── */
 [data-testid="stSidebar"] {
     background: #1E293B !important;
