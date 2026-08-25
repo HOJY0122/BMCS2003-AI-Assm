@@ -131,7 +131,7 @@ def draw_architecture():
         if sublabel:
             ax.text(x, y - 0.22, sublabel,
                     ha='center', va='center', fontsize=7,
-                    color='rgba(255,255,255,0.6)', zorder=4)
+                    color=(1, 1, 1, 0.6), zorder=4)
 
     def arrow(x1, y1, x2, y2, label=""):
         ax.annotate("", xy=(x2, y2), xytext=(x1, y1),
