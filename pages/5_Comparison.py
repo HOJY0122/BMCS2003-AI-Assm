@@ -257,6 +257,57 @@ with st.form("live_form", clear_on_submit=False):
     run = st.form_submit_button("Run All 3 Models Now",
                                 use_container_width=True)
 
+def _show_result(col, icon, title, member, target, pred, prob,
+                 act, label_pos, label_neg):
+    """Render one model's result card. Pure render — correctness is
+    computed separately (see _score()) so this can be safely called on
+    every rerun for persistent display, without double-counting the
+    scoreboard tally."""
+    with col:
+        with st.container(border=True):
+            st.markdown(f"### {icon} {title}")
+            st.caption(f"{member} · Target: {target}")
+            st.divider()
+            if pred == 1:
+                st.error(f"**{label_pos} DETECTED**")
+            else:
+                st.success(f"**NO {label_pos}**")
+
+            pa_col, pb_col = st.columns(2)
+            pa_col.metric(label_neg, f"{prob[0]*100:.1f}%")
+            pb_col.metric(label_pos, f"{prob[1]*100:.1f}%")
+
+            fig, ax = plt.subplots(figsize=(3.5, 0.6))
+            ax.barh([""], [prob[0]*100], color="#10B981",
+                    height=0.5, label=label_neg)
+            ax.barh([""], [prob[1]*100], left=[prob[0]*100],
+                    color="#EF4444", height=0.5, label=label_pos)
+            ax.set_xlim(0, 100)
+            ax.axis('off')
+            if prob[0] > 0.15:
+                ax.text(prob[0]*50, 0, f"{prob[0]*100:.0f}%",
+                        ha='center', va='center', fontsize=8,
+                        color='white', fontweight='bold')
+            if prob[1] > 0.15:
+                ax.text(prob[0]*100 + prob[1]*50, 0,
+                        f"{prob[1]*100:.0f}%",
+                        ha='center', va='center', fontsize=8,
+                        color='white', fontweight='bold')
+            plt.tight_layout(pad=0)
+            st.pyplot(fig, use_container_width=True)
+            plt.close()
+
+            if act is not None:
+                if pred == act:
+                    st.success("✅ Correct")
+                else:
+                    st.error("❌ Wrong")
+
+
+def _score(pred, act):
+    return None if act is None else (pred == act)
+
+
 if run:
     le_c = M['le_course']; le_y = M['le_year']
     g  = 1 if t_gender  == "Male" else 0
@@ -305,135 +356,33 @@ if run:
     act_panic = None if t_actual_panic == "Unknown" else (1 if t_actual_panic == "Yes" else 0)
 
     name = t_name.strip() or "Student"
+    dep_agree = (knn_pred == dt_pred)
 
-    # ── Display results ───────────────────────────────────────
-    st.markdown("---")
-    st.subheader(f"Prediction Results — {name}")
+    # Correctness computed ONCE here (not inside the render function) so
+    # the scoreboard tally below never double-counts on a later rerun.
+    knn_c = _score(knn_pred, act_dep)
+    dt_c  = _score(dt_pred,  act_dep)
+    svm_c = _score(svm_pred, act_panic)
 
-    rc1, rc2, rc3 = st.columns(3)
-
-    def show_result(col, icon, title, member, target, pred, prob,
-                    act, label_pos, label_neg):
-        with col:
-            with st.container(border=True):
-                st.markdown(f"### {icon} {title}")
-                st.caption(f"{member} · Target: {target}")
-                st.divider()
-                if pred == 1:
-                    st.error(f"**{label_pos} DETECTED**")
-                else:
-                    st.success(f"**NO {label_pos}**")
-
-                pa_col, pb_col = st.columns(2)
-                pa_col.metric(label_neg, f"{prob[0]*100:.1f}%")
-                pb_col.metric(label_pos, f"{prob[1]*100:.1f}%")
-
-                # Stacked bar
-                fig, ax = plt.subplots(figsize=(3.5, 0.6))
-                ax.barh([""], [prob[0]*100], color="#10B981",
-                        height=0.5, label=label_neg)
-                ax.barh([""], [prob[1]*100], left=[prob[0]*100],
-                        color="#EF4444", height=0.5, label=label_pos)
-                ax.set_xlim(0, 100)
-                ax.axis('off')
-                if prob[0] > 0.15:
-                    ax.text(prob[0]*50, 0, f"{prob[0]*100:.0f}%",
-                            ha='center', va='center', fontsize=8,
-                            color='white', fontweight='bold')
-                if prob[1] > 0.15:
-                    ax.text(prob[0]*100 + prob[1]*50, 0,
-                            f"{prob[1]*100:.0f}%",
-                            ha='center', va='center', fontsize=8,
-                            color='white', fontweight='bold')
-                plt.tight_layout(pad=0)
-                st.pyplot(fig, use_container_width=True)
-                plt.close()
-
-                if act is not None:
-                    correct = (pred == act)
-                    st.success("✅ Correct") if correct else st.error("❌ Wrong")
-                    return correct
-                return None
-
-    knn_c = show_result(rc1,"🔵","KNN","Ho Jun Yon","Depression",
-                        knn_pred,knn_prob,act_dep,"Depression","No Dep")
-    dt_c  = show_result(rc2,"🌳","Decision Tree","Irvin","Depression",
-                        dt_pred,dt_prob,act_dep,"Depression","No Dep")
-    svm_c = show_result(rc3,"🔴","SVM","Chiang Jun Hang","Panic Attack",
-                        svm_pred,svm_prob,act_panic,"Panic Attack","No Panic")
-
-    # Agreement line
-    dep_agree  = (knn_pred == dt_pred)
-    dep_label  = "Depression" if knn_pred == 1 else "No Depression"
-    svm_label  = "Panic Attack" if svm_pred == 1 else "No Panic Attack"
-
-    st.markdown("")
-    a1, a2 = st.columns(2)
-    with a1:
-        if dep_agree:
-            st.info(f"KNN & DT **AGREE** on Depression: **{dep_label}**")
-        else:
-            st.warning(
-                f"KNN & DT **DISAGREE** — "
-                f"KNN: **{'Depression' if knn_pred==1 else 'No Depression'}** | "
-                f"DT: **{'Depression' if dt_pred==1 else 'No Depression'}**"
-            )
-    with a2:
-        st.info(f"SVM predicts Panic Attack: **{svm_label}**")
-
-    # ── Navigate to predictor with result pre-loaded ──────────
-    st.write("")
-    st.markdown("**Open in Individual Predictor — result pre-loaded, no need to predict again**")
-    _live_shared = {
-        'from_comparison': True,
+    # ── Persist everything needed to redisplay + navigate on every
+    # future rerun — NOT just the one rerun where the form was submitted.
+    # (A button nested inside `if run:` would only ever fire once: the
+    # very next click makes `run` False again, hiding the button before
+    # its own click can be processed — that was the original bug here.)
+    st.session_state['live_result'] = {
         'name': name, 'gender': t_gender, 'age': t_age,
         'course': t_course, 'year': t_year, 'cgpa': t_cgpa,
         'marital': t_marital, 'anxiety': t_anxiety,
         'panic': t_panic, 'seek': t_seek,
+        'knn_pred': int(knn_pred), 'knn_prob': knn_prob.tolist(),
+        'dt_pred':  int(dt_pred),  'dt_prob':  dt_prob.tolist(),
+        'svm_pred': int(svm_pred), 'svm_prob': svm_prob.tolist(),
+        'svm_in': svm_in,
+        'act_dep': act_dep, 'act_panic': act_panic,
+        'dep_agree': dep_agree,
     }
-    nav1, nav2, nav3 = st.columns(3)
-    with nav1:
-        if st.button("🔵 Open KNN →", key="live_nav_knn", use_container_width=True):
-            st.session_state['knn_prefill'] = _live_shared
-            st.session_state['knn_carry']  = {
-                'pred': int(knn_pred), 'prob': knn_prob.tolist(),
-                'name': name, 'gender': t_gender, 'age': t_age,
-                'course': t_course, 'year': t_year, 'cgpa': t_cgpa,
-                'anxiety': t_anxiety, 'panic': t_panic,
-                'high_concern': (t_anxiety=="Yes" and t_panic=="Yes"),
-                'academic_risk': (t_year in ["Year 3","Year 4"] and t_cgpa=="0 - 1.99"),
-            }
-            st.switch_page("pages/2_KNN.py")
-    with nav2:
-        if st.button("🌳 Open DT →", key="live_nav_dt", use_container_width=True):
-            st.session_state['dt_prefill'] = _live_shared
-            st.session_state['dt_carry']  = {
-                'pred': int(dt_pred), 'prob': dt_prob.tolist(),
-                'name': name, 'gender': t_gender, 'age': t_age,
-                'course': t_course, 'year': t_year, 'cgpa': t_cgpa,
-                'marital': t_marital, 'anxiety': t_anxiety, 'panic': t_panic,
-                'high_concern': (t_anxiety=="Yes" and t_panic=="Yes"),
-                'married_risk': (t_marital=="Yes" and t_age<21),
-                'academic_risk': (t_year in ["Year 3","Year 4"] and t_cgpa=="0 - 1.99"),
-            }
-            st.switch_page("pages/3_Decision_Tree.py")
-    with nav3:
-        if st.button("🔴 Open SVM →", key="live_nav_svm", use_container_width=True):
-            st.session_state['svm_prefill'] = _live_shared
-            st.session_state['svm_carry']  = {
-                'pred': int(svm_pred), 'prob': svm_prob.tolist(),
-                'inp': svm_in,
-                'name': name, 'gender': t_gender, 'age': t_age,
-                'course': t_course, 'year': t_year, 'cgpa': t_cgpa,
-                'marital': t_marital, 'anxiety': t_anxiety,
-                'panic': t_panic, 'treat': t_seek,
-                'high_concern': (t_anxiety=="Yes" and t_panic=="Yes"),
-                'treat_flag': (t_seek=="Yes"),
-                'academic_risk': (t_year in ["Year 3","Year 4"] and t_cgpa=="0 - 1.99"),
-            }
-            st.switch_page("pages/4_SVM.py")
 
-    # ── Update session state ──────────────────────────────────
+    # ── Update session state / log — only on the actual submit ────
     st.session_state['n'] += 1
     if knn_c is not None: st.session_state['knn_c'] += int(knn_c)
     if dt_c  is not None: st.session_state['dt_c']  += int(dt_c)
@@ -457,6 +406,97 @@ if run:
         "Actual Dep"  : t_actual_dep,
         "Actual Panic": t_actual_panic,
     })
+
+# ══════════════════════════════════════════════════════════════
+# Persistent display — reruns EVERY time (button clicks included),
+# reading from session_state instead of local variables that only
+# existed during the `if run:` rerun. This is what actually fixes the
+# "Open KNN/DT/SVM" buttons: they now exist on every rerun after a test
+# has been run, not just the one immediately after clicking "Run All 3
+# Models Now".
+# ══════════════════════════════════════════════════════════════
+if st.session_state.get('live_result'):
+    LR = st.session_state['live_result']
+
+    st.markdown("---")
+    st.subheader(f"Prediction Results — {LR['name']}")
+
+    rc1, rc2, rc3 = st.columns(3)
+    _show_result(rc1,"🔵","KNN","Ho Jun Yon","Depression",
+                 LR['knn_pred'], LR['knn_prob'], LR['act_dep'], "Depression","No Dep")
+    _show_result(rc2,"🌳","Decision Tree","Irvin","Depression",
+                 LR['dt_pred'], LR['dt_prob'], LR['act_dep'], "Depression","No Dep")
+    _show_result(rc3,"🔴","SVM","Chiang Jun Hang","Panic Attack",
+                 LR['svm_pred'], LR['svm_prob'], LR['act_panic'], "Panic Attack","No Panic")
+
+    dep_label = "Depression" if LR['knn_pred'] == 1 else "No Depression"
+    svm_label = "Panic Attack" if LR['svm_pred'] == 1 else "No Panic Attack"
+
+    st.markdown("")
+    a1, a2 = st.columns(2)
+    with a1:
+        if LR['dep_agree']:
+            st.info(f"KNN & DT **AGREE** on Depression: **{dep_label}**")
+        else:
+            st.warning(
+                f"KNN & DT **DISAGREE** — "
+                f"KNN: **{'Depression' if LR['knn_pred']==1 else 'No Depression'}** | "
+                f"DT: **{'Depression' if LR['dt_pred']==1 else 'No Depression'}**"
+            )
+    with a2:
+        st.info(f"SVM predicts Panic Attack: **{svm_label}**")
+
+    # ── Navigate to predictor with result pre-loaded ──────────
+    st.write("")
+    st.markdown("**Open in Individual Predictor — result pre-loaded, no need to predict again**")
+    _live_shared = {
+        'from_comparison': True,
+        'name': LR['name'], 'gender': LR['gender'], 'age': LR['age'],
+        'course': LR['course'], 'year': LR['year'], 'cgpa': LR['cgpa'],
+        'marital': LR['marital'], 'anxiety': LR['anxiety'],
+        'panic': LR['panic'], 'seek': LR['seek'],
+    }
+    nav1, nav2, nav3 = st.columns(3)
+    with nav1:
+        if st.button("🔵 Open KNN →", key="live_nav_knn", use_container_width=True):
+            st.session_state['knn_prefill'] = _live_shared
+            st.session_state['knn_carry']  = {
+                'pred': LR['knn_pred'], 'prob': LR['knn_prob'],
+                'name': LR['name'], 'gender': LR['gender'], 'age': LR['age'],
+                'course': LR['course'], 'year': LR['year'], 'cgpa': LR['cgpa'],
+                'anxiety': LR['anxiety'], 'panic': LR['panic'],
+                'high_concern': (LR['anxiety']=="Yes" and LR['panic']=="Yes"),
+                'academic_risk': (LR['year'] in ["Year 3","Year 4"] and LR['cgpa']=="0 - 1.99"),
+            }
+            st.switch_page("pages/2_KNN.py")
+    with nav2:
+        if st.button("🌳 Open DT →", key="live_nav_dt", use_container_width=True):
+            st.session_state['dt_prefill'] = _live_shared
+            st.session_state['dt_carry']  = {
+                'pred': LR['dt_pred'], 'prob': LR['dt_prob'],
+                'name': LR['name'], 'gender': LR['gender'], 'age': LR['age'],
+                'course': LR['course'], 'year': LR['year'], 'cgpa': LR['cgpa'],
+                'marital': LR['marital'], 'anxiety': LR['anxiety'], 'panic': LR['panic'],
+                'high_concern': (LR['anxiety']=="Yes" and LR['panic']=="Yes"),
+                'married_risk': (LR['marital']=="Yes" and LR['age']<21),
+                'academic_risk': (LR['year'] in ["Year 3","Year 4"] and LR['cgpa']=="0 - 1.99"),
+            }
+            st.switch_page("pages/3_Decision_Tree.py")
+    with nav3:
+        if st.button("🔴 Open SVM →", key="live_nav_svm", use_container_width=True):
+            st.session_state['svm_prefill'] = _live_shared
+            st.session_state['svm_carry']  = {
+                'pred': LR['svm_pred'], 'prob': LR['svm_prob'],
+                'inp': LR['svm_in'],
+                'name': LR['name'], 'gender': LR['gender'], 'age': LR['age'],
+                'course': LR['course'], 'year': LR['year'], 'cgpa': LR['cgpa'],
+                'marital': LR['marital'], 'anxiety': LR['anxiety'],
+                'panic': LR['panic'], 'treat': LR['seek'],
+                'high_concern': (LR['anxiety']=="Yes" and LR['panic']=="Yes"),
+                'treat_flag': (LR['seek']=="Yes"),
+                'academic_risk': (LR['year'] in ["Year 3","Year 4"] and LR['cgpa']=="0 - 1.99"),
+            }
+            st.switch_page("pages/4_SVM.py")
 
 st.divider()
 
