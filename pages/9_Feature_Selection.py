@@ -12,6 +12,7 @@ warnings.filterwarnings('ignore')
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import accuracy_score
 from sklearn.feature_selection import mutual_info_classif, SelectKBest, chi2
@@ -75,7 +76,7 @@ def load_features():
     Xtr,Xte,ytr,yte = train_test_split(
         Xs, y, test_size=0.2, random_state=42, stratify=y)
 
-    knn_accs, dt_accs = [], []
+    knn_accs, dt_accs, svm_accs = [], [], []
     for n in range(1, 11):
         idx = [all_feat.index(f) for f in sorted_raw[:n]]
         knn = KNeighborsClassifier(n_neighbors=5)
@@ -86,6 +87,10 @@ def load_features():
         dt.fit(Xtr[:, idx], ytr)
         dt_accs.append(accuracy_score(yte, dt.predict(Xte[:, idx]))*100)
 
+        svm = SVC(kernel='rbf', class_weight='balanced', random_state=42)
+        svm.fit(Xtr[:, idx], ytr)
+        svm_accs.append(accuracy_score(yte, svm.predict(Xte[:, idx]))*100)
+
     return {
         'X': X, 'y': y, 'df': df,
         'all_feat': all_feat, 'feat_labels': feat_labels,
@@ -93,7 +98,7 @@ def load_features():
         'mi': mi_s, 'chi2': chi2_s,
         'sorted_labels': sorted_by_corr,
         'sorted_raw': sorted_raw,
-        'knn_accs': knn_accs, 'dt_accs': dt_accs,
+        'knn_accs': knn_accs, 'dt_accs': dt_accs, 'svm_accs': svm_accs,
         'scaler': scaler,
     }
 
@@ -353,18 +358,25 @@ ax_exp.plot(x, D['knn_accs'], 'b-o', lw=2, ms=7,
             label='KNN (K=5)', zorder=3)
 ax_exp.plot(x, D['dt_accs'], 'g-s', lw=2, ms=7,
             label='Decision Tree (Depth 5)', zorder=3)
+ax_exp.plot(x, D['svm_accs'], 'r-^', lw=2, ms=7,
+            label='SVM (RBF Kernel)', zorder=3)
 
 # Highlight best point for each
 best_knn = D['knn_accs'].index(max(D['knn_accs'])) + 1
 best_dt  = D['dt_accs'].index(max(D['dt_accs'])) + 1
+best_svm = D['svm_accs'].index(max(D['svm_accs'])) + 1
 ax_exp.axvline(best_knn, color='blue', ls='--', lw=1.2, alpha=0.5)
 ax_exp.axvline(best_dt,  color='green', ls='--', lw=1.2, alpha=0.5)
+ax_exp.axvline(best_svm, color='red', ls='--', lw=1.2, alpha=0.5)
 ax_exp.scatter([best_knn], [max(D['knn_accs'])],
                color='blue', s=120, zorder=5,
                label=f'KNN best: {max(D["knn_accs"]):.1f}% at {best_knn} features')
 ax_exp.scatter([best_dt], [max(D['dt_accs'])],
                color='green', s=120, zorder=5,
                label=f'DT best: {max(D["dt_accs"]):.1f}% at {best_dt} features')
+ax_exp.scatter([best_svm], [max(D['svm_accs'])],
+               color='red', s=120, zorder=5,
+               label=f'SVM best: {max(D["svm_accs"]):.1f}% at {best_svm} features')
 
 ax_exp.set_xlabel('Number of Features (added by correlation rank)', fontsize=11)
 ax_exp.set_ylabel('Test Accuracy (%)', fontsize=11)
@@ -388,6 +400,7 @@ exp_df = pd.DataFrame({
                       for n in range(1,11)],
     'KNN Accuracy': [f"{v:.2f}%" for v in D['knn_accs']],
     'DT Accuracy':  [f"{v:.2f}%" for v in D['dt_accs']],
+    'SVM Accuracy': [f"{v:.2f}%" for v in D['svm_accs']],
 }).set_index('Features Used')
 st.dataframe(exp_df, use_container_width=True)
 
@@ -592,6 +605,7 @@ st.subheader("8. Feature Selection Conclusion")
 top_feat  = D['corr'].sort_values(ascending=False).head(5).index.tolist()
 best_knn_n = D['knn_accs'].index(max(D['knn_accs'])) + 1
 best_dt_n  = D['dt_accs'].index(max(D['dt_accs'])) + 1
+best_svm_n = D['svm_accs'].index(max(D['svm_accs'])) + 1
 
 c1, c2 = st.columns(2)
 with c1:
@@ -611,6 +625,8 @@ with c2:
                  f"using **{best_knn_n} features**")
         st.write(f"**DT** best accuracy: **{max(D['dt_accs']):.2f}%** "
                  f"using **{best_dt_n} features**")
+        st.write(f"**SVM** best accuracy: **{max(D['svm_accs']):.2f}%** "
+                 f"using **{best_svm_n} features**")
         st.write("")
         st.write(
             "Adding more features does **not always improve** accuracy. "
