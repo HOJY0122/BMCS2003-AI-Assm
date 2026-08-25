@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+plt.style.use('seaborn-v0_8-whitegrid')
+plt.rcParams.update({'font.family':'sans-serif','font.size':10,'axes.spines.top':False,'axes.spines.right':False,'figure.facecolor':'white','axes.facecolor':'white','axes.edgecolor':'#E2E8F0','axes.labelcolor':'#1E293B','xtick.color':'#64748B','ytick.color':'#64748B','text.color':'#1E293B','grid.color':'#F1F5F9','grid.linewidth':0.8})
 import seaborn as sns
 from scipy import stats
 import sys, os, warnings
@@ -152,7 +154,7 @@ st.write(
 
 corr_sorted = D['corr'].sort_values(ascending=True)
 fig_corr, ax = plt.subplots(figsize=(9, 5))
-colors = ['#EF4444' if v >= 0.2 else '#3B82F6' if v >= 0.1 else '#9CA3AF'
+colors = ['#EF4444' if v >= 0.2 else '#3B82F6' if v >= 0.1 else '#64748B'
           for v in corr_sorted.values]
 bars = ax.barh(corr_sorted.index, corr_sorted.values,
                color=colors, edgecolor='none', height=0.6)
@@ -268,7 +270,7 @@ with tab1:
     corr_df.columns = ['Feature','Correlation |r|']
     fig1, a1 = plt.subplots(figsize=(8,4))
     c1_colors = ['#EF4444' if v >= 0.2 else '#3B82F6' if v >= 0.1
-                 else '#9CA3AF' for v in corr_df['Correlation |r|']]
+                 else '#64748B' for v in corr_df['Correlation |r|']]
     a1.bar(corr_df['Feature'], corr_df['Correlation |r|'],
            color=c1_colors, edgecolor='none')
     a1.axhline(0.2, color='red', ls='--', lw=1.2, alpha=0.7, label='Threshold 0.2')
@@ -395,9 +397,200 @@ st.dataframe(exp_df, use_container_width=True)
 st.divider()
 
 # ══════════════════════════════════════════════════════════════
-# SECTION 7 — CONCLUSION
+# SECTION 7 — WHY IMPORTANT / WHY NOT IMPORTANT
 # ══════════════════════════════════════════════════════════════
-st.subheader("7. Feature Selection Conclusion")
+st.subheader("7. Why Each Feature Matters — or Doesn't")
+st.caption("Plain English explanation for each feature's role in predicting Depression")
+
+important_feats = [
+    {
+        'name': '🧠 Mental Health Score',
+        'corr': D['corr'].get('Mental Health Score', 0),
+        'pval': D['pvals'].get('Mental Health Score', 1),
+        'why':  "Composite score combining Depression + Anxiety + Panic Attack (0–3). "
+                "Directly reflects mental health burden — highest correlation with Depression.",
+        'verdict': '✅ IMPORTANT',
+        'color': '#DCFCE7',
+        'bcolor': '#16A34A',
+    },
+    {
+        'name': '💍 Marital Status',
+        'corr': D['corr'].get('Marital Status', 0),
+        'pval': D['pvals'].get('Marital Status', 1),
+        'why':  "Married students carry additional personal responsibilities and stress. "
+                "Strong predictor — used as the root split in the Decision Tree model.",
+        'verdict': '✅ IMPORTANT',
+        'color': '#DCFCE7',
+        'bcolor': '#16A34A',
+    },
+    {
+        'name': '😰 Panic Attack',
+        'corr': D['corr'].get('Panic Attack', 0),
+        'pval': D['pvals'].get('Panic Attack', 1),
+        'why':  "Panic attacks are a strong co-morbid symptom of depression. "
+                "Students with panic attacks are significantly more likely to be depressed.",
+        'verdict': '✅ IMPORTANT',
+        'color': '#DCFCE7',
+        'bcolor': '#16A34A',
+    },
+    {
+        'name': '🏥 Seek Treatment',
+        'corr': D['corr'].get('Seek Treatment', 0),
+        'pval': D['pvals'].get('Seek Treatment', 1),
+        'why':  "Students who sought specialist help are more likely to have been diagnosed. "
+                "Acts as a proxy for severity of mental health condition.",
+        'verdict': '✅ IMPORTANT',
+        'color': '#DCFCE7',
+        'bcolor': '#16A34A',
+    },
+    {
+        'name': '😟 Anxiety',
+        'corr': D['corr'].get('Anxiety', 0),
+        'pval': D['pvals'].get('Anxiety', 1),
+        'why':  "Anxiety and depression frequently co-occur. "
+                "Significant predictor — students with anxiety show higher depression rates.",
+        'verdict': '✅ IMPORTANT',
+        'color': '#DCFCE7',
+        'bcolor': '#16A34A',
+    },
+    {
+        'name': '🚻 Gender',
+        'corr': D['corr'].get('Gender', 0),
+        'pval': D['pvals'].get('Gender', 1),
+        'why':  "Shows moderate relationship — female students in this dataset report "
+                "higher depression rates. Borderline feature, used in KNN.",
+        'verdict': '⚠️ MODERATE',
+        'color': '#FEF9C3',
+        'bcolor': '#CA8A04',
+    },
+    {
+        'name': '📚 Course',
+        'corr': D['corr'].get('Course', 0),
+        'pval': D['pvals'].get('Course', 1),
+        'why':  "Different courses carry different stress levels. "
+                "Weak predictor — stress variation across courses is not strongly linked to depression alone.",
+        'verdict': '⚠️ WEAK',
+        'color': '#FEF9C3',
+        'bcolor': '#CA8A04',
+    },
+    {
+        'name': '🎂 Age',
+        'corr': D['corr'].get('Age', 0),
+        'pval': D['pvals'].get('Age', 1),
+        'why':  "Age range is narrow (18–24) — very little variation. "
+                "Not statistically significant. Depression is not strongly age-dependent in this group.",
+        'verdict': '❌ NOT IMPORTANT',
+        'color': '#FEE2E2',
+        'bcolor': '#DC2626',
+    },
+    {
+        'name': '📅 Year of Study',
+        'corr': D['corr'].get('Year', 0),
+        'pval': D['pvals'].get('Year', 1),
+        'why':  "Expected that final year students have more stress, but data shows "
+                "no significant difference. Depression affects all years equally.",
+        'verdict': '❌ NOT IMPORTANT',
+        'color': '#FEE2E2',
+        'bcolor': '#DC2626',
+    },
+    {
+        'name': '📊 CGPA',
+        'corr': D['corr'].get('CGPA', 0),
+        'pval': D['pvals'].get('CGPA', 1),
+        'why':  "Weakest predictor. Low CGPA may be a consequence of depression, "
+                "not a cause. The relationship is not statistically significant.",
+        'verdict': '❌ NOT IMPORTANT',
+        'color': '#FEE2E2',
+        'bcolor': '#DC2626',
+    },
+]
+
+# Display as cards
+imp_col, mod_col, not_col = st.columns(3)
+col_map = {
+    '✅ IMPORTANT':     imp_col,
+    '⚠️ MODERATE':     mod_col,
+    '⚠️ WEAK':         mod_col,
+    '❌ NOT IMPORTANT': not_col,
+}
+
+# Headers
+with imp_col:
+    st.markdown("### ✅ Important Features")
+    st.caption("Strong correlation + statistically significant")
+with mod_col:
+    st.markdown("### ⚠️ Moderate / Weak")
+    st.caption("Some relationship but limited predictive power")
+with not_col:
+    st.markdown("### ❌ Not Important")
+    st.caption("Weak or no correlation — not significant")
+
+for feat in important_feats:
+    col = col_map[feat['verdict']]
+    with col:
+        st.markdown(
+            f"""<div style="
+                background:{feat['color']};
+                border-left: 4px solid {feat['bcolor']};
+                border-radius: 8px;
+                padding: 12px 14px;
+                margin-bottom: 10px;">
+                <div style="font-weight:700; font-size:14px; color:#1E293B;">
+                    {feat['name']}
+                </div>
+                <div style="font-size:12px; color:#374151; margin-top:4px; line-height:1.5;">
+                    |r| = {feat['corr']:.3f} &nbsp;·&nbsp;
+                    p = {feat['pval']:.4f}
+                </div>
+                <div style="font-size:12px; color:#374151; margin-top:6px; line-height:1.5;">
+                    {feat['why']}
+                </div>
+            </div>""",
+            unsafe_allow_html=True
+        )
+
+st.write("")
+
+# Summary chart
+fig_sum, ax_sum = plt.subplots(figsize=(12, 4))
+feat_names = [f['name'].split(' ',1)[1] for f in important_feats]
+corr_vals  = [f['corr'] for f in important_feats]
+bar_colors = []
+for f in important_feats:
+    if f['verdict'] == '✅ IMPORTANT':   bar_colors.append('#16A34A')
+    elif 'MODERATE' in f['verdict'] or 'WEAK' in f['verdict']: bar_colors.append('#CA8A04')
+    else:                                bar_colors.append('#DC2626')
+
+bars_sum = ax_sum.bar(feat_names, corr_vals, color=bar_colors,
+                       edgecolor='white', alpha=0.9, width=0.6)
+for bar, val in zip(bars_sum, corr_vals):
+    ax_sum.text(bar.get_x()+bar.get_width()/2,
+                bar.get_height()+0.005,
+                f'{val:.3f}', ha='center', va='bottom',
+                fontsize=9, fontweight='bold')
+
+ax_sum.axhline(0.2, color='#16A34A', ls='--', lw=1.5, alpha=0.7,
+               label='Important threshold (0.2)')
+ax_sum.axhline(0.1, color='#CA8A04', ls='--', lw=1.5, alpha=0.7,
+               label='Moderate threshold (0.1)')
+ax_sum.set_ylabel('Absolute Correlation |r| with Depression')
+ax_sum.set_title('Feature Importance Summary — Green=Important · Amber=Moderate · Red=Not Important',
+                 fontweight='bold')
+ax_sum.tick_params(axis='x', rotation=20)
+ax_sum.legend(fontsize=9)
+ax_sum.set_ylim(0, max(corr_vals) * 1.2)
+ax_sum.spines['top'].set_visible(False)
+ax_sum.spines['right'].set_visible(False)
+plt.tight_layout()
+st.pyplot(fig_sum, use_container_width=True)
+plt.close()
+
+st.divider()
+
+# ══════════════════════════════════════════════════════════════
+# SECTION 8 — CONCLUSION
+# ══════════════════════════════════════════════════════════════
+st.subheader("8. Feature Selection Conclusion")
 
 top_feat  = D['corr'].sort_values(ascending=False).head(5).index.tolist()
 best_knn_n = D['knn_accs'].index(max(D['knn_accs'])) + 1

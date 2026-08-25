@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+plt.style.use('seaborn-v0_8-whitegrid')
+plt.rcParams.update({'font.family':'sans-serif','font.size':10,'axes.spines.top':False,'axes.spines.right':False,'figure.facecolor':'white','axes.facecolor':'white','axes.edgecolor':'#E2E8F0','axes.labelcolor':'#1E293B','xtick.color':'#64748B','ytick.color':'#64748B','text.color':'#1E293B','grid.color':'#F1F5F9','grid.linewidth':0.8})
 import seaborn as sns
 import sys, os, warnings
 warnings.filterwarnings('ignore')
@@ -206,11 +208,32 @@ if st.session_state['knn_result']:
     if R['anxiety']=='Yes': _notes_knn.append("Anxiety = Yes — 2nd strongest predictor (r=0.257)")
     if R['panic']=='Yes':   _notes_knn.append("Panic Attack = Yes — strongest predictor (r=0.341)")
     try:
-        _pdf=generate_pdf(model_name=f"KNN (K={M['best_k']})",student_name=R['name'],
-                          result=R['pred'],prob=R['prob'],
-                          input_data={"Gender":R['gender'],"Age":str(R['age']),"Course":R['course'],
-                                      "Year":R['year'],"CGPA":R['cgpa'],"Anxiety":R['anxiety'],"Panic":R['panic']},
-                          metrics=M['knn_m'],business_alerts=_alerts_knn,explanation_notes=_notes_knn)
+        # Build feature contribution for PDF
+        _fi_for_pdf = {
+            'Gender':       (1 if R['gender']=='Male' else 0) * M['knn_corr'].get('Gender',0),
+            'Age':          -abs(M['knn_corr'].get('Age',0))*0.3,
+            'CGPA':         -abs(M['knn_corr'].get('CGPA',0))*0.3,
+            'Anxiety':      (1 if R['anxiety']=='Yes' else -0.3) * M['knn_corr'].get('Anxiety',0),
+            'Panic Attack': (1 if R['panic']=='Yes'   else -0.3) * M['knn_corr'].get('Panic Attack',0),
+        }
+        _pdf=generate_pdf(
+            model_name   = f"KNN (K={M['best_k']})",
+            student_name = R['name'],
+            result       = R['pred'],
+            prob         = R['prob'],
+            input_data   = {
+                "Gender": R['gender'], "Age": str(R['age']),
+                "Course": R['course'], "Year": R['year'],
+                "CGPA":   R['cgpa'],   "Anxiety": R['anxiety'],
+                "Panic Attack": R['panic'],
+            },
+            metrics            = M['knn_m'],
+            business_alerts    = _alerts_knn,
+            explanation_notes  = _notes_knn,
+            feature_importance = _fi_for_pdf,
+            cm_array           = M['knn_m']['cm'],
+            model_color        = '#2563EB',
+        )
         st.download_button("📥  Download PDF Report",data=_pdf,
                            file_name=f"mindcheck_knn_{R['name'].replace(' ','_')}.pdf",
                            mime="application/pdf",use_container_width=True,key="knn_pdf")
@@ -229,7 +252,7 @@ fi = M['knn_corr'].sort_values(ascending=True)
 fi_c1,fi_c2 = st.columns([2,1])
 with fi_c1:
     fig_fi,ax_fi=plt.subplots(figsize=(7,3.5))
-    colors_fi=['#3B82F6' if v>=fi.mean() else '#9CA3AF' for v in fi.values]
+    colors_fi=['#3B82F6' if v>=fi.mean() else '#64748B' for v in fi.values]
     bars_fi=ax_fi.barh(fi.index,fi.values,color=colors_fi,edgecolor='none',height=0.6)
     ax_fi.axvline(fi.mean(),color='red',ls='--',lw=1.2,alpha=0.7,label=f'Mean={fi.mean():.3f}')
     for bar,val in zip(bars_fi,fi.values):
