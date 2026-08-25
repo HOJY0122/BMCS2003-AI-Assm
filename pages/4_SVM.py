@@ -3,1104 +3,356 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-import warnings, sys, os
+from sklearn.svm import LinearSVC
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+import sys, os, warnings
 warnings.filterwarnings('ignore')
 
-try:
-    import plotly.graph_objects as go
-    import plotly.express as px
-    from plotly.subplots import make_subplots
-    PLOTLY_OK = True
-except ImportError:
-    PLOTLY_OK = False
-
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.svm import SVC
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, LabelEncoder
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import (accuracy_score, precision_score,
-                             recall_score, f1_score, confusion_matrix)
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils.preprocessing import load_and_clean_dataset
 from utils.sidebar import sidebar
-from utils.models import load_all_models as _load_shared
+from utils.models import load_all_models
+from utils.pdf_report import generate_pdf
 
-st.set_page_config(
-    page_title="Compare Models — MindCheck",
-    page_icon="📈",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-sidebar("compare")
+st.set_page_config(page_title="SVM Predictor — MindCheck",
+                   page_icon="🔴", layout="wide",
+                   initial_sidebar_state="expanded")
+sidebar("svm")
 
-# ══════════════════════════════════════════════════════════════
-# LOAD DATA + TRAIN ALL 3 MODELS
-# ══════════════════════════════════════════════════════════════
-@st.cache_resource
-def load_all_models():
-    df = load_and_clean_dataset('dataset/Student_Mental_health.csv')
-    df['CGPA_Numeric'] = df['CGPA_Numeric'].fillna(df['CGPA_Numeric'].median())
+M = load_all_models()
 
-    le_course = LabelEncoder()
-    le_year   = LabelEncoder()
-    df['Course_Enc']        = le_course.fit_transform(df['Course'])
-    df['Year_of_Study_Enc'] = le_year.fit_transform(df['Year_of_Study'])
+CGPA_MAP = M['cgpa_map']
 
-    # ── KNN — Target: Depression ─────────────────────────────
-    knn_feat = ['Gender','Age','Course_Enc','Year_of_Study_Enc',
-                'CGPA_Numeric','Anxiety','Panic_Attack']
-    X_k = df[knn_feat]; y_k = df['Depression']
-    sc_knn = MinMaxScaler()
-    X_ks   = sc_knn.fit_transform(X_k)
-    Xtr_k, Xte_k, ytr_k, yte_k = train_test_split(
-        X_ks, y_k, test_size=0.2, random_state=42, stratify=y_k)
-    best_k, best_a = 5, 0
-    for k in range(1, 21):
-        m = KNeighborsClassifier(n_neighbors=k)
-        m.fit(Xtr_k, ytr_k)
-        a = accuracy_score(yte_k, m.predict(Xte_k))
-        if a > best_a: best_a, best_k = a, k
-    knn = KNeighborsClassifier(n_neighbors=best_k, metric='euclidean')
-    knn.fit(Xtr_k, ytr_k)
-    knn_p = knn.predict(Xte_k)
+# ── Restore result carried from Comparison page ──────────────
+if 'svm_carry' in st.session_state and st.session_state['svm_carry'] is not None:
+    st.session_state['svm_result'] = st.session_state.pop('svm_carry')
 
-    # ── DT — Target: Depression ──────────────────────────────
-    dt_feat = ['Gender','Age','Course_Enc','Year_of_Study_Enc',
-               'CGPA_Numeric','Anxiety','Panic_Attack','Marital_Status']
-    X_d = df[dt_feat]; y_d = df['Depression']
-    Xtr_d, Xte_d, ytr_d, yte_d = train_test_split(
-        X_d, y_d, test_size=0.3, random_state=42, stratify=y_d)
-    dt = DecisionTreeClassifier(max_depth=5, criterion='gini', random_state=42)
-    dt.fit(Xtr_d, ytr_d)
-    dt_p = dt.predict(Xte_d)
+if 'svm_result' not in st.session_state:
+    st.session_state['svm_result'] = None
 
-    # ── SVM — Target: Depression (same as predictor page) ──────
-    from sklearn.pipeline import Pipeline
-    from sklearn.preprocessing import OrdinalEncoder
-    import pandas as _pd2
-    _df_raw = _pd2.read_csv('dataset/Student_Mental_health.csv')
-    _df_raw.columns = _df_raw.columns.str.strip()
-    _df_raw['Age'] = _df_raw['Age'].fillna(_df_raw['Age'].median())
-    _df_raw['Your current year of Study'] = _df_raw['Your current year of Study'].str.strip().str.lower()
-    _df_raw['What is your CGPA?'] = _df_raw['What is your CGPA?'].str.strip()
-    def _cat(c):
-        c = str(c).lower()
-        return 'STEM/IT' if any(x in c for x in [
-            'technology','it','computer','cs','system',
-            'software','se','bit','bcs','cts']) else 'Other'
-    _df_raw['Course_Category'] = _df_raw['What is your course?'].apply(_cat)
-    _df_raw = _df_raw.drop(columns=['Timestamp','What is your course?'], errors='ignore')
-    X_s  = _df_raw.drop(columns=['Do you have Depression?'])
-    y_s  = (_df_raw['Do you have Depression?'] == 'Yes').astype(int)
-    svm_pipe = Pipeline([
-        ('enc', OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)),
-        ('scl', StandardScaler()),
-        ('svm', SVC(kernel='rbf', probability=True,
-                    class_weight='balanced', random_state=42))
-    ])
-    svm_col_order = list(X_s.columns)
-    Xtr_s, Xte_s, ytr_s, yte_s = train_test_split(
-        X_s, y_s, test_size=0.25, random_state=42, stratify=y_s)
-    svm_pipe.fit(Xtr_s, ytr_s)
-    svm_p = svm_pipe.predict(Xte_s)
-    svm   = svm_pipe   # alias
-    sc_svm = None      # pipeline handles scaling internally
-    svm_feat = svm_col_order
+_pre = st.session_state.pop('svm_prefill', None)
+if _pre:
+    st.info(f"📋 Data from Comparison page: **{_pre.get('name','Student')}** — form pre-filled below.")
 
-    def _m(yt, yp):
-        return {
-            'acc' : accuracy_score(yt, yp)*100,
-            'prec': precision_score(yt, yp, zero_division=0)*100,
-            'rec' : recall_score(yt, yp, zero_division=0)*100,
-            'f1'  : f1_score(yt, yp, zero_division=0)*100,
-            'cm'  : confusion_matrix(yt, yp),
-        }
-
-    return {
-        'knn': knn, 'sc_knn': sc_knn, 'knn_feat': knn_feat,
-        'svm_col_order': list(X_s.columns),
-        'best_k': best_k, 'knn_m': _m(yte_k, knn_p),
-        'dt' : dt,  'dt_feat': dt_feat, 'dt_m': _m(yte_d, dt_p),
-        'svm': svm, 'sc_svm': sc_svm, 'svm_feat': svm_feat,
-        'svm_m': _m(yte_s, svm_p),
-        'le_course': le_course, 'le_year': le_year,
-        'df': df,
-        'knn_test': (Xte_k, yte_k),
-        'dt_test' : (Xte_d, yte_d),
-        'svm_test': (Xte_s, yte_s),
-    }
-
-with st.spinner("Training all 3 models..."):
-    M = load_all_models()
-
-# Session state
-for k, v in [('log',[]),('n',0),('knn_c',0),('dt_c',0),('svm_c',0),
-                ('as_result', None)]:
-    if k not in st.session_state:
-        st.session_state[k] = v
-
-# ── Page Header ────────────────────────────────────────────────
-st.markdown("##### RESULTS")
-st.title("Live Model Comparison")
-st.write(
-    "Enter student information and instantly compare predictions from "
-    "**KNN**, **Decision Tree** and **SVM** simultaneously. "
-    "Track accuracy across multiple test runs."
-)
+st.markdown("##### 🔴 SVM PREDICTOR")
+st.title("Depression Risk Predictor")
+st.caption(f"Support Vector Machine (RBF Kernel) · Member: Chiang Jun Hang · Live trained on {M['n_records']} records")
 st.divider()
 
-# ══════════════════════════════════════════════════════════════
-# SECTION 1 — SCORE CARDS WITH NAVIGATION
-# ══════════════════════════════════════════════════════════════
-c1, c2, c3 = st.columns(3)
-
-with c1:
-    with st.container(border=True):
-        st.markdown("### 🔵 KNN")
-        st.caption(f"Ho Jun Yon · K={M['best_k']} · Target: Depression")
-        st.divider()
-        # Accuracy big
-        st.metric("Accuracy",  f"{M['knn_m']['acc']:.2f}%")
-        ma, mb = st.columns(2)
-        ma.metric("Precision", f"{M['knn_m']['prec']:.2f}%")
-        mb.metric("Recall",    f"{M['knn_m']['rec']:.2f}%")
-        mc, md = st.columns(2)
-        mc.metric("F1 Score",  f"{M['knn_m']['f1']:.2f}%")
-        md.metric("Split",     "80 / 20")
-        st.divider()
-        if st.button("Open KNN Page →", key="go_knn", use_container_width=True):
-            st.switch_page("pages/2_KNN.py")
-
-with c2:
-    with st.container(border=True):
-        st.markdown("### 🌳 Decision Tree")
-        st.caption("Irvin Tan · Depth 5 · Target: Depression")
-        st.divider()
-        st.metric("Accuracy",  f"{M['dt_m']['acc']:.2f}%")
-        ma, mb = st.columns(2)
-        ma.metric("Precision", f"{M['dt_m']['prec']:.2f}%")
-        mb.metric("Recall",    f"{M['dt_m']['rec']:.2f}%")
-        mc, md = st.columns(2)
-        mc.metric("F1 Score",  f"{M['dt_m']['f1']:.2f}%")
-        md.metric("Split",     "70 / 30")
-        st.divider()
-        if st.button("Open Decision Tree Page →", key="go_dt", use_container_width=True):
-            st.switch_page("pages/3_Decision_Tree.py")
-
-with c3:
-    with st.container(border=True):
-        st.markdown("### 🔴 SVM")
-        st.caption("Chiang Jun Hang · RBF · Target: Panic Attack")
-        st.divider()
-        st.metric("Accuracy",  f"{M['svm_m']['acc']:.2f}%")
-        ma, mb = st.columns(2)
-        ma.metric("Precision", f"{M['svm_m']['prec']:.2f}%")
-        mb.metric("Recall",    f"{M['svm_m']['rec']:.2f}%")
-        mc, md = st.columns(2)
-        mc.metric("F1 Score",  f"{M['svm_m']['f1']:.2f}%")
-        md.metric("Split",     "75 / 25")
-        st.divider()
-        if st.button("Open SVM Page →", key="go_svm", use_container_width=True):
-            st.switch_page("pages/4_SVM.py")
-
+c1,c2,c3,c4=st.columns(4)
+c1.metric("Accuracy",  f"{M['svm_m']['acc']:.2f}%")
+c2.metric("Precision", f"{M['svm_m']['prec']:.2f}%")
+c3.metric("Recall",    f"{M['svm_m']['rec']:.2f}%")
+c4.metric("F1 Score",  f"{M['svm_m']['f1']:.2f}%")
 st.divider()
 
-# ══════════════════════════════════════════════════════════════
-# SECTION 2 — LIVE TEST FORM
-# ══════════════════════════════════════════════════════════════
-st.subheader("Run Live Test — All 3 Models")
-st.write("Fill in student details. All 3 models predict simultaneously.")
-
-CGPA_MAP = {
-    '0 - 1.99':1.0,'2.00 - 2.49':2.25,'2.50 - 2.99':2.75,
-    '3.00 - 3.49':3.25,'3.50 - 4.00':3.75
-}
-
-with st.form("live_form", clear_on_submit=False):
-    fa, fb, fc = st.columns(3)
-
-    with fa:
-        t_name    = st.text_input("Name (optional)")
-        t_gender  = st.selectbox("Gender", ["Female","Male"])
-        t_age     = st.slider("Age", 17, 30, 20)
-        t_course  = st.selectbox("Course", [
-            "Computer Science","Information Technology","Engineering",
-            "Law","Psychology","Language","Islamic Studies",
-            "Health Sciences","Business","Science & Math",
-            "Arts & Social","Others"])
-
-    with fb:
-        t_year    = st.selectbox("Year of Study",
-                                 ["Year 1","Year 2","Year 3","Year 4"])
-        t_cgpa    = st.selectbox("CGPA Range", list(CGPA_MAP.keys()))
-        t_marital = st.selectbox("Marital Status", ["No","Yes"])
-        t_seek    = st.selectbox("Seek Treatment?", ["No","Yes"])
-
-    with fc:
-        t_anxiety = st.selectbox("Has Anxiety?",      ["No","Yes"])
-        t_panic   = st.selectbox("Has Panic Attack?", ["No","Yes"])
-        st.markdown("**Actual answers (for tracking)**")
-        t_actual_dep   = st.selectbox("Actual Depression?",
-                                      ["Unknown","No","Yes"])
-        t_actual_panic = st.selectbox("Actual Panic Attack?",
-                                      ["Unknown","No","Yes"])
-
-    run = st.form_submit_button("Run All 3 Models Now",
-                                use_container_width=True)
-
-if run:
-    le_c = M['le_course']; le_y = M['le_year']
-    g  = 1 if t_gender  == "Male" else 0
-    ax = 1 if t_anxiety == "Yes"  else 0
-    pa = 1 if t_panic   == "Yes"  else 0
-    ma = 1 if t_marital == "Yes"  else 0
-    sk = 1 if t_seek    == "Yes"  else 0
-    cg = CGPA_MAP[t_cgpa]
-    ce = le_c.transform([t_course])[0] if t_course in le_c.classes_ else 0
-    ye = le_y.transform([t_year])[0]   if t_year   in le_y.classes_ else 0
-
-    # ── KNN ──────────────────────────────────────────────────
-    knn_in = pd.DataFrame(
-        [[g, t_age, ce, ye, cg, ax, pa]],
-        columns=M['knn_feat'])
-    knn_in_s  = M['sc_knn'].transform(knn_in)
-    knn_pred  = M['knn'].predict(knn_in_s)[0]
-    knn_prob  = M['knn'].predict_proba(knn_in_s)[0]
-
-    # ── DT ───────────────────────────────────────────────────
-    dt_in = pd.DataFrame(
-        [[g, t_age, ce, ye, cg, ax, pa, ma]],
-        columns=M['dt_feat'])
-    dt_pred  = M['dt'].predict(dt_in)[0]
-    dt_prob  = M['dt'].predict_proba(dt_in)[0]
-
-    # ── SVM ── uses pipeline (same as 4_SVM.py predictor page) ─
-    _yr_n = t_year.split()[-1]
-    svm_in = pd.DataFrame([{
-        'Choose your gender'                           : t_gender,
-        'Age'                                          : t_age,
-        'Your current year of Study'                   : f'year {_yr_n}',
-        'What is your CGPA?'                           : t_cgpa,
-        'Marital status'                               : t_marital,
-        'Do you have Anxiety?'                         : t_anxiety,
-        'Do you have Panic attack?'                    : t_panic,
-        'Did you seek any specialist for a treatment?' : t_seek,
-        'Course_Category': 'STEM/IT' if any(x in t_course.lower() for x in
-            ['technology','it','computer','cs','system','software','se']) else 'Other',
-    }])[M['svm_col_order']]
-    svm_pred = M['svm'].predict(svm_in)[0]
-    svm_prob = M['svm'].predict_proba(svm_in)[0]
-
-    # ── Actual labels ─────────────────────────────────────────
-    act_dep   = None if t_actual_dep   == "Unknown" else (1 if t_actual_dep   == "Yes" else 0)
-    act_panic = None if t_actual_panic == "Unknown" else (1 if t_actual_panic == "Yes" else 0)
-
-    name = t_name.strip() or "Student"
-
-    # ── Display results ───────────────────────────────────────
-    st.markdown("---")
-    st.subheader(f"Prediction Results — {name}")
-
-    rc1, rc2, rc3 = st.columns(3)
-
-    def show_result(col, icon, title, member, target, pred, prob,
-                    act, label_pos, label_neg):
-        with col:
-            with st.container(border=True):
-                st.markdown(f"### {icon} {title}")
-                st.caption(f"{member} · Target: {target}")
-                st.divider()
-                if pred == 1:
-                    st.error(f"**{label_pos} DETECTED**")
-                else:
-                    st.success(f"**NO {label_pos}**")
-
-                pa_col, pb_col = st.columns(2)
-                pa_col.metric(label_neg, f"{prob[0]*100:.1f}%")
-                pb_col.metric(label_pos, f"{prob[1]*100:.1f}%")
-
-                # Stacked bar
-                fig, ax = plt.subplots(figsize=(3.5, 0.6))
-                ax.barh([""], [prob[0]*100], color="#10B981",
-                        height=0.5, label=label_neg)
-                ax.barh([""], [prob[1]*100], left=[prob[0]*100],
-                        color="#EF4444", height=0.5, label=label_pos)
-                ax.set_xlim(0, 100)
-                ax.axis('off')
-                if prob[0] > 0.15:
-                    ax.text(prob[0]*50, 0, f"{prob[0]*100:.0f}%",
-                            ha='center', va='center', fontsize=8,
-                            color='white', fontweight='bold')
-                if prob[1] > 0.15:
-                    ax.text(prob[0]*100 + prob[1]*50, 0,
-                            f"{prob[1]*100:.0f}%",
-                            ha='center', va='center', fontsize=8,
-                            color='white', fontweight='bold')
-                plt.tight_layout(pad=0)
-                st.pyplot(fig, use_container_width=True)
-                plt.close()
-
-                if act is not None:
-                    correct = (pred == act)
-                    st.success("✅ Correct") if correct else st.error("❌ Wrong")
-                    return correct
-                return None
-
-    knn_c = show_result(rc1,"🔵","KNN","Ho Jun Yon","Depression",
-                        knn_pred,knn_prob,act_dep,"Depression","No Dep")
-    dt_c  = show_result(rc2,"🌳","Decision Tree","Irvin","Depression",
-                        dt_pred,dt_prob,act_dep,"Depression","No Dep")
-    svm_c = show_result(rc3,"🔴","SVM","Chiang Jun Hang","Panic Attack",
-                        svm_pred,svm_prob,act_panic,"Panic Attack","No Panic")
-
-    # Agreement line
-    dep_agree  = (knn_pred == dt_pred)
-    dep_label  = "Depression" if knn_pred == 1 else "No Depression"
-    svm_label  = "Panic Attack" if svm_pred == 1 else "No Panic Attack"
-
-    st.markdown("")
-    a1, a2 = st.columns(2)
-    with a1:
-        if dep_agree:
-            st.info(f"KNN & DT **AGREE** on Depression: **{dep_label}**")
-        else:
-            st.warning(
-                f"KNN & DT **DISAGREE** — "
-                f"KNN: **{'Depression' if knn_pred==1 else 'No Depression'}** | "
-                f"DT: **{'Depression' if dt_pred==1 else 'No Depression'}**"
-            )
-    with a2:
-        st.info(f"SVM predicts Panic Attack: **{svm_label}**")
-
-    # ── Navigate to predictor with result pre-loaded ──────────
-    st.write("")
-    st.markdown("**Open in Individual Predictor — result pre-loaded, no need to predict again**")
-    _live_shared = {
-        'from_comparison': True,
-        'name': name, 'gender': t_gender, 'age': t_age,
-        'course': t_course, 'year': t_year, 'cgpa': t_cgpa,
-        'marital': t_marital, 'anxiety': t_anxiety,
-        'panic': t_panic, 'seek': t_seek,
-    }
-    nav1, nav2, nav3 = st.columns(3)
-    with nav1:
-        if st.button("🔵 Open KNN →", key="live_nav_knn", use_container_width=True):
-            st.session_state['knn_prefill'] = _live_shared
-            st.session_state['knn_result']  = {
-                'pred': int(knn_pred), 'prob': knn_prob.tolist(),
-                'name': name, 'gender': t_gender, 'age': t_age,
-                'course': t_course, 'year': t_year, 'cgpa': t_cgpa,
-                'anxiety': t_anxiety, 'panic': t_panic,
-                'high_concern': (t_anxiety=="Yes" and t_panic=="Yes"),
-                'academic_risk': (t_year in ["Year 3","Year 4"] and t_cgpa=="0 - 1.99"),
-            }
-            st.switch_page("pages/2_KNN.py")
-    with nav2:
-        if st.button("🌳 Open DT →", key="live_nav_dt", use_container_width=True):
-            st.session_state['dt_prefill'] = _live_shared
-            st.session_state['dt_result']  = {
-                'pred': int(dt_pred), 'prob': dt_prob.tolist(),
-                'name': name, 'gender': t_gender, 'age': t_age,
-                'course': t_course, 'year': t_year, 'cgpa': t_cgpa,
-                'marital': t_marital, 'anxiety': t_anxiety, 'panic': t_panic,
-                'high_concern': (t_anxiety=="Yes" and t_panic=="Yes"),
-                'married_risk': (t_marital=="Yes" and t_age<21),
-                'academic_risk': (t_year in ["Year 3","Year 4"] and t_cgpa=="0 - 1.99"),
-            }
-            st.switch_page("pages/3_Decision_Tree.py")
-    with nav3:
-        if st.button("🔴 Open SVM →", key="live_nav_svm", use_container_width=True):
-            st.session_state['svm_prefill'] = _live_shared
-            st.session_state['svm_result']  = {
-                'pred': int(svm_pred), 'prob': svm_prob.tolist(),
-                'inp': svm_in,
-                'name': name, 'gender': t_gender, 'age': t_age,
-                'course': t_course, 'year': t_year, 'cgpa': t_cgpa,
-                'marital': t_marital, 'anxiety': t_anxiety,
-                'panic': t_panic, 'treat': t_seek,
-                'high_concern': (t_anxiety=="Yes" and t_panic=="Yes"),
-                'treat_flag': (t_seek=="Yes"),
-                'academic_risk': (t_year in ["Year 3","Year 4"] and t_cgpa=="0 - 1.99"),
-            }
-            st.switch_page("pages/4_SVM.py")
-
-    # ── Update session state ──────────────────────────────────
-    st.session_state['n'] += 1
-    if knn_c is not None: st.session_state['knn_c'] += int(knn_c)
-    if dt_c  is not None: st.session_state['dt_c']  += int(dt_c)
-    if svm_c is not None: st.session_state['svm_c'] += int(svm_c)
-
-    st.session_state['log'].insert(0, {
-        "Test #"    : st.session_state['n'],
-        "Name"      : name,
-        "Gender"    : t_gender,
-        "Age"       : t_age,
-        "CGPA"      : t_cgpa,
-        "Anxiety"   : t_anxiety,
-        "Panic"     : t_panic,
-        "KNN (Dep)" : "Dep" if knn_pred==1 else "No",
-        "DT (Dep)"  : "Dep" if dt_pred==1  else "No",
-        "SVM (Panic)": "Panic" if svm_pred==1 else "No",
-        "KNN%"      : f"{knn_prob[1]*100:.0f}%",
-        "DT%"       : f"{dt_prob[1]*100:.0f}%",
-        "SVM%"      : f"{svm_prob[1]*100:.0f}%",
-        "Agree KNN-DT": "✅" if dep_agree else "❌",
-        "Actual Dep"  : t_actual_dep,
-        "Actual Panic": t_actual_panic,
-    })
-
-st.divider()
-
-# ══════════════════════════════════════════════════════════════
-# SECTION 3 — LIVE SCOREBOARD
-# ══════════════════════════════════════════════════════════════
-st.subheader("Live Test Scoreboard")
-
-n = st.session_state['n']
-if n == 0:
-    st.info("No tests run yet. Fill in the form above and click Run All 3 Models.")
-else:
-    sb = st.columns(5)
-    sb[0].metric("Tests Run",    str(n))
-    sb[1].metric("KNN Correct",  str(st.session_state['knn_c']),
-                 help="Depression — only counted when Actual provided")
-    sb[2].metric("DT Correct",   str(st.session_state['dt_c']),
-                 help="Depression — only counted when Actual provided")
-    sb[3].metric("SVM Correct",  str(st.session_state['svm_c']),
-                 help="Panic Attack — only counted when Actual provided")
-    log_df = pd.DataFrame(st.session_state['log'])
-    agree_n = (log_df["Agree KNN-DT"] == "✅").sum()
-    sb[4].metric("KNN-DT Agree", f"{agree_n}/{n}")
-
-    # Live accuracy chart (if actuals provided)
-    actuals_dep   = sum(1 for e in st.session_state['log'] if e['Actual Dep']   != 'Unknown')
-    actuals_panic = sum(1 for e in st.session_state['log'] if e['Actual Panic'] != 'Unknown')
-
-    if actuals_dep > 0 or actuals_panic > 0:
-        st.write("")
-        st.markdown("**Live Accuracy on Your Test Cases**")
-        fig, ax = plt.subplots(figsize=(8, 2.2))
-        models, accs, colors = [], [], []
-        if actuals_dep > 0:
-            models += ['KNN (Dep)', 'DT (Dep)']
-            accs   += [st.session_state['knn_c']/actuals_dep*100,
-                       st.session_state['dt_c'] /actuals_dep*100]
-            colors += ['#5B7FFF','#10B981']
-        if actuals_panic > 0:
-            models += ['SVM (Panic)']
-            accs   += [st.session_state['svm_c']/actuals_panic*100]
-            colors += ['#EF4444']
-        bars = ax.barh(models, accs, color=colors, height=0.45, edgecolor='none')
-        for bar, val in zip(bars, accs):
-            ax.text(val+1, bar.get_y()+bar.get_height()/2,
-                    f'{val:.1f}%', va='center', fontsize=10, fontweight='bold')
-        ax.set_xlim(0, 118)
-        ax.axvline(50, color='gray', ls='--', lw=0.8, alpha=0.5)
-        ax.set_xlabel("Your live test accuracy (%)")
-        ax.spines['top'].set_visible(False)
-        ax.spines['right'].set_visible(False)
-        ax.grid(axis='x', alpha=0.3)
-        plt.tight_layout()
-        st.pyplot(fig, use_container_width=True)
-        plt.close()
-
-    st.markdown("**Test History**")
-    st.dataframe(log_df, use_container_width=True, hide_index=True)
-
-    if st.button("Clear All Tests", key="clear"):
-        for k in ['log','n','knn_c','dt_c','svm_c']:
-            st.session_state[k] = [] if k=='log' else 0
-        st.rerun()
-
-st.divider()
-
-# ══════════════════════════════════════════════════════════════
-# SECTION 4 — INTERACTIVE METRIC CHARTS (Plotly)
-# ══════════════════════════════════════════════════════════════
-st.subheader("Interactive Metric Charts")
-st.caption("Hover over bars for details · Click legend to show/hide models · "
-           "Double-click to isolate · Drag to zoom · Click metric tabs to drill down")
-
-metric_names = ["Accuracy","Precision","Recall","F1 Score"]
-knn_v = [M['knn_m']['acc'], M['knn_m']['prec'], M['knn_m']['rec'], M['knn_m']['f1']]
-dt_v  = [M['dt_m']['acc'],  M['dt_m']['prec'],  M['dt_m']['rec'],  M['dt_m']['f1']]
-svm_v = [M['svm_m']['acc'], M['svm_m']['prec'], M['svm_m']['rec'], M['svm_m']['f1']]
-
-# ── Tabs for each metric drill-down ───────────────────────────
-tab_all, tab_acc, tab_prec, tab_rec, tab_f1 = st.tabs([
-    "📊 All Metrics", "🎯 Accuracy", "🔬 Precision", "📡 Recall", "⚖️ F1 Score"
-])
-
-with tab_all:
-    ic1, ic2 = st.columns(2)
-
-    with ic1:
-        # Interactive grouped bar chart
-        fig_bar = go.Figure()
-        for name, vals, color in [
-            ('🔵 KNN',           knn_v, '#3B82F6'),
-            ('🌳 Decision Tree', dt_v,  '#10B981'),
-            ('🔴 SVM',           svm_v, '#EF4444'),
-        ]:
-            fig_bar.add_trace(go.Bar(
-                name=name, x=metric_names, y=vals,
-                marker_color=color, opacity=0.9,
-                hovertemplate='<b>%{x}</b><br>Score: <b>%{y:.2f}%</b><extra>' + name + '</extra>',
-                text=[f'{v:.1f}%' for v in vals],
-                textposition='outside',
-                textfont=dict(size=10, color='white'),
-            ))
-        fig_bar.update_layout(
-            barmode='group',
-            title=dict(text='All 3 Models — Click legend to toggle',
-                      font=dict(size=14)),
-            yaxis=dict(range=[0,115], title='Score (%)',
-                      gridcolor='rgba(255,255,255,0.1)'),
-            xaxis=dict(title='Metric'),
-            legend=dict(orientation='h', yanchor='bottom',
-                       y=1.02, xanchor='right', x=1),
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='white'),
-            hovermode='x unified',
-            height=380,
-        )
-        fig_bar.update_xaxes(showgrid=False)
-        st.plotly_chart(fig_bar, use_container_width=True)
-
-    with ic2:
-        # Interactive radar chart
-        fig_radar = go.Figure()
-        for name, vals, color in [
-            ('🔵 KNN',           knn_v, '#3B82F6'),
-            ('🌳 Decision Tree', dt_v,  '#10B981'),
-            ('🔴 SVM',           svm_v, '#EF4444'),
-        ]:
-            fig_radar.add_trace(go.Scatterpolar(
-                r=vals + [vals[0]],
-                theta=metric_names + [metric_names[0]],
-                fill='toself', fillcolor=color,
-                opacity=0.25, name=name,
-                line=dict(color=color, width=2),
-                hovertemplate='<b>%{theta}</b><br>%{r:.2f}%<extra>' + name + '</extra>',
-            ))
-        fig_radar.update_layout(
-            polar=dict(
-                radialaxis=dict(visible=True, range=[0,110],
-                               gridcolor='rgba(255,255,255,0.15)',
-                               tickfont=dict(size=9, color='grey')),
-                angularaxis=dict(gridcolor='rgba(255,255,255,0.15)'),
-                bgcolor='rgba(0,0,0,0)',
-            ),
-            title=dict(text='Radar Chart — Hover to compare',
-                      font=dict(size=14)),
-            legend=dict(orientation='h', yanchor='bottom',
-                       y=-0.15, xanchor='center', x=0.5),
-            paper_bgcolor='rgba(0,0,0,0)',
-            font=dict(color='white'),
-            height=380,
-        )
-        st.plotly_chart(fig_radar, use_container_width=True)
-
-# ── Metric drill-down tabs ─────────────────────────────────────
-for tab, metric, idx in [
-    (tab_acc,  'Accuracy',  0),
-    (tab_prec, 'Precision', 1),
-    (tab_rec,  'Recall',    2),
-    (tab_f1,   'F1 Score',  3),
-]:
-    with tab:
-        vals_3 = {'KNN': knn_v[idx], 'Decision Tree': dt_v[idx], 'SVM': svm_v[idx]}
-        best   = max(vals_3, key=vals_3.get)
-        colors_3 = {'KNN':'#3B82F6','Decision Tree':'#10B981','SVM':'#EF4444'}
-
-        dd1, dd2 = st.columns([2, 1])
-        with dd1:
-            fig_dd = go.Figure(go.Bar(
-                x=list(vals_3.keys()),
-                y=list(vals_3.values()),
-                marker_color=[colors_3[k] for k in vals_3],
-                text=[f'{v:.2f}%' for v in vals_3.values()],
-                textposition='outside',
-                textfont=dict(size=13, color='white', family='bold'),
-                hovertemplate='<b>%{x}</b><br>' + metric + ': <b>%{y:.2f}%</b><extra></extra>',
-                width=0.5,
-            ))
-            fig_dd.update_layout(
-                title=dict(text=f'{metric} — Click bar for details',
-                          font=dict(size=13)),
-                yaxis=dict(range=[0,115], title=f'{metric} (%)',
-                          gridcolor='rgba(255,255,255,0.1)'),
-                xaxis=dict(title='Model'),
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font=dict(color='white'),
-                height=300,
-            )
-            fig_dd.update_xaxes(showgrid=False)
-            st.plotly_chart(fig_dd, use_container_width=True)
-
-        with dd2:
-            with st.container(border=True):
-                st.markdown(f"**{metric} Analysis**")
-                st.write(f"🏆 Best: **{best}** ({vals_3[best]:.2f}%)")
-                st.write("")
-                for model, val in sorted(vals_3.items(),
-                                          key=lambda x: -x[1]):
-                    diff = val - list(vals_3.values())[0]
-                    icon = "🥇" if model==best else "🥈" if val==sorted(vals_3.values())[-2] else "🥉"
-                    st.write(f"{icon} {model}: **{val:.2f}%**")
-                st.write("")
-                # Metric explanation
-                explanations = {
-                    'Accuracy':  'Overall correct predictions out of all predictions.',
-                    'Precision': 'Of all Depression predictions, how many were correct.',
-                    'Recall':    'Of all actual Depression cases, how many were caught. Most critical for mental health!',
-                    'F1 Score':  'Balance between Precision and Recall.',
-                }
-                st.caption(explanations[metric])
-
-st.divider()
-
-# ══════════════════════════════════════════════════════════════
-# SECTION 5 — INTERACTIVE CONFUSION MATRICES (Plotly)
-# ══════════════════════════════════════════════════════════════
-st.subheader("Interactive Confusion Matrices")
-st.caption("Hover over each cell for details · Click model tabs to switch")
-
-cm_tab1, cm_tab2, cm_tab3 = st.tabs(["🔵 KNN", "🌳 Decision Tree", "🔴 SVM"])
-
-for cm_tab, title, cm_data, color, split, member in [
-    (cm_tab1, "KNN",           M['knn_m']['cm'], "#3B82F6", "80/20", "Ho Jun Yon"),
-    (cm_tab2, "Decision Tree", M['dt_m']['cm'],  "#10B981", "70/30", "Irvin Tan"),
-    (cm_tab3, "SVM",           M['svm_m']['cm'], "#EF4444", "75/25", "Chiang Jun Hang"),
-]:
-    with cm_tab:
-        tn,fp,fn,tp = cm_data.ravel()
-        acc  = (tn+tp)/(tn+fp+fn+tp)*100
-        prec = tp/(tp+fp)*100 if (tp+fp)>0 else 0
-        rec  = tp/(tp+fn)*100 if (tp+fn)>0 else 0
-        f1   = 2*prec*rec/(prec+rec) if (prec+rec)>0 else 0
-
-        cmt1, cmt2 = st.columns([1.5, 1])
-        with cmt1:
-            # Interactive heatmap
-            z   = [[tn, fp], [fn, tp]]
-            txt = [
-                [f'TN = {tn}<br>Correctly identified<br>as No Depression',
-                 f'FP = {fp}<br>Incorrectly predicted<br>as Depression'],
-                [f'FN = {fn}<br>Missed Depression<br>cases (most costly!)',
-                 f'TP = {tp}<br>Correctly identified<br>Depression cases'],
-            ]
-            fig_cm = go.Figure(go.Heatmap(
-                z=z, x=['Predicted: No', 'Predicted: Yes'],
-                y=['Actual: No', 'Actual: Yes'],
-                text=[[str(tn), str(fp)],[str(fn), str(tp)]],
-                texttemplate='<b>%{text}</b>',
-                textfont=dict(size=20, color='white'),
-                hovertext=txt,
-                hovertemplate='%{hovertext}<extra></extra>',
-                colorscale=[[0,'rgba(30,30,50,1)'],[1,color]],
-                showscale=False,
-            ))
-            fig_cm.update_layout(
-                title=dict(text=f'{title} Confusion Matrix — {member} · Split {split}',
-                          font=dict(size=13)),
-                xaxis=dict(title='Predicted', side='bottom'),
-                yaxis=dict(title='Actual', autorange='reversed'),
-                plot_bgcolor='rgba(0,0,0,0)',
-                paper_bgcolor='rgba(0,0,0,0)',
-                font=dict(color='white', size=12),
-                height=320,
-            )
-            st.plotly_chart(fig_cm, use_container_width=True)
-
-        with cmt2:
-            with st.container(border=True):
-                st.markdown(f"**{title} Results**")
-                st.metric("Accuracy",  f"{acc:.2f}%")
-                st.metric("Precision", f"{prec:.2f}%")
-                st.metric("Recall",    f"{rec:.2f}%")
-                st.metric("F1 Score",  f"{f1:.2f}%")
-            st.write("")
-            with st.container(border=True):
-                st.markdown("**Cell Breakdown**")
-                st.write(f"✅ **TN = {tn}** — Correctly no depression")
-                st.write(f"⚠️ **FP = {fp}** — False alarm")
-                st.write(f"❌ **FN = {fn}** — Missed depression")
-                st.write(f"✅ **TP = {tp}** — Caught depression")
-                st.write("")
-                if fn > 0:
-                    st.error(f"Missed {fn} depressed student(s)! "
-                             f"False Negative Rate: {fn/(fn+tp)*100:.1f}%")
-
-# ══════════════════════════════════════════════════════════════
-# MODEL AUTO-SELECTOR
-# ══════════════════════════════════════════════════════════════
-st.divider()
-st.subheader("🤖 Model Auto-Selector")
-st.write(
-    "Not sure which model to use? Fill in the student profile below and the system "
-    "will **automatically recommend the best model** based on the student's characteristics "
-    "and each model's strengths."
-)
-
-with st.container(border=True):
-    st.markdown("**Student Profile**")
-    as1, as2, as3 = st.columns(3)
-    with as1:
-        as_name    = st.text_input("Name", placeholder="e.g. Ahmad", key="as_name")
-        as_gender  = st.selectbox("Gender", ["Female","Male"], key="as_gender")
-        as_age     = st.slider("Age", 17, 30, 20, key="as_age")
-    with as2:
-        as_course  = st.selectbox("Course", [
-            "Computer Science","Information Technology","Engineering",
-            "Law","Psychology","Language","Islamic Studies",
-            "Health Sciences","Business","Science & Math","Arts & Social","Others"],
-            key="as_course")
-        as_year    = st.selectbox("Year of Study",
-            ["Year 1","Year 2","Year 3","Year 4"], key="as_year")
-        as_cgpa    = st.selectbox("CGPA Range", [
-            "0 - 1.99","2.00 - 2.49","2.50 - 2.99",
-            "3.00 - 3.49","3.50 - 4.00"], key="as_cgpa")
-    with as3:
-        as_marital = st.selectbox("Marital Status",           ["No","Yes"], key="as_marital")
-        as_anxiety = st.selectbox("Do you have Anxiety?",     ["No","Yes"], key="as_anxiety")
-        as_panic   = st.selectbox("Do you have Panic Attack?",["No","Yes"], key="as_panic")
-        as_treat   = st.selectbox("Sought Treatment?",        ["No","Yes"], key="as_treat")
-
-    as_btn = st.button("🔍  Find Best Model for This Student",
-                       use_container_width=True, type="primary", key="as_btn")
-
-if as_btn:
-    as_name_lbl = as_name.strip() or "Student"
-    CGPA_NUM = {'0 - 1.99':1.0,'2.00 - 2.49':2.25,'2.50 - 2.99':2.75,
-                '3.00 - 3.49':3.25,'3.50 - 4.00':3.75}
-
-    # ── Run all 3 models ──────────────────────────────────────
-    _g  = 1 if as_gender  == "Male" else 0
-    _ax = 1 if as_anxiety == "Yes"  else 0
-    _pa = 1 if as_panic   == "Yes"  else 0
-    _ma = 1 if as_marital == "Yes"  else 0
-    _sk = 1 if as_treat   == "Yes"  else 0
-    _cn = CGPA_NUM.get(as_cgpa, 3.25)
-    # Year and course encoding for SVM (same as KNN/DT)
-    _ce = M['le_course'].transform([as_course])[0] if as_course in M['le_course'].classes_ else 0
-    _ye = M['le_year'].transform([as_year])[0] if as_year   in M['le_year'].classes_ else 0
-
-    # KNN
-    _knn_inp   = pd.DataFrame([[_g,as_age,_ce,_ye,_cn,_ax,_pa]], columns=M['knn_feat'])
-    _knn_inp_s = M['sc_knn'].transform(_knn_inp)
-    _knn_pred  = int(M['knn'].predict(_knn_inp_s)[0])
-    _knn_prob  = M['knn'].predict_proba(_knn_inp_s)[0]
-
-    # DT
-    _dt_inp  = pd.DataFrame([[_g,as_age,_ce,_ye,_cn,_ax,_pa,_ma]], columns=M['dt_feat'])
-    _dt_pred = int(M['dt'].predict(_dt_inp)[0])
-    _dt_prob = M['dt'].predict_proba(_dt_inp)[0]
-
-    # SVM — uses same pipeline as predictor page
-    _yr_n2 = as_year.split()[-1]
-    _svm_inp2 = pd.DataFrame([{
-        'Choose your gender'                           : as_gender,
-        'Age'                                          : as_age,
-        'Your current year of Study'                   : f'year {_yr_n2}',
-        'What is your CGPA?'                           : as_cgpa,
-        'Marital status'                               : as_marital,
-        'Do you have Anxiety?'                         : as_anxiety,
-        'Do you have Panic attack?'                    : as_panic,
-        'Did you seek any specialist for a treatment?' : as_treat,
-        'Course_Category': 'STEM/IT' if any(x in as_course.lower() for x in
-            ['technology','it','computer','cs','system','software','se']) else 'Other',
-    }])[M['svm_col_order']]
-    _svm_pred = int(M['svm'].predict(_svm_inp2)[0])
-    _svm_prob = M['svm'].predict_proba(_svm_inp2)[0]
-
-    # ── Scoring logic — find best model ───────────────────────
-    # Score each model based on profile characteristics
-    _scores = {'KNN': 0, 'Decision Tree': 0, 'SVM': 0}
-    _reasons = {'KNN': [], 'Decision Tree': [], 'SVM': []}
-
-    # Rule 1: All 3 models agree → highest confidence model wins
-    _all_agree = (_knn_pred == _dt_pred == _svm_pred)
-    if _all_agree:
-        _scores['KNN']          += 3
-        _scores['Decision Tree'] += 2
-        _scores['SVM']           += 2
-        _reasons['KNN'].append(f"All 3 models agree — KNN selected as highest accuracy model ({M['knn_m']['acc']:.2f}%)")
-
-    # Rule 2: Marital status = Yes → DT is better (root feature)
-    if as_marital == "Yes":
-        _scores['Decision Tree'] += 3
-        _reasons['Decision Tree'].append("Marital Status = Yes → DT's root feature, gives best insight")
-
-    # Rule 3: Both anxiety + panic → KNN better (captures combined patterns)
-    if as_anxiety == "Yes" and as_panic == "Yes":
-        _scores['KNN'] += 2
-        _scores['SVM'] += 2
-        _reasons['KNN'].append("Both Anxiety + Panic present → KNN excels at multi-symptom patterns")
-        _reasons['SVM'].append("Complex symptom combination → SVM handles non-linear boundaries well")
-
-    # Rule 4: Sought treatment → SVM better (balanced weights)
-    if as_treat == "Yes":
-        _scores['SVM'] += 2
-        _reasons['SVM'].append("Sought Treatment = Yes → SVM's balanced class weights handle minority cases")
-
-    # Rule 5: High CGPA + no symptoms → KNN better (similar student profiles)
-    if _cn >= 3.0 and as_anxiety == "No" and as_panic == "No":
-        _scores['KNN'] += 2
-        _reasons['KNN'].append("High CGPA + no symptoms → KNN finds similar healthy student profiles")
-
-    # Rule 6: Low CGPA academic risk → DT better (explicit rules)
-    if _cn < 2.5:
-        _scores['Decision Tree'] += 2
-        _reasons['Decision Tree'].append("Low CGPA → DT's explicit CGPA threshold rules apply well")
-
-    # Rule 7: Model confidence tiebreaker
-    _knn_conf  = max(_knn_prob)
-    _dt_conf   = max(_dt_prob)
-    _svm_conf  = max(_svm_prob)
-    _confs = {'KNN': _knn_conf, 'Decision Tree': _dt_conf, 'SVM': _svm_conf}
-    _most_conf = max(_confs, key=_confs.get)
-    _scores[_most_conf] += 1
-    _reasons[_most_conf].append(f"Highest prediction confidence: {_confs[_most_conf]*100:.1f}%")
-
-    # Determine winner
-    _best = max(_scores, key=_scores.get)
-    _best_pred = {'KNN': _knn_pred, 'Decision Tree': _dt_pred, 'SVM': _svm_pred}[_best]
-    _best_prob = {'KNN': _knn_prob, 'Decision Tree': _dt_prob, 'SVM': _svm_prob}[_best]
-
-    # ── Display Result ─────────────────────────────────────────
-    st.divider()
-    st.subheader(f"Auto-Selector Result for {as_name_lbl}")
-
-    # Winner announcement
-    _icons = {'KNN':'🔵','Decision Tree':'🌳','SVM':'🔴'}
-    if _best_pred == 1:
-        st.error(f"### {_icons[_best]}  Recommended: **{_best}** → Depression Risk Detected")
+st.subheader("Student Information")
+col1,col2,col3=st.columns(3)
+with col1:
+    _pn=_pre.get('name','') if _pre else ''
+    name   = st.text_input("Name",value=_pn,placeholder="e.g. Wei Ming",key="svm_name")
+    _gi=["Male","Female"].index(_pre['gender']) if _pre and _pre.get('gender') in ["Male","Female"] else 0
+    gender = st.selectbox("Gender",["Male","Female"],index=_gi,key="svm_gender")
+    _ai=int(_pre.get('age',20)) if _pre else 20
+    age    = st.slider("Age",15,40,_ai,key="svm_age")
+with col2:
+    course = st.selectbox("Course Field",["Information Technology (IT)","Computer Science (CS)",
+        "Information System (IS)","Software Engineering (SE)","Other"],key="svm_course")
+    _yi=["Year 1","Year 2","Year 3","Year 4"].index(_pre['year']) if _pre and _pre.get('year') in ["Year 1","Year 2","Year 3","Year 4"] else 0
+    year   = st.selectbox("Year of Study",["Year 1","Year 2","Year 3","Year 4"],index=_yi,key="svm_year")
+    cgpa   = st.selectbox("CGPA Range",list(CGPA_MAP.keys()),key="svm_cgpa")
+with col3:
+    _mai=["No","Yes"].index(_pre['marital']) if _pre and _pre.get('marital') in ["No","Yes"] else 0
+    marital = st.selectbox("Marital Status",               ["No","Yes"],index=_mai,key="svm_marital")
+    _axi=["No","Yes"].index(_pre['anxiety']) if _pre and _pre.get('anxiety') in ["No","Yes"] else 0
+    anxiety = st.selectbox("Do you have Anxiety?",         ["No","Yes"],index=_axi,key="svm_anxiety")
+    _pai=["No","Yes"].index(_pre['panic']) if _pre and _pre.get('panic') in ["No","Yes"] else 0
+    panic   = st.selectbox("Do you have Panic Attack?",    ["No","Yes"],index=_pai,key="svm_panic")
+    treat   = st.selectbox("Sought Specialist Treatment?", ["No","Yes"],key="svm_treat")
+    predict_btn=st.button("🔍  Predict Depression Risk",use_container_width=True,type="primary",key="svm_predict")
+
+if predict_btn:
+    _errors=[]
+    if name.strip() and name.strip().isdigit(): _errors.append("❌ Name cannot be numbers only.")
+    if age<15 or age>40: _errors.append(f"❌ Age {age} outside valid range (15–40).")
+    _high_concern=(anxiety=="Yes" and panic=="Yes")
+    _treat_flag=(treat=="Yes")
+    _academic_risk=(year in ["Year 3","Year 4"] and cgpa=="0 - 1.99")
+    if _errors:
+        for e in _errors: st.error(e)
+        st.warning("⚠️ Please fix errors above.")
     else:
-        st.success(f"### {_icons[_best]}  Recommended: **{_best}** → No Depression Detected")
+        try:
+            yr_num=year.split()[-1]
+            inp=pd.DataFrame([{
+                'Choose your gender'                           : gender,
+                'Age'                                          : age,
+                'Your current year of Study'                   : f'year {yr_num}',
+                'What is your CGPA?'                           : cgpa,
+                'Marital status'                               : marital,
+                'Do you have Anxiety?'                         : anxiety,
+                'Do you have Panic attack?'                    : panic,
+                'Did you seek any specialist for a treatment?' : treat,
+                'Course_Category'                              : M['cat_course'](course),
+            }])[M['svm_col_order']]
+            pred=int(M['svm'].predict(inp)[0])
+            prob=M['svm'].predict_proba(inp)[0].tolist()
+            st.session_state['svm_result']={
+                'pred':pred,'prob':prob,'inp':inp,'name':name.strip() or "Student",
+                'gender':gender,'age':age,'course':course,'year':year,'cgpa':cgpa,
+                'marital':marital,'anxiety':anxiety,'panic':panic,'treat':treat,
+                'high_concern':_high_concern,'treat_flag':_treat_flag,'academic_risk':_academic_risk}
+        except Exception as ex: st.error(f"❌ Prediction failed: {ex}")
+
+if st.session_state['svm_result']:
+    R=st.session_state['svm_result']; pred=R['pred']; prob=R['prob']; name_lbl=R['name']
+    st.divider(); st.subheader("Prediction Result")
+    if pred==1:
+        st.error(f"### ⚠️  {name_lbl} — Depression Risk Detected\n\nPlease consider seeking professional support.")
+    else:
+        st.success(f"### ✅  {name_lbl} — No Depression Detected\n\nKeep maintaining a healthy lifestyle!")
+    if R.get('high_concern'):  st.warning("⚠️ **High Concern:** Both Anxiety AND Panic Attack present.")
+    if R.get('treat_flag'):    st.info("ℹ️ **Treatment Noted:** Student has already sought specialist help.")
+    if R.get('academic_risk'): st.warning("⚠️ **Academic Risk:** Senior year with CGPA 0–1.99.")
+
+    st.write(""); r1,r2,r3=st.columns([1.2,1.2,1])
+    with r1:
+        st.markdown("**Prediction Confidence**")
+        fig,ax2=plt.subplots(figsize=(4,0.8))
+        ax2.barh([""], [prob[0]*100],color="#10B981",height=0.5)
+        ax2.barh([""], [prob[1]*100],left=[prob[0]*100],color="#EF4444",height=0.5)
+        ax2.set_xlim(0,100); ax2.axis('off')
+        for xp,val,lbl in [(prob[0]*50,prob[0],"No Risk"),(prob[0]*100+prob[1]*50,prob[1],"At Risk")]:
+            if val>0.12: ax2.text(xp,0,f"{lbl}\n{val*100:.0f}%",ha='center',va='center',fontsize=8,color='white',fontweight='bold')
+        plt.tight_layout(pad=0); st.pyplot(fig,use_container_width=True); plt.close()
+        st.write(""); pa_c,pb_c=st.columns(2)
+        pa_c.metric("No Depression",f"{prob[0]*100:.1f}%")
+        pb_c.metric("Depression",   f"{prob[1]*100:.1f}%")
+    with r2:
+        st.markdown("**Input Summary**")
+        st.table(pd.DataFrame({"Field":["Name","Gender","Age","Course","Year","CGPA","Marital","Anxiety","Panic","Treatment"],
+            "Value":[R['name'],R['gender'],str(R['age']),R['course'],R['year'],R['cgpa'],R['marital'],R['anxiety'],R['panic'],R['treat']]
+        }).set_index("Field"))
+    with r3:
+        st.markdown("**Model Info**")
+        with st.container(border=True):
+            st.write("**Algorithm:** SVM"); st.write("**Kernel:** RBF")
+            st.write("**Class Weight:** Balanced"); st.write("**Scaling:** Standard")
+            st.write("**Split:** 75 / 25"); st.write(f"**Accuracy:** {M['svm_m']['acc']:.2f}%")
+
+    # PCA boundary
+    st.write(""); st.markdown("**SVM Decision Boundary (PCA Projection)**")
+    try:
+        prep=M['svm'].named_steps['enc']
+        X_bg_proc=prep.transform(M['svm_X_all'])
+        X_user_proc=prep.transform(R['inp'])
+        sc2d=StandardScaler()
+        X_bg_sc=sc2d.fit_transform(X_bg_proc); X_us_sc=sc2d.transform(X_user_proc)
+        pca=PCA(n_components=2,random_state=42)
+        X_bg_2d=pca.fit_transform(X_bg_sc); X_us_2d=pca.transform(X_us_sc)
+        svm2d=LinearSVC(C=1.0,class_weight='balanced',random_state=42,max_iter=5000)
+        svm2d.fit(X_bg_2d,M['svm_y_all'])
+        fig3,ax3=plt.subplots(figsize=(8,4))
+        y_all=M['svm_y_all'].values
+        ax3.scatter(X_bg_2d[y_all==1,0],X_bg_2d[y_all==1,1],color='#EF4444',s=30,alpha=0.5,label='Depression',zorder=3)
+        ax3.scatter(X_bg_2d[y_all==0,0],X_bg_2d[y_all==0,1],color='#3B82F6',s=30,alpha=0.5,label='No Depression',zorder=3)
+        ax3.scatter(X_us_2d[0,0],X_us_2d[0,1],color='black',s=300,marker='*',label=f'Input: {name_lbl}',zorder=6)
+        xmin=X_bg_2d[:,0].min()-1; xmax=X_bg_2d[:,0].max()+1
+        xmin=min(xmin,X_us_2d[0,0]-1); xmax=max(xmax,X_us_2d[0,0]+1)
+        w=svm2d.coef_[0]; b=svm2d.intercept_[0]; xpts=np.linspace(xmin,xmax,200)
+        if w[1]!=0:
+            ypts=-(w[0]*xpts+b)/w[1]
+            ax3.plot(xpts,ypts,'--',color='#1E3A5F',lw=2,label='Decision Boundary',zorder=5)
+        ax3.set_xlim(xmin,xmax); ax3.set_ylim(X_bg_2d[:,1].min()-1,X_bg_2d[:,1].max()+1)
+        ax3.set_xlabel('PC1 — Mental Health Risk Factors',fontsize=9)
+        ax3.set_ylabel('PC2 — Academic & Demographic',fontsize=9)
+        ax3.set_title('Live SVM Decision Boundary (PCA 2D)',fontsize=11,fontweight='bold')
+        ax3.legend(fontsize=9); ax3.spines['top'].set_visible(False); ax3.spines['right'].set_visible(False)
+        plt.tight_layout(); st.pyplot(fig3,use_container_width=True); plt.close()
+    except Exception as _e: st.warning(f"Visualization unavailable: {_e}")
+
+    # Explanation
+    st.write(""); st.markdown("---"); st.markdown("### 🧠 Why did SVM predict this?")
+    ex1,ex2=st.columns(2)
+    with ex1:
+        st.markdown("**Permutation Feature Importance**")
+        _fi_svm=M['svm_fi_df'].sort_values('Importance',ascending=True)
+        _mean_sv=_fi_svm['Importance'].mean()
+        fig_sv,ax_sv=plt.subplots(figsize=(5,3.5))
+        _sv_colors=['#EF4444' if v>=_mean_sv else '#9CA3AF' for v in _fi_svm['Importance']]
+        ax_sv.barh(_fi_svm['Feature'],_fi_svm['Importance'],xerr=_fi_svm['Std'],
+                   color=_sv_colors,edgecolor='none',height=0.6,error_kw={'elinewidth':1.5,'ecolor':'#374151'})
+        ax_sv.axvline(_mean_sv,color='red',ls='--',lw=1.2,alpha=0.7,label=f'Mean={_mean_sv:.4f}')
+        ax_sv.set_xlabel('Mean Accuracy Decrease')
+        ax_sv.set_title('SVM Feature Importance — Permutation (Live)',fontweight='bold')
+        ax_sv.legend(fontsize=8); ax_sv.spines['top'].set_visible(False); ax_sv.spines['right'].set_visible(False)
+        plt.tight_layout(); st.pyplot(fig_sv,use_container_width=True); plt.close()
+    with ex2:
+        st.markdown("**Risk Factor Analysis**")
+        _risk=[]; _prot=[]
+        if R['anxiety']=='Yes': _risk.append(("Anxiety","Strong predictor of depression"))
+        if R['panic']=='Yes':   _risk.append(("Panic Attack","Strongest predictor (r=0.341)"))
+        if R['marital']=='Yes': _risk.append(("Marital Status","Decision tree root feature"))
+        if R['treat']=='Yes':   _risk.append(("Sought Treatment","Indicates awareness of condition"))
+        if CGPA_MAP.get(R['cgpa'],3.25)<2.5: _risk.append(("Low CGPA","Academic difficulty increases risk"))
+        if CGPA_MAP.get(R['cgpa'],3.25)>=3.0: _prot.append(("High CGPA","Academic success is protective"))
+        if R['anxiety']=='No' and R['panic']=='No': _prot.append(("No Anxiety/Panic","Absence of co-morbid conditions"))
+        if _risk:
+            st.markdown("**⚠️ Risk Factors:**")
+            for f,r in _risk: st.write(f"• **{f}** — {r}")
+        if _prot:
+            st.markdown("**✅ Protective Factors:**")
+            for f,r in _prot: st.write(f"• **{f}** — {r}")
+        with st.container(border=True):
+            st.write(f"Risk Factors: **{len(_risk)}**")
+            st.write(f"Depression Probability: **{prob[1]*100:.1f}%**")
+            if prob[1]>0.7: st.error("High confidence — multiple risk factors")
+            elif prob[1]>0.4: st.warning("Moderate risk — some factors present")
+            else: st.success("Low risk — few risk factors")
+
+    # PDF
+    st.write("")
+    _alerts_sv=[]; _notes_sv=[]
+    if R.get('high_concern'): _alerts_sv.append("High Concern: Both Anxiety and Panic Attack present.")
+    if R.get('treat_flag'):   _alerts_sv.append("Treatment Noted: Student has already sought specialist help.")
+    if R.get('academic_risk'): _alerts_sv.append("Academic Risk: Senior year with CGPA 0-1.99.")
+    if R['anxiety']=='Yes': _notes_sv.append("Anxiety = Yes — strong SVM predictor")
+    if R['panic']=='Yes':   _notes_sv.append("Panic Attack = Yes — highest correlation (r=0.341)")
+    try:
+        _pdf=generate_pdf(model_name="SVM (RBF Kernel, Balanced)",student_name=R['name'],
+            result=R['pred'],prob=R['prob'],
+            input_data={"Gender":R['gender'],"Age":str(R['age']),"Course":R['course'],
+                        "Year":R['year'],"CGPA":R['cgpa'],"Marital":R['marital'],
+                        "Anxiety":R['anxiety'],"Panic":R['panic'],"Treatment":R['treat']},
+            metrics=M['svm_m'],business_alerts=_alerts_sv,explanation_notes=_notes_sv)
+        st.download_button("📥  Download PDF Report",data=_pdf,
+            file_name=f"mindcheck_svm_{R['name'].replace(' ','_')}.pdf",
+            mime="application/pdf",use_container_width=True,key="svm_pdf")
+    except Exception as _pe: st.caption(f"PDF unavailable: {_pe}")
 
     st.write("")
-
-    # Score cards
-    sc1, sc2, sc3 = st.columns(3)
-    for col, model, icon, pred, prob, score in [
-        (sc1, 'KNN',           '🔵', _knn_pred, _knn_prob, _scores['KNN']),
-        (sc2, 'Decision Tree', '🌳', _dt_pred,  _dt_prob,  _scores['Decision Tree']),
-        (sc3, 'SVM',           '🔴', _svm_pred, _svm_prob, _scores['SVM']),
-    ]:
-        with col:
-            is_best = (model == _best)
-            with st.container(border=True):
-                if is_best:
-                    st.markdown(f"### {icon} {model} ⭐ RECOMMENDED")
-                else:
-                    st.markdown(f"### {icon} {model}")
-                st.metric("Auto-Selector Score", f"{score} pts")
-                st.metric("Prediction",
-                          "Depression" if pred==1 else "No Depression")
-                st.metric("Confidence", f"{max(prob)*100:.1f}%")
-                if _reasons[model]:
-                    st.write("")
-                    st.caption("**Why selected/scored:**")
-                    for r in _reasons[model]:
-                        st.caption(f"• {r}")
-
-    st.write("")
-
-    # Comparison summary
-    _agree_models = sum([_knn_pred==_best_pred,
-                         _dt_pred ==_best_pred,
-                         _svm_pred==_best_pred])
-    with st.container(border=True):
-        st.markdown("**Summary**")
-        st.write(f"**Recommended Model:** {_icons[_best]} {_best} "
-                 f"(Score: {_scores[_best]} pts)")
-        st.write(f"**Prediction:** "
-                 f"{'⚠️ Depression Risk' if _best_pred==1 else '✅ No Depression'}")
-        st.write(f"**Confidence:** {max(_best_prob)*100:.1f}%")
-        st.write(f"**Model Agreement:** {_agree_models}/3 models predict the same result")
-        if _agree_models == 3:
-            st.success("All 3 models agree — high reliability prediction!")
-        elif _agree_models == 2:
-            st.info("2/3 models agree — moderate reliability.")
-        else:
-            st.warning("Models disagree — treat prediction with caution. "
-                       "Consider running individual model pages for more details.")
-
-        # ── Save results to session state so nav buttons can use them ──
-        st.session_state['as_result'] = {
-            'name'      : as_name_lbl,
-            'gender'    : as_gender, 'age'    : as_age,
-            'course'    : as_course, 'year'   : as_year, 'cgpa': as_cgpa,
-            'marital'   : as_marital,'anxiety': as_anxiety,
-            'panic'     : as_panic,  'treat'  : as_treat,
-            'knn_pred'  : int(_knn_pred), 'knn_prob': _knn_prob.tolist(),
-            'dt_pred'   : int(_dt_pred),  'dt_prob' : _dt_prob.tolist(),
-            'svm_pred'  : int(_svm_pred), 'svm_prob': _svm_prob.tolist(),
-            'svm_inp'   : _svm_inp2,
-            'best'      : _best,
-        }
-
-        st.write("")
-        st.caption("Click below to open that model's page — data and prediction result will be carried over automatically.")
-        n1, n2, n3 = st.columns(3)
-
-        # Build shared prefill + pre-computed result payload
-        _as_shared = {
-            'from_comparison': True,
-            'name'   : as_name_lbl,
-            'gender' : as_gender,
-            'age'    : as_age,
-            'course' : as_course,
-            'year'   : as_year,
-            'cgpa'   : as_cgpa,
-            'marital': as_marital,
-            'anxiety': as_anxiety,
-            'panic'  : as_panic,
-            'seek'   : as_treat,
-        }
-
-        with n1:
-            if st.button(f"🔵 Open KNN Page →", key="as_go_knn", use_container_width=True):
-                # Pre-compute KNN result so predictor page shows it immediately
-                st.session_state['knn_prefill'] = _as_shared
-                st.session_state['knn_result'] = {
-                    'pred': int(_knn_pred), 'prob': _knn_prob.tolist(),
-                    'name': as_name_lbl,
-                    'gender': as_gender, 'age': as_age,
-                    'course': as_course, 'year': as_year, 'cgpa': as_cgpa,
-                    'anxiety': as_anxiety, 'panic': as_panic,
-                    'high_concern': (as_anxiety=="Yes" and as_panic=="Yes"),
-                    'academic_risk': (as_year in ["Year 3","Year 4"] and as_cgpa=="0 - 1.99"),
-                }
-                st.switch_page("pages/2_KNN.py")
-
-        with n2:
-            if st.button(f"🌳 Open DT Page →", key="as_go_dt", use_container_width=True):
-                st.session_state['dt_prefill'] = _as_shared
-                st.session_state['dt_result'] = {
-                    'pred': int(_dt_pred), 'prob': _dt_prob.tolist(),
-                    'name': as_name_lbl,
-                    'gender': as_gender, 'age': as_age,
-                    'course': as_course, 'year': as_year, 'cgpa': as_cgpa,
-                    'marital': as_marital, 'anxiety': as_anxiety, 'panic': as_panic,
-                    'high_concern': (as_anxiety=="Yes" and as_panic=="Yes"),
-                    'married_risk': (as_marital=="Yes" and as_age<21),
-                    'academic_risk': (as_year in ["Year 3","Year 4"] and as_cgpa=="0 - 1.99"),
-                }
-                st.switch_page("pages/3_Decision_Tree.py")
-
-        with n3:
-            if st.button(f"🔴 Open SVM Page →", key="as_go_svm", use_container_width=True):
-                st.session_state['svm_prefill'] = _as_shared
-                st.session_state['svm_result'] = {
-                    'pred': int(_svm_pred), 'prob': _svm_prob.tolist(),
-                    'inp': _svm_inp2,
-                    'name': as_name_lbl,
-                    'gender': as_gender, 'age': as_age,
-                    'course': as_course, 'year': as_year, 'cgpa': as_cgpa,
-                    'marital': as_marital, 'anxiety': as_anxiety,
-                    'panic': as_panic, 'treat': as_treat,
-                    'high_concern': (as_anxiety=="Yes" and as_panic=="Yes"),
-                    'treat_flag': (as_treat=="Yes"),
-                    'academic_risk': (as_year in ["Year 3","Year 4"] and as_cgpa=="0 - 1.99"),
-                }
-                st.switch_page("pages/4_SVM.py")
-
-
-# ══════════════════════════════════════════════════════════════
-# AUTO-SELECTOR RESULT DISPLAY (persists via session state)
-# ══════════════════════════════════════════════════════════════
-if st.session_state.get('as_result'):
-    _ar = st.session_state['as_result']
-    st.divider()
-    st.subheader(f"Quick Navigate — {_ar['name']}")
-    st.caption("Result already computed — click to open page with result pre-loaded. No need to predict again!")
-
-    _icons = {'KNN':'🔵','Decision Tree':'🌳','SVM':'🔴'}
-    _best_label = _ar['best']
-
-    qn1, qn2, qn3 = st.columns(3)
-
-    with qn1:
-        _kpred = _ar['knn_pred']; _kprob = _ar['knn_prob']
-        _klbl  = "⚠️ Depression" if _kpred==1 else "✅ No Depression"
-        is_best = (_best_label == 'KNN')
-        with st.container(border=True):
-            st.markdown(f"### 🔵 KNN {'⭐ BEST' if is_best else ''}")
-            if _kpred==1: st.error(f"**{_klbl}** — {_kprob[1]*100:.1f}%")
-            else:         st.success(f"**{_klbl}** — {_kprob[0]*100:.1f}%")
-            if st.button("🔵 Open KNN with Result →", key="ar_nav_knn",
-                         use_container_width=True,
-                         type="primary" if is_best else "secondary"):
-                st.session_state['knn_result'] = {
-                    'pred': _kpred, 'prob': _kprob,
-                    'name': _ar['name'], 'gender': _ar['gender'],
-                    'age': _ar['age'], 'course': _ar['course'],
-                    'year': _ar['year'], 'cgpa': _ar['cgpa'],
-                    'anxiety': _ar['anxiety'], 'panic': _ar['panic'],
-                    'high_concern': (_ar['anxiety']=="Yes" and _ar['panic']=="Yes"),
-                    'academic_risk': (_ar['year'] in ["Year 3","Year 4"] and _ar['cgpa']=="0 - 1.99"),
-                }
-                st.switch_page("pages/2_KNN.py")
-
-    with qn2:
-        _dpred = _ar['dt_pred']; _dprob = _ar['dt_prob']
-        _dlbl  = "⚠️ Depression" if _dpred==1 else "✅ No Depression"
-        is_best = (_best_label == 'Decision Tree')
-        with st.container(border=True):
-            st.markdown(f"### 🌳 Decision Tree {'⭐ BEST' if is_best else ''}")
-            if _dpred==1: st.error(f"**{_dlbl}** — {_dprob[1]*100:.1f}%")
-            else:         st.success(f"**{_dlbl}** — {_dprob[0]*100:.1f}%")
-            if st.button("🌳 Open DT with Result →", key="ar_nav_dt",
-                         use_container_width=True,
-                         type="primary" if is_best else "secondary"):
-                st.session_state['dt_result'] = {
-                    'pred': _dpred, 'prob': _dprob,
-                    'name': _ar['name'], 'gender': _ar['gender'],
-                    'age': _ar['age'], 'course': _ar['course'],
-                    'year': _ar['year'], 'cgpa': _ar['cgpa'],
-                    'marital': _ar['marital'],
-                    'anxiety': _ar['anxiety'], 'panic': _ar['panic'],
-                    'high_concern': (_ar['anxiety']=="Yes" and _ar['panic']=="Yes"),
-                    'married_risk': (_ar['marital']=="Yes" and _ar['age']<21),
-                    'academic_risk': (_ar['year'] in ["Year 3","Year 4"] and _ar['cgpa']=="0 - 1.99"),
-                }
-                st.switch_page("pages/3_Decision_Tree.py")
-
-    with qn3:
-        _spred = _ar['svm_pred']; _sprob = _ar['svm_prob']
-        _slbl  = "⚠️ Depression" if _spred==1 else "✅ No Depression"
-        is_best = (_best_label == 'SVM')
-        with st.container(border=True):
-            st.markdown(f"### 🔴 SVM {'⭐ BEST' if is_best else ''}")
-            if _spred==1: st.error(f"**{_slbl}** — {_sprob[1]*100:.1f}%")
-            else:         st.success(f"**{_slbl}** — {_sprob[0]*100:.1f}%")
-            if st.button("🔴 Open SVM with Result →", key="ar_nav_svm",
-                         use_container_width=True,
-                         type="primary" if is_best else "secondary"):
-                st.session_state['svm_result'] = {
-                    'pred': _spred, 'prob': _sprob,
-                    'inp': _ar.get('svm_inp'),
-                    'name': _ar['name'], 'gender': _ar['gender'],
-                    'age': _ar['age'], 'course': _ar['course'],
-                    'year': _ar['year'], 'cgpa': _ar['cgpa'],
-                    'marital': _ar['marital'],
-                    'anxiety': _ar['anxiety'], 'panic': _ar['panic'],
-                    'treat': _ar['treat'],
-                    'high_concern': (_ar['anxiety']=="Yes" and _ar['panic']=="Yes"),
-                    'treat_flag': (_ar['treat']=="Yes"),
-                    'academic_risk': (_ar['year'] in ["Year 3","Year 4"] and _ar['cgpa']=="0 - 1.99"),
-                }
-                st.switch_page("pages/4_SVM.py")
-
-    if st.button("Clear Auto-Selector Result", key="ar_clear"):
-        st.session_state['as_result'] = None
-        st.rerun()
+    if st.button("Clear Result",key="svm_clear"):
+        st.session_state['svm_result']=None; st.rerun()
 
 st.divider()
-st.caption("MindCheck · BMCS2003 AI · 202605 Session · Tutorial Group 3 · Tutor: Dr Goh · TARUMT")
+
+# Feature Importance
+st.subheader("Live Feature Importance")
+st.caption("Permutation importance — computed live from trained SVM model")
+_fi_sv=M['svm_fi_df'].sort_values('Importance',ascending=True)
+_mean_sv2=_fi_sv['Importance'].mean()
+fi_c1,fi_c2=st.columns([2,1])
+with fi_c1:
+    fig_fi,ax_fi=plt.subplots(figsize=(7,3.5))
+    colors_fi=['#EF4444' if v>=_mean_sv2 else '#9CA3AF' for v in _fi_sv['Importance']]
+    ax_fi.barh(_fi_sv['Feature'],_fi_sv['Importance'],xerr=_fi_sv['Std'],
+               color=colors_fi,edgecolor='none',height=0.6,error_kw={'elinewidth':1.5,'ecolor':'#374151'})
+    ax_fi.axvline(_mean_sv2,color='red',ls='--',lw=1.2,alpha=0.7,label=f'Mean={_mean_sv2:.4f}')
+    ax_fi.set_xlabel('Mean Accuracy Decrease (Permutation)')
+    ax_fi.set_title('SVM Feature Importance — Permutation Method (Live)',fontweight='bold')
+    ax_fi.legend(fontsize=9); ax_fi.spines['top'].set_visible(False); ax_fi.spines['right'].set_visible(False)
+    ax_fi.grid(axis='x',alpha=0.3); plt.tight_layout(); st.pyplot(fig_fi,use_container_width=True); plt.close()
+with fi_c2:
+    with st.container(border=True):
+        st.markdown("**Feature Ranking**")
+        for _,row in _fi_sv.sort_values('Importance',ascending=False).iterrows():
+            icon="🔴" if row['Importance']>=_mean_sv2 else "⚪"
+            st.write(f"{icon} **{row['Feature']}** — {row['Importance']:.4f}")
+        st.caption("🔴 Above average importance")
+
+st.divider()
+
+with st.expander("📚  Learn More — Confusion Matrix & How SVM Works"):
+    fig_cm,ax_cm=plt.subplots(figsize=(5,4))
+    sns.heatmap(M['svm_m']['cm'],annot=True,fmt='d',cmap='Reds',ax=ax_cm,
+                xticklabels=['No Depression','Depression'],yticklabels=['No Depression','Depression'],
+                linewidths=0.5,annot_kws={'size':12,'weight':'bold'})
+    ax_cm.set_xlabel('Predicted'); ax_cm.set_ylabel('Actual')
+    ax_cm.set_title('SVM Confusion Matrix',fontweight='bold')
+    plt.tight_layout(); st.pyplot(fig_cm,use_container_width=True); plt.close()
+    tn,fp,fn,tp=M['svm_m']['cm'].ravel()
+    a,b,c,d=st.columns(4)
+    a.metric("TN",str(tn)); b.metric("FP",str(fp)); c.metric("FN",str(fn)); d.metric("TP",str(tp))
+    st.write("")
+    st.write("**How SVM Works:** SVM finds the optimal hyperplane that maximally separates two classes. "
+             "The **RBF kernel** handles non-linearly separable data. **Balanced class weights** "
+             "compensate for class imbalance. PCA above projects the boundary into 2D for visualization.")
+
+st.divider()
+
+# Batch
+st.subheader("Batch Prediction — 🔴 SVM")
+_svm_sample=pd.DataFrame({'Name':['Ahmad','Siti','Wei Ming'],'Gender':['Male','Female','Male'],
+    'Age':[20,21,19],'Course':['Computer Science','Engineering','Information Technology'],
+    'Year_of_Study':['Year 2','Year 3','Year 1'],'CGPA':['3.00 - 3.49','2.50 - 2.99','3.50 - 4.00'],
+    'Marital_Status':['No','No','No'],'Anxiety':['Yes','No','No'],
+    'Panic_Attack':['No','Yes','No'],'Seek_Treatment':['No','No','No']})
+with st.expander("📋  View / Download CSV Template"):
+    st.dataframe(_svm_sample,use_container_width=True,hide_index=True)
+    st.download_button("⬇️  Download SVM Template",data=_svm_sample.to_csv(index=False).encode(),
+        file_name="svm_batch_template.csv",mime="text/csv",use_container_width=True,key="svm_tmpl_dl")
+
+_svm_file=st.file_uploader("Upload CSV — drag & drop or click to browse",type=["csv"],key="svm_batch_file")
+if _svm_file:
+    try:
+        _sdf=pd.read_csv(_svm_file); _sdf.columns=_sdf.columns.str.strip()
+        st.success(f"✅ {len(_sdf)} students loaded")
+        _sresults=[]
+        for _si,_srow in _sdf.iterrows():
+            try:
+                _sname=str(_srow.get('Name',f'Student {_si+1}')).strip()
+                _sgender=str(_srow.get('Gender','Male'))
+                _smarital=str(_srow.get('Marital_Status','No'))
+                _sanxiety=str(_srow.get('Anxiety','No'))
+                _spanic=str(_srow.get('Panic_Attack','No'))
+                _streat=str(_srow.get('Seek_Treatment','No'))
+                try: _sage=int(float(_srow.get('Age',20)))
+                except: _sage=20
+                _scourse=str(_srow.get('Course','Others'))
+                _syear=str(_srow.get('Year_of_Study','Year 1'))
+                _scgpa=str(_srow.get('CGPA','3.00 - 3.49')).strip()
+                _syear_n=''.join(filter(str.isdigit,_syear)) or '1'
+                _sinp=pd.DataFrame([{
+                    'Choose your gender':_sgender,'Age':_sage,
+                    'Your current year of Study':f'year {_syear_n}',
+                    'What is your CGPA?':_scgpa,'Marital status':_smarital,
+                    'Do you have Anxiety?':_sanxiety,'Do you have Panic attack?':_spanic,
+                    'Did you seek any specialist for a treatment?':_streat,
+                    'Course_Category':M['cat_course'](_scourse)
+                }])[M['svm_col_order']]
+                _spred=int(M['svm'].predict(_sinp)[0])
+                _sprob=M['svm'].predict_proba(_sinp)[0][1]
+                _sresults.append({'Name':_sname,'Gender':_sgender,'Age':_sage,'Course':_scourse,
+                    'Year':_syear,'CGPA':_scgpa,'Anxiety':_sanxiety,'Panic':_spanic,
+                    'Result':'⚠️ Depression' if _spred==1 else '✅ No Depression',
+                    'Confidence':f"{_sprob*100:.1f}%",'Risk':'HIGH' if _spred==1 else 'LOW',
+                    '_pred':_spred,'_prob':_sprob})
+            except Exception as _se: _sresults.append({'Name':str(_srow.get('Name','')),'Error':str(_se)})
+        _sres=pd.DataFrame(_sresults); _stotal=len(_sres)
+        _sdep=int(_sres['_pred'].sum()) if '_pred' in _sres else 0
+        _sm1,_sm2,_sm3=st.columns(3)
+        _sm1.metric("Total Students",str(_stotal))
+        _sm2.metric("⚠️ At Risk",str(_sdep),delta=f"{_sdep/_stotal*100:.0f}%",delta_color="inverse")
+        _sm3.metric("✅ No Risk",str(_stotal-_sdep),delta=f"{(_stotal-_sdep)/_stotal*100:.0f}%")
+        _sdisp=_sres[['Name','Gender','Age','Course','Year','CGPA','Anxiety','Panic','Result','Confidence','Risk']]
+        def _sst(val):
+            if '⚠️' in str(val) or val=='HIGH': return 'background-color:#FEE2E2;color:#991B1B;font-weight:bold'
+            if '✅' in str(val) or val=='LOW':  return 'background-color:#DCFCE7;color:#166534;font-weight:bold'
+            return ''
+        try:    _sstyled=_sdisp.style.map(_sst,subset=['Result','Risk'])
+        except: _sstyled=_sdisp.style.applymap(_sst,subset=['Result','Risk'])
+        st.dataframe(_sstyled,use_container_width=True,hide_index=True)
+        _sdl1,_sdl2=st.columns(2)
+        with _sdl1:
+            st.download_button("⬇️  Download All Results",data=_sdisp.to_csv(index=False).encode(),
+                file_name="svm_batch_results.csv",mime="text/csv",use_container_width=True,key="svm_dl_all")
+        with _sdl2:
+            _shigh=_sres[_sres['_pred']==1][list(_sdisp.columns)] if '_pred' in _sres else pd.DataFrame()
+            if len(_shigh):
+                st.download_button(f"⬇️  At-Risk Only ({len(_shigh)})",
+                    data=_shigh.to_csv(index=False).encode(),
+                    file_name="svm_at_risk.csv",mime="text/csv",use_container_width=True,key="svm_dl_risk")
+    except Exception as _serr: st.error(f"Error: {str(_serr)}")
+
+st.divider()
+st.caption("MindCheck · BMCS2003 AI · 202605 · Group 3 · Dr Goh · TARUMT")

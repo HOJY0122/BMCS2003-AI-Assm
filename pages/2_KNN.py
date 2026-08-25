@@ -18,8 +18,12 @@ sidebar("knn")
 
 M = load_all_models()
 
+# ── Restore result carried from Comparison page ──────────────
+if 'knn_carry' in st.session_state and st.session_state['knn_carry'] is not None:
+    st.session_state['knn_result'] = st.session_state.pop('knn_carry')
+
 if 'knn_result' not in st.session_state:
-    st.session_state.knn_result = None
+    st.session_state['knn_result'] = None
 
 # ── Prefill from Comparison page ──────────────────────────────
 _pre = st.session_state.pop('knn_prefill', None)
@@ -87,7 +91,7 @@ if predict_btn:
             inp_s = M['sc_knn'].transform(inp)
             pred  = int(M['knn'].predict(inp_s)[0])
             prob  = M['knn'].predict_proba(inp_s)[0].tolist()
-            st.session_state.knn_result = {
+            st.session_state['knn_result'] = {
                 'pred': pred, 'prob': prob,
                 'name': name.strip() or "Student",
                 'gender': gender, 'age': age, 'course': course,
@@ -101,8 +105,8 @@ if predict_btn:
             st.error(f"❌ Prediction failed: {ex}")
 
 # ── Result ─────────────────────────────────────────────────────
-if st.session_state.knn_result:
-    R    = st.session_state.knn_result
+if st.session_state['knn_result']:
+    R    = st.session_state['knn_result']
     pred = R['pred']; prob = R['prob']; name_lbl = R['name']
     st.divider()
     st.subheader("Prediction Result")
@@ -214,7 +218,7 @@ if st.session_state.knn_result:
 
     st.write("")
     if st.button("Clear Result", key="knn_clear"):
-        st.session_state.knn_result = None; st.rerun()
+        st.session_state['knn_result'] = None; st.rerun()
 
 st.divider()
 
