@@ -70,14 +70,6 @@ div[data-testid="stExpander"]:hover { box-shadow: 0 4px 16px rgba(61,82,255,0.08
 # Sidebar handled by shared sidebar.py
 
 # Header
-st.markdown("""
-<div class="page-header">
-    <div class="page-label">Dataset</div>
-    <div class="page-title">Student Mental Health Dataset</div>
-    <div class="page-sub">Source: Kaggle — Shariful07 (2020) | 600 student records | IIUM Malaysia | 11 original features</div>
-</div>
-""", unsafe_allow_html=True)
-
 # Load data
 @st.cache_data
 def get_data():
@@ -85,16 +77,40 @@ def get_data():
 
 df = get_data()
 
+st.markdown(f"""
+<div class="page-header">
+    <div class="page-label">Dataset</div>
+    <div class="page-title">Student Mental Health Dataset</div>
+    <div class="page-sub">Source: Kaggle — Shariful07 (2020) | {len(df)} student records | IIUM Malaysia | 11 original features</div>
+</div>
+""", unsafe_allow_html=True)
+
+@st.cache_data
+def get_raw_missing_age():
+    """Missing-value count is measured on the RAW file before cleaning,
+    since load_and_clean_dataset() already fills Age NaNs with the
+    median — so it can't be recovered from the cleaned df anymore."""
+    import pandas as pd
+    raw = pd.read_csv('dataset/Student_Mental_health.csv')
+    return int(raw['Age'].isna().sum())
+
 st.markdown("<div class='content-wrap'>", unsafe_allow_html=True)
 
-# Metrics
+# Metrics — all computed live from the loaded dataset, not hardcoded,
+# so these stay correct if the dataset file is ever swapped or grows.
+_dep_n = int((df['Depression'] == 1).sum())
+_anx_n = int((df['Anxiety'] == 1).sum())
+_pan_n = int((df['Panic_Attack'] == 1).sum())
+_n     = len(df)
+_missing_age = get_raw_missing_age()
+
 m1,m2,m3,m4,m5,m6 = st.columns(6)
-m1.metric("Total Records", "600")
+m1.metric("Total Records", f"{_n}")
 m2.metric("Original Features", "11")
-m3.metric("Depression (Yes)", "194 (32%)")
-m4.metric("Anxiety (Yes)", "209 (35%)")
-m5.metric("Panic Attack (Yes)", "190 (32%)")
-m6.metric("Missing Values", "8 (Age)")
+m3.metric("Depression (Yes)", f"{_dep_n} ({_dep_n/_n*100:.0f}%)")
+m4.metric("Anxiety (Yes)", f"{_anx_n} ({_anx_n/_n*100:.0f}%)")
+m5.metric("Panic Attack (Yes)", f"{_pan_n} ({_pan_n/_n*100:.0f}%)")
+m6.metric("Missing Values", f"{_missing_age} (Age)")
 
 st.markdown("<br>", unsafe_allow_html=True)
 

@@ -43,7 +43,7 @@ st.markdown("##### 📊 LIVE DATASET STATISTICS")
 st.title("Live Dataset Statistics")
 st.write(
     "Explore the dataset in real-time and see how **your student profile compares** "
-    "to the 600 IIUM students in the dataset. All charts update live."
+    f"to the {len(df)} IIUM students in the dataset. All charts update live."
 )
 st.divider()
 
@@ -68,7 +68,7 @@ st.divider()
 st.subheader("Compare Your Student to the Dataset")
 st.write(
     "Enter a student's details to see **exactly where they stand** "
-    "relative to all 600 students in the dataset."
+    f"relative to all {len(df)} students in the dataset."
 )
 
 CGPA_MAP = {'0 - 1.99':1.0,'2.00 - 2.49':2.25,'2.50 - 2.99':2.75,
@@ -416,7 +416,7 @@ st.divider()
 # SECTION 5 — RAW DATA EXPLORER
 # ══════════════════════════════════════════════════════════════
 st.subheader("Raw Dataset Explorer")
-st.caption("Browse and filter the full 600-record dataset")
+st.caption(f"Browse and filter the full {len(df)}-record dataset")
 
 col_show = st.multiselect(
     "Select columns to display",
