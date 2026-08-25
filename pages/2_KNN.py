@@ -10,7 +10,7 @@ warnings.filterwarnings('ignore')
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.sidebar import sidebar
-from utils.models import load_all_models
+from utils.models import load_all_models, MAX_BATCH_ROWS, MAX_BATCH_MB
 from utils.pdf_report import generate_pdf
 
 st.set_page_config(page_title="KNN Predictor — MindCheck",
@@ -320,6 +320,7 @@ with st.expander("📚  Learn More — K-Value Optimization, Cross Validation & 
 st.divider()
 st.subheader("Batch Prediction — 🔵 KNN")
 st.caption("Upload a CSV to predict multiple students at once using KNN.")
+st.caption(f"⚠️ Limits: max **{MAX_BATCH_ROWS} records** and **{MAX_BATCH_MB} MB** per upload.")
 
 _knn_sample=pd.DataFrame({'Name':['Ahmad','Siti','Wei Ming'],'Gender':['Male','Female','Male'],
     'Age':[20,21,19],'Course':['Computer Science','Engineering','Information Technology'],
@@ -332,87 +333,94 @@ with st.expander("📋  View / Download CSV Template"):
         file_name="knn_batch_template.csv",mime="text/csv",
         use_container_width=True,key="knn_tmpl_dl")
 
-_knn_file=st.file_uploader("Upload CSV — drag & drop or click to browse",
+_knn_file=st.file_uploader(f"Upload CSV — drag & drop or click to browse (max {MAX_BATCH_ROWS} records, {MAX_BATCH_MB} MB)",
                             type=["csv"],key="knn_batch_file")
 if _knn_file:
-    try:
-        _kdf=pd.read_csv(_knn_file); _kdf.columns=_kdf.columns.str.strip()
-        st.success(f"✅ {len(_kdf)} students loaded")
-        _kresults=[]
-        for _ki,_krow in _kdf.iterrows():
-            try:
-                _kname=str(_krow.get('Name',f'Student {int(_ki)+1}')).strip()
-                _kg=1 if str(_krow.get('Gender','')).lower()=='male' else 0
-                _kax=1 if str(_krow.get('Anxiety','')).lower()=='yes' else 0
-                _kpa=1 if str(_krow.get('Panic_Attack','')).lower()=='yes' else 0
-                try: _kage=int(float(_krow.get('Age',20)))
-                except: _kage=20
-                _kcourse=str(_krow.get('Course','Others'))
-                _kyear=str(_krow.get('Year_of_Study','Year 1'))
-                _kcgpa=str(_krow.get('CGPA','3.00 - 3.49')).strip()
-                _kce=M['le_c'].transform([_kcourse])[0] if _kcourse in M['le_c'].classes_ else 0
-                _kye=M['le_y'].transform([_kyear])[0]   if _kyear   in M['le_y'].classes_ else 0
-                _kcn=M['cgpa_map'].get(_kcgpa,3.25)
-                _kinp=pd.DataFrame([[_kg,_kage,_kce,_kye,_kcn,_kax,_kpa]],columns=M['knn_feat'])
-                _kinp_s=M['sc_knn'].transform(_kinp)
-                _kpred=int(M['knn'].predict(_kinp_s)[0])
-                _kprob=M['knn'].predict_proba(_kinp_s)[0][1]
-                _kresults.append({'Name':_kname,'Gender':_krow.get('Gender',''),
-                    'Age':_kage,'Course':_kcourse,'Year':_kyear,'CGPA':_kcgpa,
-                    'Anxiety':_krow.get('Anxiety',''),'Panic Attack':_krow.get('Panic_Attack',''),
-                    'Result':'⚠️ Depression' if _kpred==1 else '✅ No Depression',
-                    'Confidence':f"{_kprob*100:.1f}%",'Risk':'HIGH' if _kpred==1 else 'LOW',
-                    '_pred':_kpred,'_prob':_kprob})
-            except Exception as _ke: _kresults.append({'Name':str(_krow.get('Name','')),'Error':str(_ke)})
-        _kres=pd.DataFrame(_kresults)
-        _ktotal=len(_kres); _kdep=int(_kres['_pred'].sum()) if '_pred' in _kres else 0
-        _bm1,_bm2,_bm3=st.columns(3)
-        _bm1.metric("Total Students",str(_ktotal))
-        _bm2.metric("⚠️ At Risk",str(_kdep),delta=f"{_kdep/_ktotal*100:.0f}%",delta_color="inverse")
-        _bm3.metric("✅ No Risk",str(_ktotal-_kdep),delta=f"{(_ktotal-_kdep)/_ktotal*100:.0f}%")
-        _bc1,_bc2=st.columns(2)
-        with _bc1:
-            fig_b,ax_b=plt.subplots(figsize=(4,3))
-            ax_b.pie([_kdep,_ktotal-_kdep],labels=[f'Depression ({_kdep})',f'No Depression ({_ktotal-_kdep})'],
-                colors=['#EF4444','#10B981'],autopct='%1.1f%%',startangle=90,
-                wedgeprops={'edgecolor':'white','linewidth':2},textprops={'fontsize':10,'fontweight':'bold'})
-            ax_b.set_title('KNN Batch Results',fontweight='bold')
-            plt.tight_layout(); st.pyplot(fig_b,use_container_width=True); plt.close()
-        with _bc2:
-            if '_prob' in _kres:
-                fig_p,ax_p=plt.subplots(figsize=(4,3))
-                ax_p.hist(_kres['_prob']*100,bins=min(10,_ktotal),color='#3B82F6',edgecolor='white',alpha=0.85)
-                ax_p.axvline(50,color='red',ls='--',lw=1.5,label='Threshold 50%')
-                ax_p.set_xlabel('Depression Probability (%)'); ax_p.set_ylabel('Count')
-                ax_p.set_title('Confidence Distribution',fontweight='bold')
-                ax_p.legend(fontsize=9); ax_p.spines['top'].set_visible(False); ax_p.spines['right'].set_visible(False)
-                plt.tight_layout(); st.pyplot(fig_p,use_container_width=True); plt.close()
-        _kdisp=_kres[['Name','Gender','Age','Course','Year','CGPA','Anxiety','Panic Attack','Result','Confidence','Risk']]
-        def _kst(val):
-            if '⚠️' in str(val) or val=='HIGH': return 'background-color:#FEE2E2;color:#991B1B;font-weight:bold'
-            if '✅' in str(val) or val=='LOW':  return 'background-color:#DCFCE7;color:#166534;font-weight:bold'
-            return ''
-        _kstyled=_kdisp.style.map(_kst,subset=['Result','Risk'])
-        st.dataframe(_kstyled,use_container_width=True,hide_index=True)
-        st.write(""); st.markdown("**Individual Student Cards**")
-        for _,_kr in _kres.iterrows():
-            if '_pred' not in _kr: continue
-            with st.expander(f"{'⚠️' if _kr['_pred']==1 else '✅'} {_kr['Name']} — {_kr['Result']} ({_kr['Confidence']})"):
-                if _kr['_pred']==1: st.error(f"**Depression Risk** | Confidence: {_kr['Confidence']}")
-                else:               st.success(f"**No Depression** | Confidence: {_kr['Confidence']}")
-        _kdl1,_kdl2=st.columns(2)
-        with _kdl1:
-            st.download_button("⬇️  Download All Results",data=_kdisp.to_csv(index=False).encode(),
-                file_name="knn_batch_results.csv",mime="text/csv",use_container_width=True,key="knn_dl_all")
-        with _kdl2:
-            _khigh=_kres[_kres['_pred']==1][list(_kdisp.columns)] if '_pred' in _kres else pd.DataFrame()
-            if len(_khigh):
-                st.download_button(f"⬇️  At-Risk Only ({len(_khigh)})",
-                    data=_khigh.to_csv(index=False).encode(),
-                    file_name="knn_at_risk.csv",mime="text/csv",use_container_width=True,key="knn_dl_risk")
-    except Exception as _kerr:
-        st.error(f"Error: {str(_kerr)}")
-        st.caption("Please check your CSV matches the template format.")
+    _knn_size_mb = _knn_file.size / (1024*1024)
+    if _knn_size_mb > MAX_BATCH_MB:
+        st.error(f"❌ File is {_knn_size_mb:.2f} MB — exceeds the {MAX_BATCH_MB} MB limit. Please upload a smaller file.")
+    else:
+        try:
+            _kdf=pd.read_csv(_knn_file); _kdf.columns=_kdf.columns.str.strip()
+            if len(_kdf) > MAX_BATCH_ROWS:
+                st.warning(f"⚠️ File has {len(_kdf)} records — only the first {MAX_BATCH_ROWS} will be processed.")
+                _kdf = _kdf.head(MAX_BATCH_ROWS)
+            st.success(f"✅ {len(_kdf)} students loaded")
+            _kresults=[]
+            for _ki,_krow in _kdf.iterrows():
+                try:
+                    _kname=str(_krow.get('Name',f'Student {int(_ki)+1}')).strip()
+                    _kg=1 if str(_krow.get('Gender','')).lower()=='male' else 0
+                    _kax=1 if str(_krow.get('Anxiety','')).lower()=='yes' else 0
+                    _kpa=1 if str(_krow.get('Panic_Attack','')).lower()=='yes' else 0
+                    try: _kage=int(float(_krow.get('Age',20)))
+                    except: _kage=20
+                    _kcourse=str(_krow.get('Course','Others'))
+                    _kyear=str(_krow.get('Year_of_Study','Year 1'))
+                    _kcgpa=str(_krow.get('CGPA','3.00 - 3.49')).strip()
+                    _kce=M['le_c'].transform([_kcourse])[0] if _kcourse in M['le_c'].classes_ else 0
+                    _kye=M['le_y'].transform([_kyear])[0]   if _kyear   in M['le_y'].classes_ else 0
+                    _kcn=M['cgpa_map'].get(_kcgpa,3.25)
+                    _kinp=pd.DataFrame([[_kg,_kage,_kce,_kye,_kcn,_kax,_kpa]],columns=M['knn_feat'])
+                    _kinp_s=M['sc_knn'].transform(_kinp)
+                    _kpred=int(M['knn'].predict(_kinp_s)[0])
+                    _kprob=M['knn'].predict_proba(_kinp_s)[0][1]
+                    _kresults.append({'Name':_kname,'Gender':_krow.get('Gender',''),
+                        'Age':_kage,'Course':_kcourse,'Year':_kyear,'CGPA':_kcgpa,
+                        'Anxiety':_krow.get('Anxiety',''),'Panic Attack':_krow.get('Panic_Attack',''),
+                        'Result':'⚠️ Depression' if _kpred==1 else '✅ No Depression',
+                        'Confidence':f"{_kprob*100:.1f}%",'Risk':'HIGH' if _kpred==1 else 'LOW',
+                        '_pred':_kpred,'_prob':_kprob})
+                except Exception as _ke: _kresults.append({'Name':str(_krow.get('Name','')),'Error':str(_ke)})
+            _kres=pd.DataFrame(_kresults)
+            _ktotal=len(_kres); _kdep=int(_kres['_pred'].sum()) if '_pred' in _kres else 0
+            _bm1,_bm2,_bm3=st.columns(3)
+            _bm1.metric("Total Students",str(_ktotal))
+            _bm2.metric("⚠️ At Risk",str(_kdep),delta=f"{_kdep/_ktotal*100:.0f}%",delta_color="inverse")
+            _bm3.metric("✅ No Risk",str(_ktotal-_kdep),delta=f"{(_ktotal-_kdep)/_ktotal*100:.0f}%")
+            _bc1,_bc2=st.columns(2)
+            with _bc1:
+                fig_b,ax_b=plt.subplots(figsize=(4,3))
+                ax_b.pie([_kdep,_ktotal-_kdep],labels=[f'Depression ({_kdep})',f'No Depression ({_ktotal-_kdep})'],
+                    colors=['#EF4444','#10B981'],autopct='%1.1f%%',startangle=90,
+                    wedgeprops={'edgecolor':'white','linewidth':2},textprops={'fontsize':10,'fontweight':'bold'})
+                ax_b.set_title('KNN Batch Results',fontweight='bold')
+                plt.tight_layout(); st.pyplot(fig_b,use_container_width=True); plt.close()
+            with _bc2:
+                if '_prob' in _kres:
+                    fig_p,ax_p=plt.subplots(figsize=(4,3))
+                    ax_p.hist(_kres['_prob']*100,bins=min(10,_ktotal),color='#3B82F6',edgecolor='white',alpha=0.85)
+                    ax_p.axvline(50,color='red',ls='--',lw=1.5,label='Threshold 50%')
+                    ax_p.set_xlabel('Depression Probability (%)'); ax_p.set_ylabel('Count')
+                    ax_p.set_title('Confidence Distribution',fontweight='bold')
+                    ax_p.legend(fontsize=9); ax_p.spines['top'].set_visible(False); ax_p.spines['right'].set_visible(False)
+                    plt.tight_layout(); st.pyplot(fig_p,use_container_width=True); plt.close()
+            _kdisp=_kres[['Name','Gender','Age','Course','Year','CGPA','Anxiety','Panic Attack','Result','Confidence','Risk']]
+            def _kst(val):
+                if '⚠️' in str(val) or val=='HIGH': return 'background-color:#FEE2E2;color:#991B1B;font-weight:bold'
+                if '✅' in str(val) or val=='LOW':  return 'background-color:#DCFCE7;color:#166534;font-weight:bold'
+                return ''
+            _kstyled=_kdisp.style.map(_kst,subset=['Result','Risk'])
+            st.dataframe(_kstyled,use_container_width=True,hide_index=True)
+            st.write(""); st.markdown("**Individual Student Cards**")
+            for _,_kr in _kres.iterrows():
+                if '_pred' not in _kr: continue
+                with st.expander(f"{'⚠️' if _kr['_pred']==1 else '✅'} {_kr['Name']} — {_kr['Result']} ({_kr['Confidence']})"):
+                    if _kr['_pred']==1: st.error(f"**Depression Risk** | Confidence: {_kr['Confidence']}")
+                    else:               st.success(f"**No Depression** | Confidence: {_kr['Confidence']}")
+            _kdl1,_kdl2=st.columns(2)
+            with _kdl1:
+                st.download_button("⬇️  Download All Results",data=_kdisp.to_csv(index=False).encode(),
+                    file_name="knn_batch_results.csv",mime="text/csv",use_container_width=True,key="knn_dl_all")
+            with _kdl2:
+                _khigh=_kres[_kres['_pred']==1][list(_kdisp.columns)] if '_pred' in _kres else pd.DataFrame()
+                if len(_khigh):
+                    st.download_button(f"⬇️  At-Risk Only ({len(_khigh)})",
+                        data=_khigh.to_csv(index=False).encode(),
+                        file_name="knn_at_risk.csv",mime="text/csv",use_container_width=True,key="knn_dl_risk")
+        except Exception as _kerr:
+            st.error(f"Error: {str(_kerr)}")
+            st.caption("Please check your CSV matches the template format.")
 
 st.divider()
 st.caption("MindCheck · BMCS2003 AI · 202605 · Group 3 · Dr Goh · TARUMT")

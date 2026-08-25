@@ -29,6 +29,18 @@ from utils.preprocessing import load_and_clean_dataset
 from utils.sidebar import sidebar
 from utils.models import load_all_models as _load_shared
 
+
+def _hex_to_rgba(hex_color, alpha):
+    """Convert a '#RRGGBB' hex color to an 'rgba(r,g,b,a)' string, so a
+    radar-chart fill can be made transparent WITHOUT also dimming the
+    trace's line/markers (which happens if you set trace-level `opacity`
+    instead — that was the cause of the radar chart's hover/interaction
+    being unreliable, since the whole trace including its hoverable line
+    became faint and hard to target)."""
+    hex_color = hex_color.lstrip('#')
+    r, g, b = (int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+    return f'rgba({r},{g},{b},{alpha})'
+
 st.set_page_config(
     page_title="Compare Models — MindCheck",
     page_icon="📈",
@@ -576,9 +588,12 @@ with tab_all:
             fig_radar.add_trace(go.Scatterpolar(
                 r=vals + [vals[0]],
                 theta=metric_names + [metric_names[0]],
-                fill='toself', fillcolor=color,
-                opacity=0.25, name=name,
+                fill='toself', fillcolor=_hex_to_rgba(color, 0.25),
+                mode='lines+markers',
+                marker=dict(size=7, color=color),
+                name=name,
                 line=dict(color=color, width=2),
+                hoveron='points+fills',
                 hovertemplate='<b>%{theta}</b><br>%{r:.2f}%<extra>' + name + '</extra>',
             ))
         fig_radar.update_layout(
@@ -735,7 +750,7 @@ for cm_tab, title, cm_data, color, split, member in [
 # MODEL AUTO-SELECTOR
 # ══════════════════════════════════════════════════════════════
 st.divider()
-st.subheader("🤖 Model Auto-Selector")
+st.subheader("🤖 Predictor Auto Selector")
 st.write(
     "Not sure which model to use? Fill in the student profile below and the system "
     "will **automatically recommend the best model** based on the student's characteristics "
