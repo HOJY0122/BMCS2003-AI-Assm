@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+plt.style.use('seaborn-v0_8-whitegrid')
+plt.rcParams.update({'font.family':'sans-serif','font.size':10,'axes.spines.top':False,'axes.spines.right':False,'figure.facecolor':'white','axes.facecolor':'white','axes.edgecolor':'#E2E8F0','axes.labelcolor':'#1E293B','xtick.color':'#64748B','ytick.color':'#64748B','text.color':'#1E293B','grid.color':'#F1F5F9','grid.linewidth':0.8})
 import seaborn as sns
 import warnings, sys, os
 warnings.filterwarnings('ignore')
@@ -938,71 +940,7 @@ if as_btn:
             'best'      : _best,
         }
 
-        st.write("")
-        st.caption("Click below to open that model's page — data and prediction result will be carried over automatically.")
-        n1, n2, n3 = st.columns(3)
-
-        # Build shared prefill + pre-computed result payload
-        _as_shared = {
-            'from_comparison': True,
-            'name'   : as_name_lbl,
-            'gender' : as_gender,
-            'age'    : as_age,
-            'course' : as_course,
-            'year'   : as_year,
-            'cgpa'   : as_cgpa,
-            'marital': as_marital,
-            'anxiety': as_anxiety,
-            'panic'  : as_panic,
-            'seek'   : as_treat,
-        }
-
-        with n1:
-            if st.button(f"🔵 Open KNN Page →", key="as_go_knn", use_container_width=True):
-                # Pre-compute KNN result so predictor page shows it immediately
-                st.session_state['knn_prefill'] = _as_shared
-                st.session_state['knn_result'] = {
-                    'pred': int(_knn_pred), 'prob': _knn_prob.tolist(),
-                    'name': as_name_lbl,
-                    'gender': as_gender, 'age': as_age,
-                    'course': as_course, 'year': as_year, 'cgpa': as_cgpa,
-                    'anxiety': as_anxiety, 'panic': as_panic,
-                    'high_concern': (as_anxiety=="Yes" and as_panic=="Yes"),
-                    'academic_risk': (as_year in ["Year 3","Year 4"] and as_cgpa=="0 - 1.99"),
-                }
-                st.switch_page("pages/2_KNN.py")
-
-        with n2:
-            if st.button(f"🌳 Open DT Page →", key="as_go_dt", use_container_width=True):
-                st.session_state['dt_prefill'] = _as_shared
-                st.session_state['dt_result'] = {
-                    'pred': int(_dt_pred), 'prob': _dt_prob.tolist(),
-                    'name': as_name_lbl,
-                    'gender': as_gender, 'age': as_age,
-                    'course': as_course, 'year': as_year, 'cgpa': as_cgpa,
-                    'marital': as_marital, 'anxiety': as_anxiety, 'panic': as_panic,
-                    'high_concern': (as_anxiety=="Yes" and as_panic=="Yes"),
-                    'married_risk': (as_marital=="Yes" and as_age<21),
-                    'academic_risk': (as_year in ["Year 3","Year 4"] and as_cgpa=="0 - 1.99"),
-                }
-                st.switch_page("pages/3_Decision_Tree.py")
-
-        with n3:
-            if st.button(f"🔴 Open SVM Page →", key="as_go_svm", use_container_width=True):
-                st.session_state['svm_prefill'] = _as_shared
-                st.session_state['svm_result'] = {
-                    'pred': int(_svm_pred), 'prob': _svm_prob.tolist(),
-                    'inp': _svm_inp2,
-                    'name': as_name_lbl,
-                    'gender': as_gender, 'age': as_age,
-                    'course': as_course, 'year': as_year, 'cgpa': as_cgpa,
-                    'marital': as_marital, 'anxiety': as_anxiety,
-                    'panic': as_panic, 'treat': as_treat,
-                    'high_concern': (as_anxiety=="Yes" and as_panic=="Yes"),
-                    'treat_flag': (as_treat=="Yes"),
-                    'academic_risk': (as_year in ["Year 3","Year 4"] and as_cgpa=="0 - 1.99"),
-                }
-                st.switch_page("pages/4_SVM.py")
+        st.info("✅ Result saved — use the **Quick Navigate** banner below to open any predictor page with this result pre-loaded.")
 
 
 # AUTO-SELECTOR RESULT — COMPACT QUICK NAVIGATE BANNER
