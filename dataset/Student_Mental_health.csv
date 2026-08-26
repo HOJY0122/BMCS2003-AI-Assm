@@ -42,7 +42,7 @@ Timestamp,Choose your gender,Age,What is your course?,Your current year of Study
 08/30/2022 09:35,Female,24,BIT,Year 3,3.00 - 3.49,No,No,Yes,No,No
 01-12-25 13:35,Female,22,Engineering,year 4,3.50 - 4.00,No,No,No,No,No
 10/20/2024 11:08,Female,20,Usuluddin ,year 2,3.00 - 3.49,No,Yes,No,No,No
-06-02-23 23:05,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
+06-02-23 23:05,Male,27,BIT,year 1,0 - 1.99,No,No,No,No,No
 04-10-22 5:32,Male,23,TAASL,year 2,3.50 - 4.00,No,No,No,Yes,No
 11/19/2025 04:33,Male,18,BCS,year 1,3.50 - 4.00,No,No,Yes,Yes,No
 10/14/2023 03:35,Female,19,Engineering,year 1,3.50 - 4.00,No,No,Yes,No,No
@@ -164,7 +164,7 @@ Timestamp,Choose your gender,Age,What is your course?,Your current year of Study
 08/21/2023 19:42,Male,18,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
 08/17/2023 17:32,Female,23,Benl,year 1,3.00 - 3.49,No,No,No,No,No
 09-03-23 15:18,Female,24,Biomedical science,year 1,3.00 - 3.49,No,No,No,No,No
-04-04-25 6:48,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
+04-04-25 6:48,Male,25,BIT,year 1,0 - 1.99,No,No,No,No,No
 04/15/2023 07:06,Female,18,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
 09-01-22 22:44,Female,19,Engineering,year 1,3.50 - 4.00,No,No,Yes,No,No
 05-04-23 9:35,Female,19,BIT,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
@@ -182,7 +182,7 @@ Timestamp,Choose your gender,Age,What is your course?,Your current year of Study
 10-02-25 11:50,Female,18,CTS,Year 1,3.50 - 4.00,No,No,No,Yes,No
 08-11-22 12:40,Female,24,ENM,year 4,3.00 - 3.49,Yes,Yes,Yes,Yes,No
 12/28/2023 14:22,Male,24,Engineering,Year 2,2.00 - 2.49,No,No,No,Yes,No
-10/14/2024 07:46,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
+10/14/2024 07:46,Male,20,BIT,year 1,0 - 1.99,No,No,No,No,No
 12/26/2023 02:37,Male,18,BCS,Year 2,3.50 - 4.00,Yes,Yes,Yes,No,Yes
 10/14/2023 20:01,Male,18,Biomedical science,year 1,0 - 1.99,No,No,No,No,No
 08/31/2022 20:07,Female,19,BCS,year 1,3.50 - 4.00,No,No,No,No,No
@@ -238,7 +238,7 @@ Timestamp,Choose your gender,Age,What is your course?,Your current year of Study
 08/27/2024 01:52,Female,18,psychology,year 1,3.50 - 4.00,No,Yes,Yes,Yes,No
 09/24/2023 06:54,Female,18,Law,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
 03/27/2023 23:06,Female,19,Nursing ,Year 3,3.50 - 4.00,Yes,Yes,No,Yes,No
-07-05-24 11:57,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
+07-05-24 11:57,Male,21,BIT,year 1,0 - 1.99,No,No,No,No,No
 07/24/2022 20:49,Female,18,psychology,year 1,3.50 - 4.00,No,Yes,Yes,No,Yes
 05-03-24 8:48,Female,23,DIPLOMA TESL,Year 3,3.50 - 4.00,No,No,No,Yes,No
 05/19/2022 08:22,Female,19,BIT,year 1,3.00 - 3.49,No,Yes,Yes,Yes,No
@@ -286,7 +286,7 @@ Timestamp,Choose your gender,Age,What is your course?,Your current year of Study
 10-07-23 13:07,Male,19,Engineering,Year 2,3.50 - 4.00,No,No,No,Yes,No
 10-02-25 3:56,Male,18,Engineering,Year 2,3.00 - 3.49,Yes,Yes,Yes,No,No
 08/24/2022 05:58,Male,18,Engineering,Year 2,3.00 - 3.49,Yes,Yes,Yes,No,No
-04/15/2024 07:04,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
+04/15/2024 07:04,Male,25,BIT,year 1,0 - 1.99,No,No,No,No,No
 03-03-24 5:16,Female,19,Pendidikan Islam ,Year 2,3.00 - 3.49,No,No,No,No,No
 11/23/2023 18:25,Female,24,BCS,year 4,3.50 - 4.00,No,No,No,No,No
 03/25/2025 21:35,Female,19,BCS,year 1,3.50 - 4.00,No,No,No,No,No
@@ -308,7 +308,7 @@ Timestamp,Choose your gender,Age,What is your course?,Your current year of Study
 03/18/2023 11:36,Female,18,Law,Year 3,3.00 - 3.49,No,Yes,Yes,No,No
 03/20/2024 10:43,Female,21,BCS,year 1,3.50 - 4.00,No,No,Yes,No,No
 04-07-23 5:25,Female,23,ALA,year 1,2.50 - 2.99,Yes,Yes,No,Yes,Yes
-06-08-22 15:05,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
+06-08-22 15:05,Male,29,BIT,year 1,0 - 1.99,No,No,No,No,No
 08/31/2024 00:14,Female,24,Engineering,year 1,3.00 - 3.49,No,No,No,No,No
 09-09-24 3:25,Female,19,Biotechnology,Year 3,0 - 1.99,No,No,No,No,No
 06/23/2022 16:12,Female,18,BCS,year 1,3.50 - 4.00,No,No,No,No,No
@@ -471,7 +471,7 @@ Timestamp,Choose your gender,Age,What is your course?,Your current year of Study
 09/25/2025 03:31,Female,24,engin,year 1,3.50 - 4.00,No,No,No,Yes,No
 12/14/2024 16:38,Male,24,BCS,year 2,3.00 - 3.49,No,Yes,No,No,No
 03/21/2025 04:06,Female,24,Accounting ,year 3,3.00 - 3.49,No,No,No,No,No
-09/24/2023 06:26,Male,,BIT,year 1,0 - 1.99,No,No,No,No,No
+09/24/2023 06:26,Male,22,BIT,year 1,0 - 1.99,No,No,No,No,No
 11/14/2023 20:16,Male,18,Koe,Year 2,3.00 - 3.49,No,No,Yes,No,No
 07/15/2024 17:08,Female,24,BCS,year 4,3.50 - 4.00,No,No,No,No,No
 02/20/2025 12:56,Female,19,KOE,year 2,3.00 - 3.49,Yes,Yes,No,No,No
