@@ -144,7 +144,7 @@ def _arch_card(label, sub, color, key=None, page=None):
 # ── Row 1: Data Layer ──────────────────────────────────────────
 r1 = st.columns(4)
 with r1[0]:
-    _arch_card("📁 Raw Dataset", "Kaggle Shariful07 (2020) · 600 records · IIUM Malaysia",
+    _arch_card("📁 Raw Dataset", f"Kaggle Shariful07 (2020) · {_LM['n']} records · IIUM Malaysia",
                "#1E3A5F", key="arch_dataset", page="pages/6_Dataset.py")
 with r1[1]:
     _arch_card("⚙️ Preprocessing", "Clean · Encode · Engineer (utils/preprocessing.py)",
@@ -232,7 +232,7 @@ st.subheader("Data Preprocessing Pipeline")
 st.caption("Step-by-step transformation from raw CSV to model-ready features — hover a step for details")
 
 pipe_steps = [
-    ("📁 Raw CSV",      "600 records · 11 features",              "#1E3A5F"),
+    ("📁 Raw CSV",      f"{_LM['n']} records · 11 features",       "#1E3A5F"),
     ("🧹 Clean",        "Drop Timestamp · fill 8 Age NaN",        "#1B3A6B"),
     ("🔄 Standardize",  "Course → 10 categories · Year → 4",      "#1B4A5F"),
     ("🔢 Encode",       "Yes/No → 1/0 · Gender → 1/0",            "#1E4A3A"),

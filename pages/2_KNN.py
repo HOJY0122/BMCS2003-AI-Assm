@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
 plt.style.use('seaborn-v0_8-whitegrid')
 plt.rcParams.update({'font.family':'sans-serif','font.size':10,'axes.spines.top':False,'axes.spines.right':False,'figure.facecolor':'white','axes.facecolor':'white','axes.edgecolor':'#E2E8F0','axes.labelcolor':'#1E293B','xtick.color':'#64748B','ytick.color':'#64748B','text.color':'#1E293B','grid.color':'#F1F5F9','grid.linewidth':0.8})
 import seaborn as sns
@@ -159,6 +160,74 @@ if st.session_state['knn_result']:
             st.write(f"**Split:** 80 / 20")
             st.write(f"**CV Mean:** {M['cv_scores'].mean()*100:.2f}%")
             st.write(f"**Accuracy:** {M['knn_m']['acc']:.2f}%")
+
+    # KNN Neighbours — PCA projection (same visual language as the SVM
+    # decision-boundary chart, so the two predictor pages feel consistent)
+    st.write(""); st.markdown("**KNN Neighbours (PCA Projection)**")
+    try:
+        # Recompute the scaled input from R's fields (not a stored inp_s
+        # array) — this is the same pattern the "K Nearest Neighbours"
+        # panel below already uses, and it's what makes this work whether
+        # R came from a fresh prediction on this page OR a Quick Navigate
+        # carry from the Comparison page (which doesn't carry inp_s).
+        _pg = 1 if R['gender']=='Male' else 0
+        _pax = 1 if R['anxiety']=='Yes' else 0
+        _ppa = 1 if R['panic']=='Yes' else 0
+        _pce = M['le_c'].transform([R['course']])[0] if R['course'] in M['le_c'].classes_ else 0
+        _pye = M['le_y'].transform([R['year']])[0]   if R['year']   in M['le_y'].classes_ else 0
+        _pcn = M['cgpa_map'].get(R['cgpa'], 3.25)
+        _p_inp = pd.DataFrame([[_pg, R['age'], _pce, _pye, _pcn, _pax, _ppa]], columns=M['knn_feat'])
+        _p_inp_s = M['sc_knn'].transform(_p_inp)
+
+        pca = PCA(n_components=2, random_state=42)
+        X_bg_2d = pca.fit_transform(M['knn_Xtr'])
+        X_us_2d = pca.transform(_p_inp_s)
+
+        _dists, _idxs = M['knn'].kneighbors(_p_inp_s)
+        y_all = np.array(M['knn_ytr'])
+        nbr_pts    = X_bg_2d[_idxs[0]]
+        nbr_labels = y_all[_idxs[0]]
+
+        fig4, ax4 = plt.subplots(figsize=(8, 4.5))
+        # All training students, faint background
+        ax4.scatter(X_bg_2d[y_all==1,0], X_bg_2d[y_all==1,1],
+                    color='#EF4444', s=25, alpha=0.30, label='Depression', zorder=2)
+        ax4.scatter(X_bg_2d[y_all==0,0], X_bg_2d[y_all==0,1],
+                    color='#3B82F6', s=25, alpha=0.30, label='No Depression', zorder=2)
+
+        # Dashed lines from the student to each of the K neighbours actually
+        # used by the model (real neighbours from M['knn'].kneighbors(), not
+        # just "nearest in this 2D picture" — the picture is a projection of
+        # the real decision, not a re-derived one)
+        for pt in nbr_pts:
+            ax4.plot([X_us_2d[0,0], pt[0]], [X_us_2d[0,1], pt[1]],
+                     color='#9CA3AF', lw=1, linestyle='--', zorder=3)
+
+        ax4.scatter(nbr_pts[:,0], nbr_pts[:,1],
+                    color=['#EF4444' if l==1 else '#3B82F6' for l in nbr_labels],
+                    s=150, edgecolor='black', linewidth=1.5, zorder=4,
+                    label=f'{M["best_k"]} Nearest Neighbours')
+
+        ax4.scatter(X_us_2d[0,0], X_us_2d[0,1], color='black', s=300,
+                    marker='*', label=f'Input: {name_lbl}', zorder=6)
+
+        ax4.set_xlabel('PC1', fontsize=9)
+        ax4.set_ylabel('PC2', fontsize=9)
+        ax4.set_title(f'Live KNN Neighbours — PCA 2D Projection (K={M["best_k"]})',
+                      fontsize=11, fontweight='bold')
+        ax4.legend(fontsize=8)
+        ax4.spines['top'].set_visible(False)
+        ax4.spines['right'].set_visible(False)
+        plt.tight_layout()
+        st.pyplot(fig4, use_container_width=True)
+        plt.close()
+        st.caption(
+            "Full 7-feature space compressed to 2D via PCA for visualization — the "
+            "highlighted neighbours are the model's real K nearest neighbours, not "
+            "re-derived from this 2D picture."
+        )
+    except Exception as _ke2:
+        st.warning(f"Visualization unavailable: {_ke2}")
 
     # Explanation
     st.write(""); st.markdown("---")

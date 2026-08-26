@@ -1,13 +1,24 @@
 import streamlit as st
+import pandas as pd
 import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.sidebar import sidebar
+from utils.models import load_all_models
 
 st.set_page_config(page_title="FAQ — MindCheck", page_icon="❓",
                    layout="wide", initial_sidebar_state="expanded")
 sidebar("faq")
 
+M = load_all_models()
 
+# ── Live metrics used throughout this page — no hardcoded numbers,
+# so this always matches whatever's shown on the predictor/comparison
+# pages, even if the dataset changes. ──────────────────────────────
+_knn = M['knn_m']; _dt = M['dt_m']; _svm = M['svm_m']
+_knn_tn, _knn_fp, _knn_fn, _knn_tp = _knn['cm'].ravel()
+_knn_test_n   = int(_knn['cm'].sum())
+_knn_wrong_n  = int(_knn_fp + _knn_fn)
+_cv = M['cv_scores']
 
 # ── PAGE ──────────────────────────────────────────────────────
 st.title("❓ Frequently Asked Questions")
@@ -27,13 +38,13 @@ with st.expander("What is KNN (K-Nearest Neighbor)?", expanded=False):
             "all features to the range [0, 1]."
         )
         st.write(
-            "In this project, K=5 was selected as optimal by systematically testing K values "
-            "from 1 to 20 and selecting the K with the highest test accuracy."
+            f"In this project, K={M['best_k']} was selected as optimal by systematically testing K "
+            "values from 1 to 20 and selecting the K with the highest test accuracy."
         )
     with c2:
-        st.metric("Best K", "5")
-        st.metric("Accuracy", "95.83%")
-        st.metric("Recall", "97.44%")
+        st.metric("Best K", f"{M['best_k']}")
+        st.metric("Accuracy", f"{_knn['acc']:.2f}%")
+        st.metric("Recall", f"{_knn['rec']:.2f}%")
 
 with st.expander("What is Decision Tree (CART)?", expanded=False):
     c1, c2 = st.columns([2, 1])
@@ -50,7 +61,7 @@ with st.expander("What is Decision Tree (CART)?", expanded=False):
         )
     with c2:
         st.metric("Max Depth", "5")
-        st.metric("Accuracy", "85.50%")
+        st.metric("Accuracy", f"{_dt['acc']:.2f}%")
         st.metric("Root Feature", "Marital Status")
 
 with st.expander("What is SVM (Support Vector Machine)?", expanded=False):
@@ -68,7 +79,7 @@ with st.expander("What is SVM (Support Vector Machine)?", expanded=False):
         )
     with c2:
         st.metric("Kernel", "RBF")
-        st.metric("Scaling", "Standard")
+        st.metric("Accuracy", f"{_svm['acc']:.2f}%")
         st.metric("Target", "Panic Attack")
 
 st.divider()
@@ -81,11 +92,14 @@ with st.expander("What is Accuracy?", expanded=False):
     with c1:
         st.write("**Accuracy** measures the overall proportion of correctly classified instances out of all instances.")
         st.code("Accuracy = (TP + TN) / (TP + TN + FP + FN)", language="text")
-        st.write("KNN achieved **95.83%** accuracy on the 120-record test set — only 5 wrong predictions out of 120.")
+        st.write(
+            f"KNN achieved **{_knn['acc']:.2f}%** accuracy on the {_knn_test_n}-record test set — "
+            f"only {_knn_wrong_n} wrong prediction{'s' if _knn_wrong_n != 1 else ''} out of {_knn_test_n}."
+        )
     with c2:
-        st.metric("KNN", "95.83%")
-        st.metric("Decision Tree", "85.50%")
-        st.metric("SVM", "TBD")
+        st.metric("KNN", f"{_knn['acc']:.2f}%")
+        st.metric("Decision Tree", f"{_dt['acc']:.2f}%")
+        st.metric("SVM", f"{_svm['acc']:.2f}%")
 
 with st.expander("What is Precision?", expanded=False):
     c1, c2 = st.columns([2, 1])
@@ -94,9 +108,9 @@ with st.expander("What is Precision?", expanded=False):
         st.code("Precision = TP / (TP + FP)", language="text")
         st.write("High precision means fewer false alarms — students predicted as depressed who are not actually depressed.")
     with c2:
-        st.metric("KNN", "90.48%")
-        st.metric("Decision Tree", "72.38%")
-        st.metric("SVM", "TBD")
+        st.metric("KNN", f"{_knn['prec']:.2f}%")
+        st.metric("Decision Tree", f"{_dt['prec']:.2f}%")
+        st.metric("SVM", f"{_svm['prec']:.2f}%")
 
 with st.expander("What is Recall (Sensitivity)?", expanded=False):
     c1, c2 = st.columns([2, 1])
@@ -106,13 +120,13 @@ with st.expander("What is Recall (Sensitivity)?", expanded=False):
         st.write(
             "Recall is the **most important metric** for mental health screening. "
             "Missing a depressed student (false negative) is more serious than "
-            "a false alarm (false positive). KNN achieved **97.44% recall** — "
-            "it correctly identified 97.44% of all depressed students."
+            f"a false alarm (false positive). KNN achieved **{_knn['rec']:.2f}% recall** — "
+            f"it correctly identified {_knn['rec']:.2f}% of all depressed students."
         )
     with c2:
-        st.metric("KNN", "97.44%")
-        st.metric("Decision Tree", "89.18%")
-        st.metric("SVM", "TBD")
+        st.metric("KNN", f"{_knn['rec']:.2f}%")
+        st.metric("Decision Tree", f"{_dt['rec']:.2f}%")
+        st.metric("SVM", f"{_svm['rec']:.2f}%")
 
 with st.expander("What is F1 Score?", expanded=False):
     c1, c2 = st.columns([2, 1])
@@ -121,9 +135,9 @@ with st.expander("What is F1 Score?", expanded=False):
         st.code("F1 = 2 × (Precision × Recall) / (Precision + Recall)", language="text")
         st.write("It is useful when you need to balance between false positives and false negatives.")
     with c2:
-        st.metric("KNN", "93.83%")
-        st.metric("Decision Tree", "79.91%")
-        st.metric("SVM", "TBD")
+        st.metric("KNN", f"{_knn['f1']:.2f}%")
+        st.metric("Decision Tree", f"{_dt['f1']:.2f}%")
+        st.metric("SVM", f"{_svm['f1']:.2f}%")
 
 with st.expander("What is a Confusion Matrix?", expanded=False):
     st.write("A **Confusion Matrix** shows the full breakdown of predictions vs actual values.")
@@ -138,9 +152,11 @@ with st.expander("What is a Confusion Matrix?", expanded=False):
         """)
     st.write("")
     st.info(
-        "**KNN Confusion Matrix (Test Set: 120 records):**\n\n"
-        "TN = 77 (correctly predicted No Depression) | FP = 4 (wrongly predicted Depression)\n\n"
-        "FN = 1 (missed 1 depressed student) | TP = 38 (correctly predicted Depression)"
+        f"**KNN Confusion Matrix (Test Set: {_knn_test_n} records):**\n\n"
+        f"TN = {int(_knn_tn)} (correctly predicted No Depression) | "
+        f"FP = {int(_knn_fp)} (wrongly predicted Depression)\n\n"
+        f"FN = {int(_knn_fn)} (missed {int(_knn_fn)} depressed student{'s' if _knn_fn != 1 else ''}) | "
+        f"TP = {int(_knn_tp)} (correctly predicted Depression)"
     )
 
 with st.expander("What is 5-Fold Cross Validation?", expanded=False):
@@ -153,15 +169,14 @@ with st.expander("What is 5-Fold Cross Validation?", expanded=False):
         )
         st.write("KNN 5-Fold CV Results:")
         fold_data = {
-            "Fold": ["Fold 1", "Fold 2", "Fold 3", "Fold 4", "Fold 5"],
-            "Accuracy": ["83.3%", "87.5%", "89.6%", "85.4%", "87.5%"]
+            "Fold": [f"Fold {i+1}" for i in range(len(_cv))],
+            "Accuracy": [f"{s*100:.1f}%" for s in _cv],
         }
-        import pandas as pd
         st.dataframe(pd.DataFrame(fold_data), use_container_width=True, hide_index=True)
     with c2:
-        st.metric("CV Mean", "86.67%")
-        st.metric("CV Std Dev", "2.12%")
-        st.metric("CV Max", "89.58%")
+        st.metric("CV Mean", f"{_cv.mean()*100:.2f}%")
+        st.metric("CV Std Dev", f"{_cv.std()*100:.2f}%")
+        st.metric("CV Max", f"{_cv.max()*100:.2f}%")
 
 st.divider()
 
