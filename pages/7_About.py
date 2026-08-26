@@ -78,6 +78,12 @@ def get_live_metrics():
         'svm': _m(yte_sv, pipe.predict(Xte_sv)),
         'best_k': best_k,
         'n': len(df),
+        'dep_n': int((df['Depression']==1).sum()),
+        'anx_n': int((df['Anxiety']==1).sum()),
+        'pan_n': int((df['Panic_Attack']==1).sum()),
+        'age_min': int(df['Age'].min()),
+        'age_max': int(df['Age'].max()),
+        'missing_age': int(pd.read_csv('dataset/Student_Mental_health.csv')['Age'].isna().sum()),
     }
 
 _LM = get_live_metrics()
@@ -352,11 +358,11 @@ with d1:
 with d2:
     with st.container(border=True):
         st.markdown("**Key Statistics**")
-        st.write("**Depression Rate:** 32.3% (194 students)")
-        st.write("**Anxiety Rate:** 34.8% (209 students)")
-        st.write("**Panic Attack Rate:** 31.7% (190 students)")
-        st.write("**Missing Values:** 8 (Age column only)")
-        st.write("**Age Range:** 18–24 years")
+        st.write(f"**Depression Rate:** {_LM['dep_n']/_LM['n']*100:.1f}% ({_LM['dep_n']} students)")
+        st.write(f"**Anxiety Rate:** {_LM['anx_n']/_LM['n']*100:.1f}% ({_LM['anx_n']} students)")
+        st.write(f"**Panic Attack Rate:** {_LM['pan_n']/_LM['n']*100:.1f}% ({_LM['pan_n']} students)")
+        st.write(f"**Missing Values:** {_LM['missing_age']} (Age column only)")
+        st.write(f"**Age Range:** {_LM['age_min']}–{_LM['age_max']} years")
         st.write("**CGPA Range:** 0–4.00")
 
 st.divider()
