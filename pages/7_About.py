@@ -143,7 +143,7 @@ def _arch_card(label, sub, color, key=None, page=None):
         unsafe_allow_html=True,
     )
     if page:
-        if st.button("Open →", key=key, use_container_width=True):
+        if st.button("Open →", key=key, width='stretch'):
             st.switch_page(page)
 
 
@@ -259,7 +259,7 @@ for col, (label, sub, color) in zip(pcols, pipe_steps):
         )
 
 st.write("")
-if st.button("🔬  See these steps applied to real data →", use_container_width=True, key="pipe_cta"):
+if st.button("🔬  See these steps applied to real data →", width='stretch', key="pipe_cta"):
     st.switch_page("pages/9_Feature_Selection.py")
 
 st.divider()

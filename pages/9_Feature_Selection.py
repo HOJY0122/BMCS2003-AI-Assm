@@ -143,7 +143,7 @@ feat_overview = pd.DataFrame({
     'Significant': ['✅' if D['pvals'][f] < 0.05 else '❌'
                     for f in D['feat_labels']],
 })
-st.dataframe(feat_overview.set_index('Feature'), use_container_width=True)
+st.dataframe(feat_overview.set_index('Feature'), width='stretch')
 st.caption("p-value < 0.05 = statistically significant difference between Depression and No Depression groups")
 
 st.divider()
@@ -178,7 +178,7 @@ ax.spines['top'].set_visible(False)
 ax.spines['right'].set_visible(False)
 ax.grid(axis='x', alpha=0.3)
 plt.tight_layout()
-st.pyplot(fig_corr, use_container_width=True)
+st.pyplot(fig_corr, width='stretch')
 plt.close()
 
 # Key findings
@@ -245,7 +245,7 @@ def color_pval(val):
         return 'color: #1A1A1A'
 
 styled_pval = pval_df.style.map(color_pval, subset=['p-value'])
-st.dataframe(styled_pval, use_container_width=True)
+st.dataframe(styled_pval, width='stretch')
 sig_count = sum(1 for v in D['pvals'].values() if v < 0.05)
 st.info(f"**{sig_count} out of {len(D['pvals'])} features** are statistically "
         f"significant (p < 0.05). These features show a meaningful difference "
@@ -279,7 +279,7 @@ with tab1:
     a1.set_ylabel('|Correlation|'); a1.set_title('Pearson Correlation', fontweight='bold')
     a1.tick_params(axis='x', rotation=30)
     a1.legend(); a1.spines['top'].set_visible(False); a1.spines['right'].set_visible(False)
-    plt.tight_layout(); st.pyplot(fig1, use_container_width=True); plt.close()
+    plt.tight_layout(); st.pyplot(fig1, width='stretch'); plt.close()
 
 with tab2:
     st.write("**Mutual Information** measures non-linear dependency between feature and target.")
@@ -292,7 +292,7 @@ with tab2:
     a2.set_title('Mutual Information with Depression', fontweight='bold')
     a2.tick_params(axis='x', rotation=30)
     a2.spines['top'].set_visible(False); a2.spines['right'].set_visible(False)
-    plt.tight_layout(); st.pyplot(fig2, use_container_width=True); plt.close()
+    plt.tight_layout(); st.pyplot(fig2, width='stretch'); plt.close()
 
 with tab3:
     st.write("**Chi-Square Test** measures statistical independence between feature and target.")
@@ -305,7 +305,7 @@ with tab3:
     a3.set_title('Chi-Square Score with Depression', fontweight='bold')
     a3.tick_params(axis='x', rotation=30)
     a3.spines['top'].set_visible(False); a3.spines['right'].set_visible(False)
-    plt.tight_layout(); st.pyplot(fig3, use_container_width=True); plt.close()
+    plt.tight_layout(); st.pyplot(fig3, width='stretch'); plt.close()
 
 st.divider()
 
@@ -330,7 +330,7 @@ sns.heatmap(full_corr, annot=True, fmt='.2f', cmap='RdBu_r',
 ax_heat.set_title('Feature Correlation Heatmap (Lower Triangle)',
                   fontsize=13, fontweight='bold', pad=16)
 plt.tight_layout()
-st.pyplot(fig_heat, use_container_width=True)
+st.pyplot(fig_heat, width='stretch')
 plt.close()
 
 st.divider()
@@ -391,7 +391,7 @@ ax_exp.grid(True, alpha=0.3)
 ax_exp.spines['top'].set_visible(False)
 ax_exp.spines['right'].set_visible(False)
 plt.tight_layout()
-st.pyplot(fig_exp, use_container_width=True)
+st.pyplot(fig_exp, width='stretch')
 plt.close()
 
 # Results table
@@ -402,7 +402,7 @@ exp_df = pd.DataFrame({
     'DT Accuracy':  [f"{v:.2f}%" for v in D['dt_accs']],
     'SVM Accuracy': [f"{v:.2f}%" for v in D['svm_accs']],
 }).set_index('Features Used')
-st.dataframe(exp_df, use_container_width=True)
+st.dataframe(exp_df, width='stretch')
 
 st.divider()
 
@@ -592,7 +592,7 @@ ax_sum.set_ylim(0, max(corr_vals) * 1.2)
 ax_sum.spines['top'].set_visible(False)
 ax_sum.spines['right'].set_visible(False)
 plt.tight_layout()
-st.pyplot(fig_sum, use_container_width=True)
+st.pyplot(fig_sum, width='stretch')
 plt.close()
 
 st.divider()

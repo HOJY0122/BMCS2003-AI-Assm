@@ -74,7 +74,7 @@ feature_table = pd.DataFrame([
 feature_table.index = range(1, len(feature_table) + 1)
 
 with st.expander("View All Features", expanded=True):
-    st.dataframe(feature_table, use_container_width=True)
+    st.dataframe(feature_table, width='stretch')
 
 st.divider()
 
@@ -147,21 +147,21 @@ st.divider()
 
 # ── Dataset preview ───────────────────────────────────────────
 st.subheader("Cleaned Dataset Preview")
-st.dataframe(df.head(20), use_container_width=True)
+st.dataframe(df.head(20), width='stretch')
 
 st.divider()
 
 # ── Statistical summary ──────────────────────────────────────
 st.subheader("Statistical Summary")
-st.dataframe(df.describe().style.format("{:.2f}"), use_container_width=True)
+st.dataframe(df.describe().style.format("{:.2f}"), width='stretch')
 
 st.divider()
 
 # ── Navigate ──────────────────────────────────────────────────
 n1, n2, _ = st.columns([1, 1, 4])
 with n1:
-    if st.button("Explore EDA Visualizations", use_container_width=True):
+    if st.button("Explore EDA Visualizations", width='stretch'):
         st.switch_page("pages/1_EDA.py")
 with n2:
-    if st.button("Back to Home", use_container_width=True):
+    if st.button("Back to Home", width='stretch'):
         st.switch_page("Home.py")

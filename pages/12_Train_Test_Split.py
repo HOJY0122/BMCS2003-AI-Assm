@@ -97,7 +97,7 @@ ax_ov.set_title(f'Train / Test Split — {total} Total Records',
 ax_ov.legend(fontsize=10, loc='lower right')
 ax_ov.set_xlim(0, total + 30)
 plt.tight_layout()
-st.pyplot(fig_ov, use_container_width=True)
+st.pyplot(fig_ov, width='stretch')
 plt.close()
 
 st.divider()
@@ -147,7 +147,7 @@ def draw_split_detail(tab, name, info, ytr, yte):
             )
             ax1.set_title(f'{name}\nTrain / Test Split', fontweight='bold', fontsize=11)
             plt.tight_layout()
-            st.pyplot(fig1, use_container_width=True); plt.close()
+            st.pyplot(fig1, width='stretch'); plt.close()
 
         # Chart 2 — Class distribution in train set
         with col2:
@@ -165,7 +165,7 @@ def draw_split_detail(tab, name, info, ytr, yte):
                           fontweight='bold', fontsize=11)
             ax2.set_ylim(0, max(nodep_tr, dep_tr)*1.2)
             plt.tight_layout()
-            st.pyplot(fig2, use_container_width=True); plt.close()
+            st.pyplot(fig2, width='stretch'); plt.close()
 
         # Chart 3 — Class distribution in test set
         with col3:
@@ -183,7 +183,7 @@ def draw_split_detail(tab, name, info, ytr, yte):
                           fontweight='bold', fontsize=11)
             ax3.set_ylim(0, max(nodep_te, dep_te)*1.2)
             plt.tight_layout()
-            st.pyplot(fig3, use_container_width=True); plt.close()
+            st.pyplot(fig3, width='stretch'); plt.close()
 
         # Why stratify?
         with st.container(border=True):
@@ -212,7 +212,7 @@ def draw_split_detail(tab, name, info, ytr, yte):
             'Feature': feat_labels[name],
             'Used in Training': ['✅'] * len(feat_labels[name]),
         })
-        st.dataframe(feat_df.set_index('Feature'), use_container_width=True)
+        st.dataframe(feat_df.set_index('Feature'), width='stretch')
         st.caption(f"Target variable: **Depression** (0 = No, 1 = Yes) · "
                    f"{len(feat_labels[name])} features used")
 
@@ -299,7 +299,7 @@ for ax, (name, info) in zip(axes, splits.items()):
 plt.suptitle('Class Distribution Preserved in Both Train & Test Sets',
              fontsize=12, fontweight='bold', y=1.02)
 plt.tight_layout()
-st.pyplot(fig_s, use_container_width=True)
+st.pyplot(fig_s, width='stretch')
 plt.close()
 
 st.info(

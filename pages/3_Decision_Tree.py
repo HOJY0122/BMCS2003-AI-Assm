@@ -139,7 +139,7 @@ with col3:
     anxiety = st.selectbox("Do you have Anxiety?",["No","Yes"],index=_axi,key="dt_anxiety")
     _pai=["No","Yes"].index(_pre['panic']) if _pre and _pre.get('panic') in ["No","Yes"] else 0
     panic   = st.selectbox("Do you have Panic Attack?",["No","Yes"],index=_pai,key="dt_panic")
-    predict_btn = st.button("🔍  Predict Depression Risk",use_container_width=True,type="primary",key="dt_predict")
+    predict_btn = st.button("🔍  Predict Depression Risk",width='stretch',type="primary",key="dt_predict")
 
 if predict_btn:
     _errors=[]
@@ -188,7 +188,7 @@ if st.session_state.dt_result:
         ax2.set_xlim(0,100); ax2.axis('off')
         for xp,val,lbl in [(prob[0]*50,prob[0],"No Risk"),(prob[0]*100+prob[1]*50,prob[1],"At Risk")]:
             if val>0.12: ax2.text(xp,0,f"{lbl}\n{val*100:.0f}%",ha='center',va='center',fontsize=8,color='white',fontweight='bold')
-        plt.tight_layout(pad=0); st.pyplot(fig,use_container_width=True); plt.close()
+        plt.tight_layout(pad=0); st.pyplot(fig,width='stretch'); plt.close()
         st.write(""); pa_c,pb_c=st.columns(2)
         pa_c.metric("No Depression",f"{prob[0]*100:.1f}%")
         pb_c.metric("Depression",   f"{prob[1]*100:.1f}%")
@@ -245,14 +245,14 @@ if st.session_state.dt_result:
         ax_ex2.axvline(_mean_fi,color='red',ls='--',lw=1.2,alpha=0.7,label=f'Mean={_mean_fi:.3f}')
         ax_ex2.set_xlabel('Gini Importance'); ax_ex2.set_title('Feature Importance (Live)',fontweight='bold')
         ax_ex2.legend(fontsize=8); ax_ex2.spines['top'].set_visible(False); ax_ex2.spines['right'].set_visible(False)
-        plt.tight_layout(); st.pyplot(fig_ex2,use_container_width=True); plt.close()
+        plt.tight_layout(); st.pyplot(fig_ex2,width='stretch'); plt.close()
 
     if _path_node_ids:
         st.write("")
         st.markdown("**🌳 Full Decision Path Visualized**")
         st.caption("Red route = exactly how this student's data traveled through the tree")
         fig_path = _draw_path_tree(M['dt'], M['dt_fi_labels'], _path_node_ids)
-        st.pyplot(fig_path, use_container_width=True)
+        st.pyplot(fig_path, width='stretch')
         plt.close(fig_path)
 
     # PDF
@@ -272,7 +272,7 @@ if st.session_state.dt_result:
             metrics=M['dt_m'],business_alerts=_alerts_dt,explanation_notes=_notes_dt)
         st.download_button("📥  Download PDF Report",data=_pdf,
             file_name=f"mindcheck_dt_{R['name'].replace(' ','_')}.pdf",
-            mime="application/pdf",use_container_width=True,key="dt_pdf")
+            mime="application/pdf",width='stretch',key="dt_pdf")
     except Exception as _pe: st.caption(f"PDF unavailable: {_pe}")
 
     st.write("")
@@ -297,7 +297,7 @@ with fi_c1:
     ax_fi.set_xlabel('Feature Importance (Gini Reduction)')
     ax_fi.set_title('Decision Tree Feature Importance (Live)',fontweight='bold')
     ax_fi.legend(fontsize=9); ax_fi.spines['top'].set_visible(False); ax_fi.spines['right'].set_visible(False)
-    ax_fi.grid(axis='x',alpha=0.3); plt.tight_layout(); st.pyplot(fig_fi,use_container_width=True); plt.close()
+    ax_fi.grid(axis='x',alpha=0.3); plt.tight_layout(); st.pyplot(fig_fi,width='stretch'); plt.close()
 with fi_c2:
     with st.container(border=True):
         st.markdown("**Feature Ranking**")
@@ -318,7 +318,7 @@ def get_tree_fig(_model):
               class_names=['No Depression','Depression'],filled=True,rounded=True,fontsize=7,ax=ax)
     ax.set_title("Decision Tree — Live Trained (Depth 5)",fontsize=13,fontweight='bold',pad=16)
     plt.tight_layout(); return fig
-st.pyplot(get_tree_fig(M['dt']),use_container_width=True); plt.close('all')
+st.pyplot(get_tree_fig(M['dt']),width='stretch'); plt.close('all')
 
 st.divider()
 
@@ -330,7 +330,7 @@ with st.expander("📚  Learn More — Confusion Matrix & How Decision Tree Work
                 linewidths=0.5,annot_kws={'size':12,'weight':'bold'})
     ax_cm.set_xlabel('Predicted'); ax_cm.set_ylabel('Actual')
     ax_cm.set_title('Decision Tree Confusion Matrix',fontweight='bold')
-    plt.tight_layout(); st.pyplot(fig_cm,use_container_width=True); plt.close()
+    plt.tight_layout(); st.pyplot(fig_cm,width='stretch'); plt.close()
     tn,fp,fn,tp=M['dt_m']['cm'].ravel()
     a,b,c,d=st.columns(4)
     a.metric("TN",str(tn)); b.metric("FP",str(fp)); c.metric("FN",str(fn)); d.metric("TP",str(tp))
@@ -345,9 +345,9 @@ _dt_sample=pd.DataFrame({'Name':['Ahmad','Siti','Wei Ming'],'Gender':['Male','Fe
     'Year_of_Study':['Year 2','Year 3','Year 1'],'CGPA':['3.00 - 3.49','2.50 - 2.99','3.50 - 4.00'],
     'Marital_Status':['No','No','No'],'Anxiety':['Yes','No','No'],'Panic_Attack':['No','Yes','No']})
 with st.expander("📋  View / Download CSV Template"):
-    st.dataframe(_dt_sample,use_container_width=True,hide_index=True)
+    st.dataframe(_dt_sample,width='stretch',hide_index=True)
     st.download_button("⬇️  Download DT Template",data=_dt_sample.to_csv(index=False).encode(),
-        file_name="dt_batch_template.csv",mime="text/csv",use_container_width=True,key="dt_tmpl_dl")
+        file_name="dt_batch_template.csv",mime="text/csv",width='stretch',key="dt_tmpl_dl")
 
 _dt_file=st.file_uploader(f"Upload CSV — drag & drop or click to browse (max {MAX_BATCH_ROWS} records, {MAX_BATCH_MB} MB)",type=["csv"],key="dt_batch_file")
 if _dt_file:
@@ -398,17 +398,17 @@ if _dt_file:
                 return ''
             try:    _dstyled=_ddisp.style.map(_dst,subset=['Result','Risk'])
             except: _dstyled=_ddisp.style.applymap(_dst,subset=['Result','Risk'])
-            st.dataframe(_dstyled,use_container_width=True,hide_index=True)
+            st.dataframe(_dstyled,width='stretch',hide_index=True)
             _ddl1,_ddl2=st.columns(2)
             with _ddl1:
                 st.download_button("⬇️  Download All Results",data=_ddisp.to_csv(index=False).encode(),
-                    file_name="dt_batch_results.csv",mime="text/csv",use_container_width=True,key="dt_dl_all")
+                    file_name="dt_batch_results.csv",mime="text/csv",width='stretch',key="dt_dl_all")
             with _ddl2:
                 _dhigh=_dres[_dres['_pred']==1][list(_ddisp.columns)] if '_pred' in _dres else pd.DataFrame()
                 if len(_dhigh):
                     st.download_button(f"⬇️  At-Risk Only ({len(_dhigh)})",
                         data=_dhigh.to_csv(index=False).encode(),
-                        file_name="dt_at_risk.csv",mime="text/csv",use_container_width=True,key="dt_dl_risk")
+                        file_name="dt_at_risk.csv",mime="text/csv",width='stretch',key="dt_dl_risk")
         except Exception as _derr: st.error(f"Error: {str(_derr)}")
 
 st.divider()

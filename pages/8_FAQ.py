@@ -172,7 +172,7 @@ with st.expander("What is 5-Fold Cross Validation?", expanded=False):
             "Fold": [f"Fold {i+1}" for i in range(len(_cv))],
             "Accuracy": [f"{s*100:.1f}%" for s in _cv],
         }
-        st.dataframe(pd.DataFrame(fold_data), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(fold_data), width='stretch', hide_index=True)
     with c2:
         st.metric("CV Mean", f"{_cv.mean()*100:.2f}%")
         st.metric("CV Std Dev", f"{_cv.std()*100:.2f}%")

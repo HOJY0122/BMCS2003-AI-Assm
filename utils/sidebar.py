@@ -292,7 +292,7 @@ def _nav_btn(icon, label, key, active, page):
         """, unsafe_allow_html=True)
     else:
         if st.button(f"{icon}  {label}", key=f"sb_{key}",
-                     use_container_width=True):
+                     width='stretch'):
             try:
                 st.switch_page(page)
             except Exception:

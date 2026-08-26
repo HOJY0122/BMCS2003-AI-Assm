@@ -73,7 +73,7 @@ with col3:
     panic   = st.selectbox("Do you have Panic Attack?", ["No","Yes"], index=_pai, key="knn_panic")
     st.write(""); st.write(""); st.write("")
     predict_btn = st.button("🔍  Predict Depression Risk",
-                            use_container_width=True, type="primary", key="knn_predict")
+                            width='stretch', type="primary", key="knn_predict")
 
 if predict_btn:
     _errors = []
@@ -140,7 +140,7 @@ if st.session_state['knn_result']:
         for xp, val, lbl in [(prob[0]*50,prob[0],"No Risk"),(prob[0]*100+prob[1]*50,prob[1],"At Risk")]:
             if val > 0.12:
                 ax2.text(xp,0,f"{lbl}\n{val*100:.0f}%",ha='center',va='center',fontsize=8,color='white',fontweight='bold')
-        plt.tight_layout(pad=0); st.pyplot(fig,use_container_width=True); plt.close()
+        plt.tight_layout(pad=0); st.pyplot(fig,width='stretch'); plt.close()
         st.write("")
         pa_c,pb_c = st.columns(2)
         pa_c.metric("No Depression", f"{prob[0]*100:.1f}%")
@@ -219,7 +219,7 @@ if st.session_state['knn_result']:
         ax4.spines['top'].set_visible(False)
         ax4.spines['right'].set_visible(False)
         plt.tight_layout()
-        st.pyplot(fig4, use_container_width=True)
+        st.pyplot(fig4, width='stretch')
         plt.close()
         st.caption(
             "Full 7-feature space compressed to 2D via PCA for visualization — the "
@@ -248,7 +248,7 @@ if st.session_state['knn_result']:
         ax_ex.set_xlabel('Contribution (→ Depression  ← No Depression)')
         ax_ex.set_title('Feature Contribution',fontweight='bold')
         ax_ex.spines['top'].set_visible(False); ax_ex.spines['right'].set_visible(False)
-        plt.tight_layout(); st.pyplot(fig_ex,use_container_width=True); plt.close()
+        plt.tight_layout(); st.pyplot(fig_ex,width='stretch'); plt.close()
     with ex2:
         st.markdown("**K Nearest Neighbours**")
         try:
@@ -309,7 +309,7 @@ if st.session_state['knn_result']:
         )
         st.download_button("📥  Download PDF Report",data=_pdf,
                            file_name=f"mindcheck_knn_{R['name'].replace(' ','_')}.pdf",
-                           mime="application/pdf",use_container_width=True,key="knn_pdf")
+                           mime="application/pdf",width='stretch',key="knn_pdf")
     except Exception as _pe: st.caption(f"PDF unavailable: {_pe}")
 
     st.write("")
@@ -333,7 +333,7 @@ with fi_c1:
     ax_fi.set_xlabel('Absolute Correlation with Depression')
     ax_fi.set_title('Feature Importance — Pearson Correlation (Live)',fontweight='bold')
     ax_fi.legend(fontsize=9); ax_fi.spines['top'].set_visible(False); ax_fi.spines['right'].set_visible(False)
-    ax_fi.grid(axis='x',alpha=0.3); plt.tight_layout(); st.pyplot(fig_fi,use_container_width=True); plt.close()
+    ax_fi.grid(axis='x',alpha=0.3); plt.tight_layout(); st.pyplot(fig_fi,width='stretch'); plt.close()
 with fi_c2:
     with st.container(border=True):
         st.markdown("**Feature Ranking**")
@@ -355,7 +355,7 @@ with st.expander("📚  Learn More — K-Value Optimization, Cross Validation & 
     ax_k.set_title('KNN: Test Accuracy for Different K Values',fontweight='bold')
     ax_k.set_xticks(k_range); ax_k.legend(); ax_k.grid(True,alpha=0.3)
     ax_k.spines['top'].set_visible(False); ax_k.spines['right'].set_visible(False)
-    plt.tight_layout(); st.pyplot(fig_k,use_container_width=True); plt.close()
+    plt.tight_layout(); st.pyplot(fig_k,width='stretch'); plt.close()
 
     st.markdown("### 5-Fold Cross Validation")
     cv=M['cv_scores']
@@ -373,7 +373,7 @@ with st.expander("📚  Learn More — K-Value Optimization, Cross Validation & 
     ax_cv.spines['top'].set_visible(False); ax_cv.spines['right'].set_visible(False)
     for bar,val in zip(bars_cv,cv*100):
         ax_cv.text(bar.get_x()+bar.get_width()/2,bar.get_height()+0.8,f'{val:.1f}%',ha='center',fontsize=9,fontweight='bold')
-    plt.tight_layout(); st.pyplot(fig_cv,use_container_width=True); plt.close()
+    plt.tight_layout(); st.pyplot(fig_cv,width='stretch'); plt.close()
 
     st.markdown("### Confusion Matrix")
     fig_cm,ax_cm=plt.subplots(figsize=(5,4))
@@ -383,7 +383,7 @@ with st.expander("📚  Learn More — K-Value Optimization, Cross Validation & 
                 linewidths=0.5,annot_kws={'size':12,'weight':'bold'})
     ax_cm.set_xlabel('Predicted'); ax_cm.set_ylabel('Actual')
     ax_cm.set_title('KNN Confusion Matrix',fontweight='bold')
-    plt.tight_layout(); st.pyplot(fig_cm,use_container_width=True); plt.close()
+    plt.tight_layout(); st.pyplot(fig_cm,width='stretch'); plt.close()
     tn,fp,fn,tp=M['knn_m']['cm'].ravel()
     a,b,c,d=st.columns(4)
     a.metric("TN",str(tn)); b.metric("FP",str(fp))
@@ -400,11 +400,11 @@ _knn_sample=pd.DataFrame({'Name':['Ahmad','Siti','Wei Ming'],'Gender':['Male','F
     'Year_of_Study':['Year 2','Year 3','Year 1'],'CGPA':['3.00 - 3.49','2.50 - 2.99','3.50 - 4.00'],
     'Anxiety':['Yes','No','No'],'Panic_Attack':['No','Yes','No']})
 with st.expander("📋  View / Download CSV Template"):
-    st.dataframe(_knn_sample,use_container_width=True,hide_index=True)
+    st.dataframe(_knn_sample,width='stretch',hide_index=True)
     st.download_button("⬇️  Download KNN Template",
         data=_knn_sample.to_csv(index=False).encode(),
         file_name="knn_batch_template.csv",mime="text/csv",
-        use_container_width=True,key="knn_tmpl_dl")
+        width='stretch',key="knn_tmpl_dl")
 
 _knn_file=st.file_uploader(f"Upload CSV — drag & drop or click to browse (max {MAX_BATCH_ROWS} records, {MAX_BATCH_MB} MB)",
                             type=["csv"],key="knn_batch_file")
@@ -458,7 +458,7 @@ if _knn_file:
                     colors=['#EF4444','#10B981'],autopct='%1.1f%%',startangle=90,
                     wedgeprops={'edgecolor':'white','linewidth':2},textprops={'fontsize':10,'fontweight':'bold'})
                 ax_b.set_title('KNN Batch Results',fontweight='bold')
-                plt.tight_layout(); st.pyplot(fig_b,use_container_width=True); plt.close()
+                plt.tight_layout(); st.pyplot(fig_b,width='stretch'); plt.close()
             with _bc2:
                 if '_prob' in _kres:
                     fig_p,ax_p=plt.subplots(figsize=(4,3))
@@ -467,14 +467,14 @@ if _knn_file:
                     ax_p.set_xlabel('Depression Probability (%)'); ax_p.set_ylabel('Count')
                     ax_p.set_title('Confidence Distribution',fontweight='bold')
                     ax_p.legend(fontsize=9); ax_p.spines['top'].set_visible(False); ax_p.spines['right'].set_visible(False)
-                    plt.tight_layout(); st.pyplot(fig_p,use_container_width=True); plt.close()
+                    plt.tight_layout(); st.pyplot(fig_p,width='stretch'); plt.close()
             _kdisp=_kres[['Name','Gender','Age','Course','Year','CGPA','Anxiety','Panic Attack','Result','Confidence','Risk']]
             def _kst(val):
                 if '⚠️' in str(val) or val=='HIGH': return 'background-color:#FEE2E2;color:#991B1B;font-weight:bold'
                 if '✅' in str(val) or val=='LOW':  return 'background-color:#DCFCE7;color:#166534;font-weight:bold'
                 return ''
             _kstyled=_kdisp.style.map(_kst,subset=['Result','Risk'])
-            st.dataframe(_kstyled,use_container_width=True,hide_index=True)
+            st.dataframe(_kstyled,width='stretch',hide_index=True)
             st.write(""); st.markdown("**Individual Student Cards**")
             for _,_kr in _kres.iterrows():
                 if '_pred' not in _kr: continue
@@ -484,13 +484,13 @@ if _knn_file:
             _kdl1,_kdl2=st.columns(2)
             with _kdl1:
                 st.download_button("⬇️  Download All Results",data=_kdisp.to_csv(index=False).encode(),
-                    file_name="knn_batch_results.csv",mime="text/csv",use_container_width=True,key="knn_dl_all")
+                    file_name="knn_batch_results.csv",mime="text/csv",width='stretch',key="knn_dl_all")
             with _kdl2:
                 _khigh=_kres[_kres['_pred']==1][list(_kdisp.columns)] if '_pred' in _kres else pd.DataFrame()
                 if len(_khigh):
                     st.download_button(f"⬇️  At-Risk Only ({len(_khigh)})",
                         data=_khigh.to_csv(index=False).encode(),
-                        file_name="knn_at_risk.csv",mime="text/csv",use_container_width=True,key="knn_dl_risk")
+                        file_name="knn_at_risk.csv",mime="text/csv",width='stretch',key="knn_dl_risk")
         except Exception as _kerr:
             st.error(f"Error: {str(_kerr)}")
             st.caption("Please check your CSV matches the template format.")

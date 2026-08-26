@@ -73,7 +73,7 @@ with col3:
     _pai=["No","Yes"].index(_pre['panic']) if _pre and _pre.get('panic') in ["No","Yes"] else 0
     panic   = st.selectbox("Do you have Panic Attack?",    ["No","Yes"],index=_pai,key="svm_panic")
     treat   = st.selectbox("Sought Specialist Treatment?", ["No","Yes"],key="svm_treat")
-    predict_btn=st.button("🔍  Predict Depression Risk",use_container_width=True,type="primary",key="svm_predict")
+    predict_btn=st.button("🔍  Predict Depression Risk",width='stretch',type="primary",key="svm_predict")
 
 if predict_btn:
     _errors=[]
@@ -128,7 +128,7 @@ if st.session_state['svm_result']:
         ax2.set_xlim(0,100); ax2.axis('off')
         for xp,val,lbl in [(prob[0]*50,prob[0],"No Risk"),(prob[0]*100+prob[1]*50,prob[1],"At Risk")]:
             if val>0.12: ax2.text(xp,0,f"{lbl}\n{val*100:.0f}%",ha='center',va='center',fontsize=8,color='white',fontweight='bold')
-        plt.tight_layout(pad=0); st.pyplot(fig,use_container_width=True); plt.close()
+        plt.tight_layout(pad=0); st.pyplot(fig,width='stretch'); plt.close()
         st.write(""); pa_c,pb_c=st.columns(2)
         pa_c.metric("No Depression",f"{prob[0]*100:.1f}%")
         pb_c.metric("Depression",   f"{prob[1]*100:.1f}%")
@@ -172,7 +172,7 @@ if st.session_state['svm_result']:
         ax3.set_ylabel('PC2 — Academic & Demographic',fontsize=9)
         ax3.set_title('Live SVM Decision Boundary (PCA 2D)',fontsize=11,fontweight='bold')
         ax3.legend(fontsize=9); ax3.spines['top'].set_visible(False); ax3.spines['right'].set_visible(False)
-        plt.tight_layout(); st.pyplot(fig3,use_container_width=True); plt.close()
+        plt.tight_layout(); st.pyplot(fig3,width='stretch'); plt.close()
     except Exception as _e: st.warning(f"Visualization unavailable: {_e}")
 
     # Explanation
@@ -190,7 +190,7 @@ if st.session_state['svm_result']:
         ax_sv.set_xlabel('Mean Accuracy Decrease')
         ax_sv.set_title('SVM Feature Importance — Permutation (Live)',fontweight='bold')
         ax_sv.legend(fontsize=8); ax_sv.spines['top'].set_visible(False); ax_sv.spines['right'].set_visible(False)
-        plt.tight_layout(); st.pyplot(fig_sv,use_container_width=True); plt.close()
+        plt.tight_layout(); st.pyplot(fig_sv,width='stretch'); plt.close()
     with ex2:
         st.markdown("**Risk Factor Analysis**")
         _risk=[]; _prot=[]
@@ -231,7 +231,7 @@ if st.session_state['svm_result']:
             metrics=M['svm_m'],business_alerts=_alerts_sv,explanation_notes=_notes_sv)
         st.download_button("📥  Download PDF Report",data=_pdf,
             file_name=f"mindcheck_svm_{R['name'].replace(' ','_')}.pdf",
-            mime="application/pdf",use_container_width=True,key="svm_pdf")
+            mime="application/pdf",width='stretch',key="svm_pdf")
     except Exception as _pe: st.caption(f"PDF unavailable: {_pe}")
 
     st.write("")
@@ -255,7 +255,7 @@ with fi_c1:
     ax_fi.set_xlabel('Mean Accuracy Decrease (Permutation)')
     ax_fi.set_title('SVM Feature Importance — Permutation Method (Live)',fontweight='bold')
     ax_fi.legend(fontsize=9); ax_fi.spines['top'].set_visible(False); ax_fi.spines['right'].set_visible(False)
-    ax_fi.grid(axis='x',alpha=0.3); plt.tight_layout(); st.pyplot(fig_fi,use_container_width=True); plt.close()
+    ax_fi.grid(axis='x',alpha=0.3); plt.tight_layout(); st.pyplot(fig_fi,width='stretch'); plt.close()
 with fi_c2:
     with st.container(border=True):
         st.markdown("**Feature Ranking**")
@@ -273,7 +273,7 @@ with st.expander("📚  Learn More — Confusion Matrix & How SVM Works"):
                 linewidths=0.5,annot_kws={'size':12,'weight':'bold'})
     ax_cm.set_xlabel('Predicted'); ax_cm.set_ylabel('Actual')
     ax_cm.set_title('SVM Confusion Matrix',fontweight='bold')
-    plt.tight_layout(); st.pyplot(fig_cm,use_container_width=True); plt.close()
+    plt.tight_layout(); st.pyplot(fig_cm,width='stretch'); plt.close()
     tn,fp,fn,tp=M['svm_m']['cm'].ravel()
     a,b,c,d=st.columns(4)
     a.metric("TN",str(tn)); b.metric("FP",str(fp)); c.metric("FN",str(fn)); d.metric("TP",str(tp))
@@ -293,9 +293,9 @@ _svm_sample=pd.DataFrame({'Name':['Ahmad','Siti','Wei Ming'],'Gender':['Male','F
     'Marital_Status':['No','No','No'],'Anxiety':['Yes','No','No'],
     'Panic_Attack':['No','Yes','No'],'Seek_Treatment':['No','No','No']})
 with st.expander("📋  View / Download CSV Template"):
-    st.dataframe(_svm_sample,use_container_width=True,hide_index=True)
+    st.dataframe(_svm_sample,width='stretch',hide_index=True)
     st.download_button("⬇️  Download SVM Template",data=_svm_sample.to_csv(index=False).encode(),
-        file_name="svm_batch_template.csv",mime="text/csv",use_container_width=True,key="svm_tmpl_dl")
+        file_name="svm_batch_template.csv",mime="text/csv",width='stretch',key="svm_tmpl_dl")
 
 _svm_file=st.file_uploader(f"Upload CSV — drag & drop or click to browse (max {MAX_BATCH_ROWS} records, {MAX_BATCH_MB} MB)",type=["csv"],key="svm_batch_file")
 if _svm_file:
@@ -353,17 +353,17 @@ if _svm_file:
                 return ''
             try:    _sstyled=_sdisp.style.map(_sst,subset=['Result','Risk'])
             except: _sstyled=_sdisp.style.applymap(_sst,subset=['Result','Risk'])
-            st.dataframe(_sstyled,use_container_width=True,hide_index=True)
+            st.dataframe(_sstyled,width='stretch',hide_index=True)
             _sdl1,_sdl2=st.columns(2)
             with _sdl1:
                 st.download_button("⬇️  Download All Results",data=_sdisp.to_csv(index=False).encode(),
-                    file_name="svm_batch_results.csv",mime="text/csv",use_container_width=True,key="svm_dl_all")
+                    file_name="svm_batch_results.csv",mime="text/csv",width='stretch',key="svm_dl_all")
             with _sdl2:
                 _shigh=_sres[_sres['_pred']==1][list(_sdisp.columns)] if '_pred' in _sres else pd.DataFrame()
                 if len(_shigh):
                     st.download_button(f"⬇️  At-Risk Only ({len(_shigh)})",
                         data=_shigh.to_csv(index=False).encode(),
-                        file_name="svm_at_risk.csv",mime="text/csv",use_container_width=True,key="svm_dl_risk")
+                        file_name="svm_at_risk.csv",mime="text/csv",width='stretch',key="svm_dl_risk")
         except Exception as _serr: st.error(f"Error: {str(_serr)}")
 
 st.divider()

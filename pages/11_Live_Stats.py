@@ -90,7 +90,7 @@ with st.container(border=True):
         s_marital = st.selectbox("Marital Status",    ["No","Yes"], key="ls_marital")
         s_treat   = st.selectbox("Sought Treatment?", ["No","Yes"], key="ls_treat")
     compare_btn = st.button("📊  Compare to Dataset",
-                            use_container_width=True, type="primary", key="ls_compare")
+                            width='stretch', type="primary", key="ls_compare")
 
 if compare_btn:
     s_name_lbl = s_name.strip() or "Student"
@@ -187,7 +187,7 @@ if compare_btn:
     axes[2].spines['right'].set_visible(False)
 
     plt.tight_layout()
-    st.pyplot(fig, use_container_width=True)
+    st.pyplot(fig, width='stretch')
     plt.close()
 
     st.write("")
@@ -225,7 +225,7 @@ if compare_btn:
             display_similar['Anxiety']    = display_similar['Anxiety'].map({1:'Yes',0:'No'})
             display_similar['Panic']      = display_similar['Panic'].map({1:'Yes',0:'No'})
             st.dataframe(display_similar.reset_index(drop=True),
-                         use_container_width=True, hide_index=True)
+                         width='stretch', hide_index=True)
     else:
         st.info("No similar students found with matching criteria. Try adjusting the filters.")
 
@@ -285,7 +285,7 @@ with ch1:
             textprops={'fontsize':10,'fontweight':'bold'})
     ax1.set_title('Depression Distribution\n(Filtered)', fontweight='bold')
     plt.tight_layout()
-    st.pyplot(fig1, use_container_width=True); plt.close()
+    st.pyplot(fig1, width='stretch'); plt.close()
 
 with ch2:
     fig2, ax2 = plt.subplots(figsize=(4,3.5))
@@ -306,7 +306,7 @@ with ch2:
     ax2.set_title('Mental Health Score\nDistribution', fontweight='bold')
     ax2.spines['top'].set_visible(False); ax2.spines['right'].set_visible(False)
     plt.tight_layout()
-    st.pyplot(fig2, use_container_width=True); plt.close()
+    st.pyplot(fig2, width='stretch'); plt.close()
 
 with ch3:
     fig3, ax3 = plt.subplots(figsize=(4,3.5))
@@ -322,7 +322,7 @@ with ch3:
     ax3.legend(fontsize=8)
     ax3.spines['top'].set_visible(False); ax3.spines['right'].set_visible(False)
     plt.tight_layout()
-    st.pyplot(fig3, use_container_width=True); plt.close()
+    st.pyplot(fig3, width='stretch'); plt.close()
 
 # Charts row 2
 ch4, ch5, ch6 = st.columns(3)
@@ -340,7 +340,7 @@ with ch4:
     ax4.legend(fontsize=8)
     ax4.spines['top'].set_visible(False); ax4.spines['right'].set_visible(False)
     plt.tight_layout()
-    st.pyplot(fig4, use_container_width=True); plt.close()
+    st.pyplot(fig4, width='stretch'); plt.close()
 
 with ch5:
     fig5, ax5 = plt.subplots(figsize=(4,3.5))
@@ -357,7 +357,7 @@ with ch5:
     ax5.legend(fontsize=8)
     ax5.spines['top'].set_visible(False); ax5.spines['right'].set_visible(False)
     plt.tight_layout()
-    st.pyplot(fig5, use_container_width=True); plt.close()
+    st.pyplot(fig5, width='stretch'); plt.close()
 
 with ch6:
     fig6, ax6 = plt.subplots(figsize=(4,3.5))
@@ -376,7 +376,7 @@ with ch6:
     ax6.set_title('Feature Correlation\n(Filtered Data)', fontweight='bold')
     ax6.spines['top'].set_visible(False); ax6.spines['right'].set_visible(False)
     plt.tight_layout()
-    st.pyplot(fig6, use_container_width=True); plt.close()
+    st.pyplot(fig6, width='stretch'); plt.close()
 
 st.divider()
 
@@ -404,7 +404,7 @@ else:
         'Name':'Student','Age':'Age','CGPA':'CGPA',
         'Anxiety':'Anxiety (1=Yes)','Panic':'Panic (1=Yes)',
         'Gender':'Gender (1=Male)'
-    }), use_container_width=True, hide_index=True)
+    }), width='stretch', hide_index=True)
 
     if st.button("Clear Session History", key="ls_clear"):
         st.session_state.live_predictions = []
@@ -435,7 +435,7 @@ if col_show:
     raw_display = df[col_show].sort_values(
         sort_col, ascending=(sort_asc=="Ascending"))
     st.dataframe(raw_display.reset_index(drop=True),
-                 use_container_width=True, hide_index=True,
+                 width='stretch', hide_index=True,
                  height=400)
     st.caption(f"Showing all {len(raw_display)} records")
 
@@ -445,7 +445,7 @@ if col_show:
         data=raw_display.to_csv(index=False).encode(),
         file_name="mindcheck_filtered_dataset.csv",
         mime="text/csv",
-        use_container_width=True,
+        width='stretch',
     )
 
 st.divider()

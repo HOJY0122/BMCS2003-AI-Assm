@@ -53,21 +53,21 @@ with c1:
         st.markdown("### EDA")
         st.caption("Exploratory Data Analysis")
         st.write("Visualize distributions, correlations and feature analysis.")
-        if st.button("Open EDA →", key="nc_eda", use_container_width=True):
+        if st.button("Open EDA →", key="nc_eda", width='stretch'):
             st.switch_page("pages/1_EDA.py")
 with c2:
     with st.container(border=True):
         st.markdown("### KNN Model")
         st.caption("Member 1 — Ho Jun Yon")
         st.write(f"K-Nearest Neighbor · **{M['knn_m']['acc']:.2f}%** accuracy · K = {M['best_k']} · Depression")
-        if st.button("Open KNN →", key="nc_knn", use_container_width=True):
+        if st.button("Open KNN →", key="nc_knn", width='stretch'):
             st.switch_page("pages/2_KNN.py")
 with c3:
     with st.container(border=True):
         st.markdown("### Decision Tree")
         st.caption("Member 2 — Irvin Tan Wei Shen")
         st.write(f"CART Algorithm · **{M['dt_m']['acc']:.2f}%** accuracy · Depth 5 · Depression")
-        if st.button("Open Decision Tree →", key="nc_dt", use_container_width=True):
+        if st.button("Open Decision Tree →", key="nc_dt", width='stretch'):
             st.switch_page("pages/3_Decision_Tree.py")
 
 st.write("")
@@ -78,21 +78,21 @@ with c4:
         st.markdown("### SVM Model")
         st.caption("Member 3 — Chiang Jun Hang")
         st.write(f"Support Vector Machine · RBF Kernel · **{M['svm_m']['acc']:.2f}%** accuracy · Panic Attack")
-        if st.button("Open SVM →", key="nc_svm", use_container_width=True):
+        if st.button("Open SVM →", key="nc_svm", width='stretch'):
             st.switch_page("pages/4_SVM.py")
 with c5:
     with st.container(border=True):
         st.markdown("### Compare Models")
         st.caption("All 3 Algorithms Side by Side")
         st.write("Performance comparison of KNN, Decision Tree and SVM.")
-        if st.button("Open Comparison →", key="nc_cmp", use_container_width=True):
+        if st.button("Open Comparison →", key="nc_cmp", width='stretch'):
             st.switch_page("pages/5_Comparison.py")
 with c6:
     with st.container(border=True):
         st.markdown("### Dataset")
         st.caption("Kaggle — IIUM Malaysia")
         st.write(f"{M['n_records']} records · 11 features · Preprocessing steps and summary.")
-        if st.button("Open Dataset →", key="nc_ds", use_container_width=True):
+        if st.button("Open Dataset →", key="nc_ds", width='stretch'):
             st.switch_page("pages/6_Dataset.py")
 
 st.divider()

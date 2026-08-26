@@ -76,11 +76,11 @@ o4.metric("Target Variables", "3")
 
 st.markdown("<br>", unsafe_allow_html=True)
 st.markdown("**Dataset Preview (First 50 Rows)**")
-st.dataframe(df.head(50), use_container_width=True)
+st.dataframe(df.head(50), width='stretch')
 
 st.markdown("<br>", unsafe_allow_html=True)
 st.markdown("**Basic Statistical Description**")
-st.dataframe(df.describe().style.format("{:.2f}"), use_container_width=True)
+st.dataframe(df.describe().style.format("{:.2f}"), width='stretch')
 
 st.markdown("<br>", unsafe_allow_html=True)
 
@@ -93,7 +93,7 @@ col_info = pd.DataFrame({
     'Null Count': df.isnull().sum().values,
     'Unique Values': [df[c].nunique() for c in df.columns],
 })
-st.dataframe(col_info, use_container_width=True)
+st.dataframe(col_info, width='stretch')
 
 st.markdown("---")
 
