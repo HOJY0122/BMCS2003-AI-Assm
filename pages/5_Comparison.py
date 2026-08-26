@@ -255,7 +255,7 @@ with st.form("live_form", clear_on_submit=False):
                                       ["Unknown","No","Yes"])
 
     run = st.form_submit_button("Run All 3 Models Now",
-                                use_container_width=True)
+                                width='stretch')
 
 def _show_result(col, icon, title, member, target, pred, prob,
                  act, label_pos, label_neg):
@@ -294,7 +294,7 @@ def _show_result(col, icon, title, member, target, pred, prob,
                         ha='center', va='center', fontsize=8,
                         color='white', fontweight='bold')
             plt.tight_layout(pad=0)
-            st.pyplot(fig, use_container_width=True)
+            st.pyplot(fig, width='stretch')
             plt.close()
 
             if act is not None:
@@ -458,7 +458,7 @@ if st.session_state.get('live_result'):
     }
     nav1, nav2, nav3 = st.columns(3)
     with nav1:
-        if st.button("🔵 Open KNN →", key="live_nav_knn", use_container_width=True):
+        if st.button("🔵 Open KNN →", key="live_nav_knn", width='stretch'):
             st.session_state['knn_prefill'] = _live_shared
             st.session_state['knn_carry']  = {
                 'pred': LR['knn_pred'], 'prob': LR['knn_prob'],
@@ -470,7 +470,7 @@ if st.session_state.get('live_result'):
             }
             st.switch_page("pages/2_KNN.py")
     with nav2:
-        if st.button("🌳 Open DT →", key="live_nav_dt", use_container_width=True):
+        if st.button("🌳 Open DT →", key="live_nav_dt", width='stretch'):
             st.session_state['dt_prefill'] = _live_shared
             st.session_state['dt_carry']  = {
                 'pred': LR['dt_pred'], 'prob': LR['dt_prob'],
@@ -483,7 +483,7 @@ if st.session_state.get('live_result'):
             }
             st.switch_page("pages/3_Decision_Tree.py")
     with nav3:
-        if st.button("🔴 Open SVM →", key="live_nav_svm", use_container_width=True):
+        if st.button("🔴 Open SVM →", key="live_nav_svm", width='stretch'):
             st.session_state['svm_prefill'] = _live_shared
             st.session_state['svm_carry']  = {
                 'pred': LR['svm_pred'], 'prob': LR['svm_prob'],
@@ -550,11 +550,11 @@ else:
         ax.spines['right'].set_visible(False)
         ax.grid(axis='x', alpha=0.3)
         plt.tight_layout()
-        st.pyplot(fig, use_container_width=True)
+        st.pyplot(fig, width='stretch')
         plt.close()
 
     st.markdown("**Test History**")
-    st.dataframe(log_df, use_container_width=True, hide_index=True)
+    st.dataframe(log_df, width='stretch', hide_index=True)
 
     if st.button("Clear All Tests", key="clear"):
         for k in ['log','n','knn_c','dt_c','svm_c']:
@@ -615,7 +615,7 @@ with tab_all:
             height=380,
         )
         fig_bar.update_xaxes(showgrid=False)
-        st.plotly_chart(fig_bar, use_container_width=True)
+        st.plotly_chart(fig_bar, width='stretch')
 
     with ic2:
         # Interactive radar chart
@@ -652,7 +652,7 @@ with tab_all:
             font=dict(color='white'),
             height=380,
         )
-        st.plotly_chart(fig_radar, use_container_width=True)
+        st.plotly_chart(fig_radar, width='stretch')
 
 # ── Metric drill-down tabs ─────────────────────────────────────
 for tab, metric, idx in [
@@ -690,7 +690,7 @@ for tab, metric, idx in [
                 height=300,
             )
             fig_dd.update_xaxes(showgrid=False)
-            st.plotly_chart(fig_dd, use_container_width=True)
+            st.plotly_chart(fig_dd, width='stretch')
 
         with dd2:
             with st.container(border=True):
@@ -765,7 +765,7 @@ for cm_tab, title, cm_data, color, split, member in [
                 font=dict(color='white', size=12),
                 height=320,
             )
-            st.plotly_chart(fig_cm, use_container_width=True)
+            st.plotly_chart(fig_cm, width='stretch')
 
         with cmt2:
             with st.container(border=True):
@@ -822,7 +822,7 @@ with st.container(border=True):
         as_treat   = st.selectbox("Sought Treatment?",        ["No","Yes"], key="as_treat")
 
     as_btn = st.button("🔍  Find Best Model for This Student",
-                       use_container_width=True, type="primary", key="as_btn")
+                       width='stretch', type="primary", key="as_btn")
 
 if as_btn:
     as_name_lbl = as_name.strip() or "Student"
@@ -1050,7 +1050,7 @@ if st.session_state.get('as_result'):
             st.caption("Result already computed — no re-prediction needed. Click **Open →** to view full details.")
         with _xcol:
             st.write("")
-            if st.button("✖ Clear", key="ar_clear", use_container_width=True):
+            if st.button("✖ Clear", key="ar_clear", width='stretch'):
                 st.session_state['as_result'] = None
                 st.rerun()
 
@@ -1069,7 +1069,7 @@ if st.session_state.get('as_result'):
                     else:        st.success(f"{_lbl} · {_conf} confidence")
                     if st.button(f"Open {_model.split()[0]} →",
                                   key=f"qn_{_model.replace(' ','_')}",
-                                  use_container_width=True,
+                                  width='stretch',
                                   type="primary" if _is_best else "secondary"):
                         st.session_state[_ckeys[_model]] = _cdata[_model]
                         st.switch_page(_pages_map[_model])
