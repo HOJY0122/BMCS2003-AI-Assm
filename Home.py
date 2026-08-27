@@ -77,7 +77,7 @@ with c4:
     with st.container(border=True):
         st.markdown("### SVM Model")
         st.caption("Member 3 — Chiang Jun Hang")
-        st.write(f"Support Vector Machine · RBF Kernel · **{M['svm_m']['acc']:.2f}%** accuracy · Panic Attack")
+        st.write(f"Support Vector Machine · RBF Kernel · **{M['svm_m']['acc']:.2f}%** accuracy · Depression")
         if st.button("Open SVM →", key="nc_svm", width='stretch'):
             st.switch_page("pages/4_SVM.py")
 with c5:

@@ -7,7 +7,10 @@ Every page imports from this module — guaranteed consistent metrics.
 Ground truth (random_state=42):
   KNN K=5:  Acc=95.83% Prec=90.48% Rec=97.44% F1=93.83%
   DT  D=5:  Acc=91.11% Prec=100.0% Rec=72.41% F1=84.00%
-  SVM RBF:  Acc=94.67% Prec=91.67% Rec=91.67% F1=91.67%
+  SVM RBF:  Acc=94.00% Prec=91.49% Rec=89.58% F1=90.53%
+  (SVM retrained on the shared 8-feature set — same encoded columns as
+  KNN/DT, no Seek_Treatment, no derived Course_Category — for
+  consistency across all three models.)
 """
 import pandas as pd
 import numpy as np

@@ -80,7 +80,7 @@ with st.expander("What is SVM (Support Vector Machine)?", expanded=False):
     with c2:
         st.metric("Kernel", "RBF")
         st.metric("Accuracy", f"{_svm['acc']:.2f}%")
-        st.metric("Target", "Panic Attack")
+        st.metric("Target", "Depression")
 
 st.divider()
 
