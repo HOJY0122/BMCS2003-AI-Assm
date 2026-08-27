@@ -90,38 +90,23 @@ def load_all_models():
     dt.fit(Xtr_d, ytr_d)
     dt_p = dt.predict(Xte_d)
 
-    # ── SVM — Target: Depression (same as predictor page) ──────
+    # ── SVM — Target: Depression (same encoded features as KNN/DT) ──
     from sklearn.pipeline import Pipeline
-    from sklearn.preprocessing import OrdinalEncoder
-    import pandas as _pd2
-    _df_raw = _pd2.read_csv('dataset/Student_Mental_health.csv')
-    _df_raw.columns = _df_raw.columns.str.strip()
-    _df_raw['Age'] = _df_raw['Age'].fillna(_df_raw['Age'].median())
-    _df_raw['Your current year of Study'] = _df_raw['Your current year of Study'].str.strip().str.lower()
-    _df_raw['What is your CGPA?'] = _df_raw['What is your CGPA?'].str.strip()
-    def _cat(c):
-        c = str(c).lower()
-        return 'STEM/IT' if any(x in c for x in [
-            'technology','it','computer','cs','system',
-            'software','se','bit','bcs','cts']) else 'Other'
-    _df_raw['Course_Category'] = _df_raw['What is your course?'].apply(_cat)
-    _df_raw = _df_raw.drop(columns=['Timestamp','What is your course?'], errors='ignore')
-    X_s  = _df_raw.drop(columns=['Do you have Depression?'])
-    y_s  = (_df_raw['Do you have Depression?'] == 'Yes').astype(int)
+    svm_feat = ['Gender','Age','Course_Enc','Year_of_Study_Enc',
+                'CGPA_Numeric','Anxiety','Panic_Attack','Marital_Status']
+    X_s = df[svm_feat]; y_s = df['Depression']
+    svm_col_order = svm_feat
     svm_pipe = Pipeline([
-        ('enc', OrdinalEncoder(handle_unknown='use_encoded_value', unknown_value=-1)),
         ('scl', StandardScaler()),
         ('svm', SVC(kernel='rbf', probability=True,
                     class_weight='balanced', random_state=42))
     ])
-    svm_col_order = list(X_s.columns)
     Xtr_s, Xte_s, ytr_s, yte_s = train_test_split(
         X_s, y_s, test_size=0.25, random_state=42, stratify=y_s)
     svm_pipe.fit(Xtr_s, ytr_s)
     svm_p = svm_pipe.predict(Xte_s)
     svm   = svm_pipe   # alias
     sc_svm = None      # pipeline handles scaling internally
-    svm_feat = svm_col_order
 
     def _m(yt, yp):
         return {
@@ -243,15 +228,12 @@ with st.form("live_form", clear_on_submit=False):
                                  ["Year 1","Year 2","Year 3","Year 4"])
         t_cgpa    = st.selectbox("CGPA Range", list(CGPA_MAP.keys()))
         t_marital = st.selectbox("Marital Status", ["No","Yes"])
-        t_seek    = st.selectbox("Seek Treatment?", ["No","Yes"])
 
     with fc:
         t_anxiety = st.selectbox("Has Anxiety?",      ["No","Yes"])
         t_panic   = st.selectbox("Has Panic Attack?", ["No","Yes"])
         st.markdown("**Actual answers (for tracking)**")
         t_actual_dep   = st.selectbox("Actual Depression?",
-                                      ["Unknown","No","Yes"])
-        t_actual_panic = st.selectbox("Actual Panic Attack?",
                                       ["Unknown","No","Yes"])
 
     run = st.form_submit_button("Run All 3 Models Now",
@@ -314,7 +296,6 @@ if run:
     ax = 1 if t_anxiety == "Yes"  else 0
     pa = 1 if t_panic   == "Yes"  else 0
     ma = 1 if t_marital == "Yes"  else 0
-    sk = 1 if t_seek    == "Yes"  else 0
     cg = CGPA_MAP[t_cgpa]
     ce = le_c.transform([t_course])[0] if t_course in le_c.classes_ else 0
     ye = le_y.transform([t_year])[0]   if t_year   in le_y.classes_ else 0
@@ -334,26 +315,14 @@ if run:
     dt_pred  = M['dt'].predict(dt_in)[0]
     dt_prob  = M['dt'].predict_proba(dt_in)[0]
 
-    # ── SVM ── uses pipeline (same as 4_SVM.py predictor page) ─
-    _yr_n = t_year.split()[-1]
-    svm_in = pd.DataFrame([{
-        'Choose your gender'                           : t_gender,
-        'Age'                                          : t_age,
-        'Your current year of Study'                   : f'year {_yr_n}',
-        'What is your CGPA?'                           : t_cgpa,
-        'Marital status'                               : t_marital,
-        'Do you have Anxiety?'                         : t_anxiety,
-        'Do you have Panic attack?'                    : t_panic,
-        'Did you seek any specialist for a treatment?' : t_seek,
-        'Course_Category': 'STEM/IT' if any(x in t_course.lower() for x in
-            ['technology','it','computer','cs','system','software','se']) else 'Other',
-    }])[M['svm_col_order']]
+    # ── SVM ── same encoded feature set as KNN/DT ──────────────
+    svm_in = pd.DataFrame([[g, t_age, ce, ye, cg, ax, pa, ma]],
+                          columns=M['svm_col_order'])
     svm_pred = M['svm'].predict(svm_in)[0]
     svm_prob = M['svm'].predict_proba(svm_in)[0]
 
     # ── Actual labels ─────────────────────────────────────────
     act_dep   = None if t_actual_dep   == "Unknown" else (1 if t_actual_dep   == "Yes" else 0)
-    act_panic = None if t_actual_panic == "Unknown" else (1 if t_actual_panic == "Yes" else 0)
 
     name = t_name.strip() or "Student"
     dep_agree = (knn_pred == dt_pred)
@@ -362,7 +331,7 @@ if run:
     # the scoreboard tally below never double-counts on a later rerun.
     knn_c = _score(knn_pred, act_dep)
     dt_c  = _score(dt_pred,  act_dep)
-    svm_c = _score(svm_pred, act_panic)
+    svm_c = _score(svm_pred, act_dep)
 
     # ── Persist everything needed to redisplay + navigate on every
     # future rerun — NOT just the one rerun where the form was submitted.
@@ -373,12 +342,12 @@ if run:
         'name': name, 'gender': t_gender, 'age': t_age,
         'course': t_course, 'year': t_year, 'cgpa': t_cgpa,
         'marital': t_marital, 'anxiety': t_anxiety,
-        'panic': t_panic, 'seek': t_seek,
+        'panic': t_panic,
         'knn_pred': int(knn_pred), 'knn_prob': knn_prob.tolist(),
         'dt_pred':  int(dt_pred),  'dt_prob':  dt_prob.tolist(),
         'svm_pred': int(svm_pred), 'svm_prob': svm_prob.tolist(),
         'svm_in': svm_in,
-        'act_dep': act_dep, 'act_panic': act_panic,
+        'act_dep': act_dep,
         'dep_agree': dep_agree,
     }
 
@@ -398,13 +367,12 @@ if run:
         "Panic"     : t_panic,
         "KNN (Dep)" : "Dep" if knn_pred==1 else "No",
         "DT (Dep)"  : "Dep" if dt_pred==1  else "No",
-        "SVM (Panic)": "Panic" if svm_pred==1 else "No",
+        "SVM (Dep)" : "Dep" if svm_pred==1 else "No",
         "KNN%"      : f"{knn_prob[1]*100:.0f}%",
         "DT%"       : f"{dt_prob[1]*100:.0f}%",
         "SVM%"      : f"{svm_prob[1]*100:.0f}%",
-        "Agree KNN-DT": "✅" if dep_agree else "❌",
+        "Agree KNN-DT-SVM": "✅" if (knn_pred==dt_pred==svm_pred) else "❌",
         "Actual Dep"  : t_actual_dep,
-        "Actual Panic": t_actual_panic,
     })
 
 # ══════════════════════════════════════════════════════════════
@@ -426,11 +394,11 @@ if st.session_state.get('live_result'):
                  LR['knn_pred'], LR['knn_prob'], LR['act_dep'], "Depression","No Dep")
     _show_result(rc2,"🌳","Decision Tree","Irvin","Depression",
                  LR['dt_pred'], LR['dt_prob'], LR['act_dep'], "Depression","No Dep")
-    _show_result(rc3,"🔴","SVM","Chiang Jun Hang","Panic Attack",
-                 LR['svm_pred'], LR['svm_prob'], LR['act_panic'], "Panic Attack","No Panic")
+    _show_result(rc3,"🔴","SVM","Chiang Jun Hang","Depression",
+                 LR['svm_pred'], LR['svm_prob'], LR['act_dep'], "Depression","No Dep")
 
     dep_label = "Depression" if LR['knn_pred'] == 1 else "No Depression"
-    svm_label = "Panic Attack" if LR['svm_pred'] == 1 else "No Panic Attack"
+    svm_label = "Depression" if LR['svm_pred'] == 1 else "No Depression"
 
     st.markdown("")
     a1, a2 = st.columns(2)
@@ -444,7 +412,7 @@ if st.session_state.get('live_result'):
                 f"DT: **{'Depression' if LR['dt_pred']==1 else 'No Depression'}**"
             )
     with a2:
-        st.info(f"SVM predicts Panic Attack: **{svm_label}**")
+        st.info(f"SVM predicts Depression: **{svm_label}**")
 
     # ── Navigate to predictor with result pre-loaded ──────────
     st.write("")
@@ -454,7 +422,7 @@ if st.session_state.get('live_result'):
         'name': LR['name'], 'gender': LR['gender'], 'age': LR['age'],
         'course': LR['course'], 'year': LR['year'], 'cgpa': LR['cgpa'],
         'marital': LR['marital'], 'anxiety': LR['anxiety'],
-        'panic': LR['panic'], 'seek': LR['seek'],
+        'panic': LR['panic'],
     }
     nav1, nav2, nav3 = st.columns(3)
     with nav1:
@@ -491,9 +459,8 @@ if st.session_state.get('live_result'):
                 'name': LR['name'], 'gender': LR['gender'], 'age': LR['age'],
                 'course': LR['course'], 'year': LR['year'], 'cgpa': LR['cgpa'],
                 'marital': LR['marital'], 'anxiety': LR['anxiety'],
-                'panic': LR['panic'], 'treat': LR['seek'],
+                'panic': LR['panic'],
                 'high_concern': (LR['anxiety']=="Yes" and LR['panic']=="Yes"),
-                'treat_flag': (LR['seek']=="Yes"),
                 'academic_risk': (LR['year'] in ["Year 3","Year 4"] and LR['cgpa']=="0 - 1.99"),
             }
             st.switch_page("pages/4_SVM.py")
@@ -516,29 +483,24 @@ else:
     sb[2].metric("DT Correct",   str(st.session_state['dt_c']),
                  help="Depression — only counted when Actual provided")
     sb[3].metric("SVM Correct",  str(st.session_state['svm_c']),
-                 help="Panic Attack — only counted when Actual provided")
+                 help="Depression — only counted when Actual provided")
     log_df = pd.DataFrame(st.session_state['log'])
-    agree_n = (log_df["Agree KNN-DT"] == "✅").sum()
-    sb[4].metric("KNN-DT Agree", f"{agree_n}/{n}")
+    agree_n = (log_df["Agree KNN-DT-SVM"] == "✅").sum()
+    sb[4].metric("All 3 Agree", f"{agree_n}/{n}")
 
     # Live accuracy chart (if actuals provided)
-    actuals_dep   = sum(1 for e in st.session_state['log'] if e['Actual Dep']   != 'Unknown')
-    actuals_panic = sum(1 for e in st.session_state['log'] if e['Actual Panic'] != 'Unknown')
+    actuals_dep = sum(1 for e in st.session_state['log'] if e['Actual Dep'] != 'Unknown')
 
-    if actuals_dep > 0 or actuals_panic > 0:
+    if actuals_dep > 0:
         st.write("")
         st.markdown("**Live Accuracy on Your Test Cases**")
         fig, ax = plt.subplots(figsize=(8, 2.2))
         models, accs, colors = [], [], []
-        if actuals_dep > 0:
-            models += ['KNN (Dep)', 'DT (Dep)']
-            accs   += [st.session_state['knn_c']/actuals_dep*100,
-                       st.session_state['dt_c'] /actuals_dep*100]
-            colors += ['#5B7FFF','#10B981']
-        if actuals_panic > 0:
-            models += ['SVM (Panic)']
-            accs   += [st.session_state['svm_c']/actuals_panic*100]
-            colors += ['#EF4444']
+        models += ['KNN (Dep)', 'DT (Dep)', 'SVM (Dep)']
+        accs   += [st.session_state['knn_c']/actuals_dep*100,
+                   st.session_state['dt_c'] /actuals_dep*100,
+                   st.session_state['svm_c']/actuals_dep*100]
+        colors += ['#5B7FFF','#10B981','#EF4444']
         bars = ax.barh(models, accs, color=colors, height=0.45, edgecolor='none')
         for bar, val in zip(bars, accs):
             ax.text(val+1, bar.get_y()+bar.get_height()/2,
@@ -819,7 +781,6 @@ with st.container(border=True):
         as_marital = st.selectbox("Marital Status",           ["No","Yes"], key="as_marital")
         as_anxiety = st.selectbox("Do you have Anxiety?",     ["No","Yes"], key="as_anxiety")
         as_panic   = st.selectbox("Do you have Panic Attack?",["No","Yes"], key="as_panic")
-        as_treat   = st.selectbox("Sought Treatment?",        ["No","Yes"], key="as_treat")
 
     as_btn = st.button("🔍  Find Best Model for This Student",
                        width='stretch', type="primary", key="as_btn")
@@ -834,7 +795,6 @@ if as_btn:
     _ax = 1 if as_anxiety == "Yes"  else 0
     _pa = 1 if as_panic   == "Yes"  else 0
     _ma = 1 if as_marital == "Yes"  else 0
-    _sk = 1 if as_treat   == "Yes"  else 0
     _cn = CGPA_NUM.get(as_cgpa, 3.25)
     # Year and course encoding for SVM (same as KNN/DT)
     _ce = M['le_course'].transform([as_course])[0] if as_course in M['le_course'].classes_ else 0
@@ -851,20 +811,9 @@ if as_btn:
     _dt_pred = int(M['dt'].predict(_dt_inp)[0])
     _dt_prob = M['dt'].predict_proba(_dt_inp)[0]
 
-    # SVM — uses same pipeline as predictor page
-    _yr_n2 = as_year.split()[-1]
-    _svm_inp2 = pd.DataFrame([{
-        'Choose your gender'                           : as_gender,
-        'Age'                                          : as_age,
-        'Your current year of Study'                   : f'year {_yr_n2}',
-        'What is your CGPA?'                           : as_cgpa,
-        'Marital status'                               : as_marital,
-        'Do you have Anxiety?'                         : as_anxiety,
-        'Do you have Panic attack?'                    : as_panic,
-        'Did you seek any specialist for a treatment?' : as_treat,
-        'Course_Category': 'STEM/IT' if any(x in as_course.lower() for x in
-            ['technology','it','computer','cs','system','software','se']) else 'Other',
-    }])[M['svm_col_order']]
+    # SVM — same encoded feature set as KNN/DT
+    _svm_inp2 = pd.DataFrame([[_g,as_age,_ce,_ye,_cn,_ax,_pa,_ma]],
+                             columns=M['svm_col_order'])
     _svm_pred = int(M['svm'].predict(_svm_inp2)[0])
     _svm_prob = M['svm'].predict_proba(_svm_inp2)[0]
 
@@ -893,22 +842,17 @@ if as_btn:
         _reasons['KNN'].append("Both Anxiety + Panic present → KNN excels at multi-symptom patterns")
         _reasons['SVM'].append("Complex symptom combination → SVM handles non-linear boundaries well")
 
-    # Rule 4: Sought treatment → SVM better (balanced weights)
-    if as_treat == "Yes":
-        _scores['SVM'] += 2
-        _reasons['SVM'].append("Sought Treatment = Yes → SVM's balanced class weights handle minority cases")
-
-    # Rule 5: High CGPA + no symptoms → KNN better (similar student profiles)
+    # Rule 4: High CGPA + no symptoms → KNN better (similar student profiles)
     if _cn >= 3.0 and as_anxiety == "No" and as_panic == "No":
         _scores['KNN'] += 2
         _reasons['KNN'].append("High CGPA + no symptoms → KNN finds similar healthy student profiles")
 
-    # Rule 6: Low CGPA academic risk → DT better (explicit rules)
+    # Rule 5: Low CGPA academic risk → DT better (explicit rules)
     if _cn < 2.5:
         _scores['Decision Tree'] += 2
         _reasons['Decision Tree'].append("Low CGPA → DT's explicit CGPA threshold rules apply well")
 
-    # Rule 7: Model confidence tiebreaker
+    # Rule 6: Model confidence tiebreaker
     _knn_conf  = max(_knn_prob)
     _dt_conf   = max(_dt_prob)
     _svm_conf  = max(_svm_prob)
@@ -987,7 +931,7 @@ if as_btn:
             'gender'    : as_gender, 'age'    : as_age,
             'course'    : as_course, 'year'   : as_year, 'cgpa': as_cgpa,
             'marital'   : as_marital,'anxiety': as_anxiety,
-            'panic'     : as_panic,  'treat'  : as_treat,
+            'panic'     : as_panic,
             'knn_pred'  : int(_knn_pred), 'knn_prob': _knn_prob.tolist(),
             'dt_pred'   : int(_dt_pred),  'dt_prob' : _dt_prob.tolist(),
             'svm_pred'  : int(_svm_pred), 'svm_prob': _svm_prob.tolist(),
@@ -1035,9 +979,8 @@ if st.session_state.get('as_result'):
             'name':_ar['name'],'gender':_ar['gender'],'age':_ar['age'],
             'course':_ar['course'],'year':_ar['year'],'cgpa':_ar['cgpa'],
             'marital':_ar['marital'],'anxiety':_ar['anxiety'],
-            'panic':_ar['panic'],'treat':_ar['treat'],
+            'panic':_ar['panic'],
             'high_concern':(_ar['anxiety']=="Yes" and _ar['panic']=="Yes"),
-            'treat_flag':(_ar['treat']=="Yes"),
             'academic_risk':(_ar['year'] in ["Year 3","Year 4"] and _ar['cgpa']=="0 - 1.99"),
         },
     }

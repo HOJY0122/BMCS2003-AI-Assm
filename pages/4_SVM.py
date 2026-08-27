@@ -60,8 +60,7 @@ with col1:
     _ai=int(_pre.get('age',20)) if _pre else 20
     age    = st.slider("Age",15,40,_ai,key="svm_age")
 with col2:
-    course = st.selectbox("Course Field",["Information Technology (IT)","Computer Science (CS)",
-        "Information System (IS)","Software Engineering (SE)","Other"],key="svm_course")
+    course = st.selectbox("Course", M['courses'], key="svm_course")
     _yi=["Year 1","Year 2","Year 3","Year 4"].index(_pre['year']) if _pre and _pre.get('year') in ["Year 1","Year 2","Year 3","Year 4"] else 0
     year   = st.selectbox("Year of Study",["Year 1","Year 2","Year 3","Year 4"],index=_yi,key="svm_year")
     cgpa   = st.selectbox("CGPA Range",list(CGPA_MAP.keys()),key="svm_cgpa")
@@ -72,7 +71,6 @@ with col3:
     anxiety = st.selectbox("Do you have Anxiety?",         ["No","Yes"],index=_axi,key="svm_anxiety")
     _pai=["No","Yes"].index(_pre['panic']) if _pre and _pre.get('panic') in ["No","Yes"] else 0
     panic   = st.selectbox("Do you have Panic Attack?",    ["No","Yes"],index=_pai,key="svm_panic")
-    treat   = st.selectbox("Sought Specialist Treatment?", ["No","Yes"],key="svm_treat")
     predict_btn=st.button("🔍  Predict Depression Risk",width='stretch',type="primary",key="svm_predict")
 
 if predict_btn:
@@ -80,32 +78,27 @@ if predict_btn:
     if name.strip() and name.strip().isdigit(): _errors.append("❌ Name cannot be numbers only.")
     if age<15 or age>40: _errors.append(f"❌ Age {age} outside valid range (15–40).")
     _high_concern=(anxiety=="Yes" and panic=="Yes")
-    _treat_flag=(treat=="Yes")
     _academic_risk=(year in ["Year 3","Year 4"] and cgpa=="0 - 1.99")
     if _errors:
         for e in _errors: st.error(e)
         st.warning("⚠️ Please fix errors above.")
     else:
         try:
-            yr_num=year.split()[-1]
-            inp=pd.DataFrame([{
-                'Choose your gender'                           : gender,
-                'Age'                                          : age,
-                'Your current year of Study'                   : f'year {yr_num}',
-                'What is your CGPA?'                           : cgpa,
-                'Marital status'                               : marital,
-                'Do you have Anxiety?'                         : anxiety,
-                'Do you have Panic attack?'                    : panic,
-                'Did you seek any specialist for a treatment?' : treat,
-                'Course_Category'                              : M['cat_course'](course),
-            }])[M['svm_col_order']]
+            g=1 if gender=='Male' else 0
+            ax=1 if anxiety=='Yes' else 0
+            pa=1 if panic=='Yes' else 0
+            ma=1 if marital=='Yes' else 0
+            ce=M['le_c'].transform([course])[0] if course in M['le_c'].classes_ else 0
+            ye=M['le_y'].transform([year])[0] if year in M['le_y'].classes_ else 0
+            cn=M['cgpa_map'].get(cgpa,3.25)
+            inp=pd.DataFrame([[g,age,ce,ye,cn,ax,pa,ma]],columns=M['svm_col_order'])
             pred=int(M['svm'].predict(inp)[0])
             prob=M['svm'].predict_proba(inp)[0].tolist()
             st.session_state['svm_result']={
                 'pred':pred,'prob':prob,'inp':inp,'name':name.strip() or "Student",
                 'gender':gender,'age':age,'course':course,'year':year,'cgpa':cgpa,
-                'marital':marital,'anxiety':anxiety,'panic':panic,'treat':treat,
-                'high_concern':_high_concern,'treat_flag':_treat_flag,'academic_risk':_academic_risk}
+                'marital':marital,'anxiety':anxiety,'panic':panic,
+                'high_concern':_high_concern,'academic_risk':_academic_risk}
         except Exception as ex: st.error(f"❌ Prediction failed: {ex}")
 
 if st.session_state['svm_result']:
@@ -116,7 +109,6 @@ if st.session_state['svm_result']:
     else:
         st.success(f"### ✅  {name_lbl} — No Depression Detected\n\nKeep maintaining a healthy lifestyle!")
     if R.get('high_concern'):  st.warning("⚠️ **High Concern:** Both Anxiety AND Panic Attack present.")
-    if R.get('treat_flag'):    st.info("ℹ️ **Treatment Noted:** Student has already sought specialist help.")
     if R.get('academic_risk'): st.warning("⚠️ **Academic Risk:** Senior year with CGPA 0–1.99.")
 
     st.write(""); r1,r2,r3=st.columns([1.2,1.2,1])
@@ -134,8 +126,8 @@ if st.session_state['svm_result']:
         pb_c.metric("Depression",   f"{prob[1]*100:.1f}%")
     with r2:
         st.markdown("**Input Summary**")
-        st.table(pd.DataFrame({"Field":["Name","Gender","Age","Course","Year","CGPA","Marital","Anxiety","Panic","Treatment"],
-            "Value":[R['name'],R['gender'],str(R['age']),R['course'],R['year'],R['cgpa'],R['marital'],R['anxiety'],R['panic'],R['treat']]
+        st.table(pd.DataFrame({"Field":["Name","Gender","Age","Course","Year","CGPA","Marital","Anxiety","Panic"],
+            "Value":[R['name'],R['gender'],str(R['age']),R['course'],R['year'],R['cgpa'],R['marital'],R['anxiety'],R['panic']]
         }).set_index("Field"))
     with r3:
         st.markdown("**Model Info**")
@@ -147,11 +139,10 @@ if st.session_state['svm_result']:
     # PCA boundary
     st.write(""); st.markdown("**SVM Decision Boundary (PCA Projection)**")
     try:
-        prep=M['svm'].named_steps['enc']
-        X_bg_proc=prep.transform(M['svm_X_all'])
-        X_user_proc=prep.transform(R['inp'])
+        # Features are already numeric (shared label-encoded columns), so
+        # no separate encoding step is needed before scaling for PCA.
         sc2d=StandardScaler()
-        X_bg_sc=sc2d.fit_transform(X_bg_proc); X_us_sc=sc2d.transform(X_user_proc)
+        X_bg_sc=sc2d.fit_transform(M['svm_X_all']); X_us_sc=sc2d.transform(R['inp'])
         pca=PCA(n_components=2,random_state=42)
         X_bg_2d=pca.fit_transform(X_bg_sc); X_us_2d=pca.transform(X_us_sc)
         svm2d=LinearSVC(C=1.0,class_weight='balanced',random_state=42,max_iter=5000)
@@ -197,7 +188,6 @@ if st.session_state['svm_result']:
         if R['anxiety']=='Yes': _risk.append(("Anxiety","Strong predictor of depression"))
         if R['panic']=='Yes':   _risk.append(("Panic Attack","Strongest predictor (r=0.341)"))
         if R['marital']=='Yes': _risk.append(("Marital Status","Decision tree root feature"))
-        if R['treat']=='Yes':   _risk.append(("Sought Treatment","Indicates awareness of condition"))
         if CGPA_MAP.get(R['cgpa'],3.25)<2.5: _risk.append(("Low CGPA","Academic difficulty increases risk"))
         if CGPA_MAP.get(R['cgpa'],3.25)>=3.0: _prot.append(("High CGPA","Academic success is protective"))
         if R['anxiety']=='No' and R['panic']=='No': _prot.append(("No Anxiety/Panic","Absence of co-morbid conditions"))
@@ -218,7 +208,6 @@ if st.session_state['svm_result']:
     st.write("")
     _alerts_sv=[]; _notes_sv=[]
     if R.get('high_concern'): _alerts_sv.append("High Concern: Both Anxiety and Panic Attack present.")
-    if R.get('treat_flag'):   _alerts_sv.append("Treatment Noted: Student has already sought specialist help.")
     if R.get('academic_risk'): _alerts_sv.append("Academic Risk: Senior year with CGPA 0-1.99.")
     if R['anxiety']=='Yes': _notes_sv.append("Anxiety = Yes — strong SVM predictor")
     if R['panic']=='Yes':   _notes_sv.append("Panic Attack = Yes — highest correlation (r=0.341)")
@@ -227,7 +216,7 @@ if st.session_state['svm_result']:
             result=R['pred'],prob=R['prob'],
             input_data={"Gender":R['gender'],"Age":str(R['age']),"Course":R['course'],
                         "Year":R['year'],"CGPA":R['cgpa'],"Marital":R['marital'],
-                        "Anxiety":R['anxiety'],"Panic":R['panic'],"Treatment":R['treat']},
+                        "Anxiety":R['anxiety'],"Panic":R['panic']},
             metrics=M['svm_m'],business_alerts=_alerts_sv,explanation_notes=_notes_sv)
         st.download_button("📥  Download PDF Report",data=_pdf,
             file_name=f"mindcheck_svm_{R['name'].replace(' ','_')}.pdf",
@@ -291,7 +280,7 @@ _svm_sample=pd.DataFrame({'Name':['Ahmad','Siti','Wei Ming'],'Gender':['Male','F
     'Age':[20,21,19],'Course':['Computer Science','Engineering','Information Technology'],
     'Year_of_Study':['Year 2','Year 3','Year 1'],'CGPA':['3.00 - 3.49','2.50 - 2.99','3.50 - 4.00'],
     'Marital_Status':['No','No','No'],'Anxiety':['Yes','No','No'],
-    'Panic_Attack':['No','Yes','No'],'Seek_Treatment':['No','No','No']})
+    'Panic_Attack':['No','Yes','No']})
 with st.expander("📋  View / Download CSV Template"):
     st.dataframe(_svm_sample,width='stretch',hide_index=True)
     st.download_button("⬇️  Download SVM Template",data=_svm_sample.to_csv(index=False).encode(),
@@ -317,21 +306,19 @@ if _svm_file:
                     _smarital=str(_srow.get('Marital_Status','No'))
                     _sanxiety=str(_srow.get('Anxiety','No'))
                     _spanic=str(_srow.get('Panic_Attack','No'))
-                    _streat=str(_srow.get('Seek_Treatment','No'))
                     try: _sage=int(float(_srow.get('Age',20)))
                     except: _sage=20
                     _scourse=str(_srow.get('Course','Others'))
                     _syear=str(_srow.get('Year_of_Study','Year 1'))
                     _scgpa=str(_srow.get('CGPA','3.00 - 3.49')).strip()
-                    _syear_n=''.join(filter(str.isdigit,_syear)) or '1'
-                    _sinp=pd.DataFrame([{
-                        'Choose your gender':_sgender,'Age':_sage,
-                        'Your current year of Study':f'year {_syear_n}',
-                        'What is your CGPA?':_scgpa,'Marital status':_smarital,
-                        'Do you have Anxiety?':_sanxiety,'Do you have Panic attack?':_spanic,
-                        'Did you seek any specialist for a treatment?':_streat,
-                        'Course_Category':M['cat_course'](_scourse)
-                    }])[M['svm_col_order']]
+                    _sg=1 if _sgender.lower()=='male' else 0
+                    _sax=1 if _sanxiety.lower()=='yes' else 0
+                    _spa=1 if _spanic.lower()=='yes' else 0
+                    _sma=1 if _smarital.lower()=='yes' else 0
+                    _sce=M['le_c'].transform([_scourse])[0] if _scourse in M['le_c'].classes_ else 0
+                    _sye=M['le_y'].transform([_syear])[0]   if _syear   in M['le_y'].classes_ else 0
+                    _scn=M['cgpa_map'].get(_scgpa,3.25)
+                    _sinp=pd.DataFrame([[_sg,_sage,_sce,_sye,_scn,_sax,_spa,_sma]],columns=M['svm_col_order'])
                     _spred=int(M['svm'].predict(_sinp)[0])
                     _sprob=M['svm'].predict_proba(_sinp)[0][1]
                     _sresults.append({'Name':_sname,'Gender':_sgender,'Age':_sage,'Course':_scourse,

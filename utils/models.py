@@ -23,7 +23,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import (MinMaxScaler, StandardScaler,
-                                   LabelEncoder, OrdinalEncoder)
+                                   LabelEncoder)
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.metrics import (accuracy_score, precision_score,
                               recall_score, f1_score, confusion_matrix)
@@ -123,33 +123,20 @@ def load_all_models():
 
     # ══════════════════════════════════════════════════════════
     # SVM — Target: Depression
-    # Features: raw original cols | Split: 75/25 | OrdinalEncoder+Standard
+    # Features: 8 (same encoded columns as KNN/DT) | Split: 75/25 | Standard
+    # Uses the SAME shared df, Course_Enc/Year_Enc label encoders as
+    # KNN and Decision Tree — no separate raw-column pipeline, no
+    # derived Course_Category, no Seek_Treatment — so all three models
+    # are trained on a consistent, directly comparable feature
+    # representation.
     # ══════════════════════════════════════════════════════════
-    df_raw = pd.read_csv('dataset/Student_Mental_health.csv')
-    df_raw.columns = df_raw.columns.str.strip()
-    df_raw['Age'] = df_raw['Age'].fillna(df_raw['Age'].median())
-    df_raw['Your current year of Study'] = (
-        df_raw['Your current year of Study'].str.strip().str.lower())
-    df_raw['What is your CGPA?'] = df_raw['What is your CGPA?'].str.strip()
-
-    def _cat_course(c):
-        c = str(c).lower()
-        return 'STEM/IT' if any(x in c for x in [
-            'technology', 'it', 'computer', 'cs', 'system',
-            'software', 'se', 'bit', 'bcs', 'cts'
-        ]) else 'Other'
-
-    df_raw['Course_Category'] = df_raw['What is your course?'].apply(_cat_course)
-    df_raw = df_raw.drop(
-        columns=['Timestamp', 'What is your course?'], errors='ignore')
-
-    X_sv = df_raw.drop(columns=['Do you have Depression?'])
-    y_sv = (df_raw['Do you have Depression?'] == 'Yes').astype(int)
+    svm_feat = ['Gender', 'Age', 'Course_Enc', 'Year_Enc',
+                'CGPA_Numeric', 'Anxiety', 'Panic_Attack', 'Marital_Status']
+    X_sv = df[svm_feat]
+    y_sv = df['Depression']
     svm_col_order = list(X_sv.columns)
 
     svm_pipe = Pipeline([
-        ('enc', OrdinalEncoder(
-            handle_unknown='use_encoded_value', unknown_value=-1)),
         ('scl', StandardScaler()),
         ('svm', SVC(kernel='rbf', probability=True,
                     class_weight='balanced', random_state=42)),
@@ -164,9 +151,8 @@ def load_all_models():
     perm = permutation_importance(
         svm_pipe, Xte_sv, yte_sv,
         n_repeats=10, random_state=42, scoring='accuracy')
-    svm_fi_labels = ['Gender', 'Age', 'Year of Study', 'CGPA',
-                     'Marital Status', 'Anxiety', 'Panic Attack',
-                     'Seek Treatment', 'Course Category']
+    svm_fi_labels = ['Gender', 'Age', 'Course', 'Year of Study', 'CGPA',
+                     'Anxiety', 'Panic Attack', 'Marital Status']
     svm_fi_df = pd.DataFrame({
         'Feature'   : svm_fi_labels[:len(perm.importances_mean)],
         'Importance': perm.importances_mean,
@@ -179,7 +165,6 @@ def load_all_models():
     return {
         # ── Dataset ──────────────────────────────────────────
         'df'          : df,
-        'df_raw'      : df_raw,
         'le_c'        : le_c,
         'le_y'        : le_y,
         'n_records'   : len(df),
@@ -212,7 +197,6 @@ def load_all_models():
         # ── SVM ───────────────────────────────────────────────
         'svm'         : svm_pipe,
         'svm_col_order': svm_col_order,
-        'cat_course'  : _cat_course,
         'svm_m'       : _metrics(yte_sv, svm_pred),
         'svm_Xtr'     : Xtr_sv,
         'svm_Xte'     : Xte_sv,

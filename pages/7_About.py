@@ -14,7 +14,7 @@ def get_live_metrics():
     from sklearn.svm import SVC
     from sklearn.pipeline import Pipeline
     from sklearn.preprocessing import (MinMaxScaler, StandardScaler,
-                                        LabelEncoder, OrdinalEncoder)
+                                        LabelEncoder)
     from sklearn.model_selection import train_test_split
     from sklearn.metrics import (accuracy_score, precision_score,
                                   recall_score, f1_score)
@@ -53,21 +53,11 @@ def get_live_metrics():
     dt=DecisionTreeClassifier(max_depth=5,criterion='gini',random_state=42)
     dt.fit(Xtr_d,ytr_d)
 
-    # SVM
-    df_raw=pd.read_csv('dataset/Student_Mental_health.csv')
-    df_raw.columns=df_raw.columns.str.strip()
-    df_raw['Age']=df_raw['Age'].fillna(df_raw['Age'].median())
-    df_raw['Your current year of Study']=df_raw['Your current year of Study'].str.strip().str.lower()
-    df_raw['What is your CGPA?']=df_raw['What is your CGPA?'].str.strip()
-    def cat(c):
-        c=str(c).lower()
-        return 'STEM/IT' if any(x in c for x in ['technology','it','computer','cs','system','software','se','bit','bcs','cts']) else 'Other'
-    df_raw['Course_Category']=df_raw['What is your course?'].apply(cat)
-    df_raw=df_raw.drop(columns=['Timestamp','What is your course?'],errors='ignore')
-    X_sv=df_raw.drop(columns=['Do you have Depression?'])
-    y_sv=(df_raw['Do you have Depression?']=='Yes').astype(int)
-    pipe=Pipeline([('enc',OrdinalEncoder(handle_unknown='use_encoded_value',unknown_value=-1)),
-                   ('scl',StandardScaler()),
+    # SVM — same encoded feature set as KNN/DT
+    svm_feat = ['Gender','Age','Course_Enc','Year_Enc','CGPA_Numeric',
+                'Anxiety','Panic_Attack','Marital_Status']
+    X_sv=df[svm_feat]; y_sv=df['Depression']
+    pipe=Pipeline([('scl',StandardScaler()),
                    ('svm',SVC(kernel='rbf',probability=True,class_weight='balanced',random_state=42))])
     Xtr_sv,Xte_sv,ytr_sv,yte_sv=train_test_split(X_sv,y_sv,test_size=0.25,random_state=42,stratify=y_sv)
     pipe.fit(Xtr_sv,ytr_sv)
