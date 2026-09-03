@@ -451,23 +451,6 @@ if _knn_file:
             _bm1.metric("Total Students",str(_ktotal))
             _bm2.metric("⚠️ At Risk",str(_kdep),delta=f"{_kdep/_ktotal*100:.0f}%",delta_color="inverse")
             _bm3.metric("✅ No Risk",str(_ktotal-_kdep),delta=f"{(_ktotal-_kdep)/_ktotal*100:.0f}%")
-            _bc1,_bc2=st.columns(2)
-            with _bc1:
-                fig_b,ax_b=plt.subplots(figsize=(4,3))
-                ax_b.pie([_kdep,_ktotal-_kdep],labels=[f'Depression ({_kdep})',f'No Depression ({_ktotal-_kdep})'],
-                    colors=['#EF4444','#10B981'],autopct='%1.1f%%',startangle=90,
-                    wedgeprops={'edgecolor':'white','linewidth':2},textprops={'fontsize':10,'fontweight':'bold'})
-                ax_b.set_title('KNN Batch Results',fontweight='bold')
-                plt.tight_layout(); st.pyplot(fig_b,width='stretch'); plt.close()
-            with _bc2:
-                if '_prob' in _kres:
-                    fig_p,ax_p=plt.subplots(figsize=(4,3))
-                    ax_p.hist(_kres['_prob']*100,bins=min(10,_ktotal),color='#3B82F6',edgecolor='white',alpha=0.85)
-                    ax_p.axvline(50,color='red',ls='--',lw=1.5,label='Threshold 50%')
-                    ax_p.set_xlabel('Depression Probability (%)'); ax_p.set_ylabel('Count')
-                    ax_p.set_title('Confidence Distribution',fontweight='bold')
-                    ax_p.legend(fontsize=9); ax_p.spines['top'].set_visible(False); ax_p.spines['right'].set_visible(False)
-                    plt.tight_layout(); st.pyplot(fig_p,width='stretch'); plt.close()
             _kdisp=_kres[['Name','Gender','Age','Course','Year','CGPA','Anxiety','Panic Attack','Result','Confidence','Risk']]
             def _kst(val):
                 if '⚠️' in str(val) or val=='HIGH': return 'background-color:#FEE2E2;color:#991B1B;font-weight:bold'
@@ -475,12 +458,6 @@ if _knn_file:
                 return ''
             _kstyled=_kdisp.style.map(_kst,subset=['Result','Risk'])
             st.dataframe(_kstyled,width='stretch',hide_index=True)
-            st.write(""); st.markdown("**Individual Student Cards**")
-            for _,_kr in _kres.iterrows():
-                if '_pred' not in _kr: continue
-                with st.expander(f"{'⚠️' if _kr['_pred']==1 else '✅'} {_kr['Name']} — {_kr['Result']} ({_kr['Confidence']})"):
-                    if _kr['_pred']==1: st.error(f"**Depression Risk** | Confidence: {_kr['Confidence']}")
-                    else:               st.success(f"**No Depression** | Confidence: {_kr['Confidence']}")
             _kdl1,_kdl2=st.columns(2)
             with _kdl1:
                 st.download_button("⬇️  Download All Results",data=_kdisp.to_csv(index=False).encode(),
